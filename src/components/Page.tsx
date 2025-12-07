@@ -21,7 +21,7 @@ export const Page: React.FC<PageProps> = ({
                 {lastUpdated && <div><em>Last Updated: {lastUpdated}</em></div>}
             </div>
             
-            {description && <p>{description}</p>}
+            {description && (<><p>{description}</p></>)}
             
             <hr />
             {rows ? rows.map((row, rowIndex) => (
@@ -32,7 +32,9 @@ export const Page: React.FC<PageProps> = ({
                 </div>
             )) 
             : 
-            <p>There are no rows on this page.</p>}
+            <div className="dl2-no-items-div">
+                <p>There are no rows on this page.</p>
+            </div>}
         </div>
     );
 };

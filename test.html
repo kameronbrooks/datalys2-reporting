@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,35 +11,128 @@
             font-family: Arial, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
         }
+
         .datalys2-dashboard {
             border: 2px solid #007bff;
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
+
         .datalys2-report {
             background: #f8f9fa;
             border-radius: 4px;
             padding: 15px;
             margin: 10px 0;
         }
+
+        .dl2-head-bar {
+            background: #159957;
+            /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #155799, #159957);
+            /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #155799, #159957);
+            /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+            color: white;
+            padding: 10px;
+        }
+
         .dl2-page-report-header {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
         }
+
+        .dl2-page-report-header h1 {
+            margin: 0;
+            font-size: medium;
+        }
+
+        .dl2-no-items-div {
+            padding: 20px;
+            text-align: center;
+            background-color: #dddddd;
+            color: #555555;
+            border: 1px solid #888888;
+        }
+
+        /* Tab group styles */
+        .dl2-tab-group {
+            display: flex;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .dl2-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            /*
+            background: linear-gradient(to bottom,
+                    #edf1f3 0%,
+                    #edf1f3 55%,
+                    #edf1f3 80%,
+                    #d6dde1 100%); */
+            background: #edf1f3;
+            color: #333333;
+            transition: background-color 0.15s ease, font-weight 0.15s ease;
+            border-top: 1px solid #cccccc;
+            border-right: 1px solid #cccccc;
+            border-left: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+        }
+
+        .dl2-tab-inset-shadow-right {
+            box-shadow: inset -5px -5px 5px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dl2-tab-inset-shadow-left {
+            box-shadow: inset 5px -5px 5px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dl2-tab-inset-shadow-bottom {
+            box-shadow: inset 0 -5px 5px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dl2-tab-inset-shadow-none {
+            box-shadow: none;
+        }
+
+        .dl2-tab:hover {
+            background: #f2f2f2;
+        }
+
+        .dl2-tab--active {
+            border-top: 1px solid #cccccc;
+            border-right: 1px solid #cccccc;
+            border-left: 1px solid #cccccc;
+            border-bottom: 0px;
+            font-weight: 700;
+            background: #ffffff;
+        }
+
+        .dl2-tab-group-remaining-border {
+            flex-grow: 1;
+            border-bottom: 1px solid #cccccc;
+        }
     </style>
 </head>
+
 <body>
-    <script id ="report-data" type="application/json">
+    <script id="report-data" type="application/json">
 {
     "pages" : [
         {
             "title": "Overview",
             "description": "This is the overview page of the report.",
+            "lastUpdated": "2024-06-15T10:00:00Z",
+            "rows" : null
+        },
+        {
+            "title": "Page 2",
+            "description": "This is the second page of the report.",
             "lastUpdated": "2024-06-15T10:00:00Z",
             "rows" : null
         }
@@ -50,4 +144,5 @@
     <script src="dist/datalys2-reports.min.js"></script>
 
 </body>
+
 </html>

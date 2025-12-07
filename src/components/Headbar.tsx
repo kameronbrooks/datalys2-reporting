@@ -9,7 +9,7 @@ export interface HeadbarProps {
 
 export const Headbar: React.FC<HeadbarProps> = ({ title, description, author, lastUpdated }) => {
     return (
-        <header style={{ padding: '10px', borderBottom: '1px solid #ccc', marginBottom: '20px' }}>
+        <header className='dl2-head-bar'>
             <h1>{title}</h1>
             <div style={{ fontSize: '0.9em', color: '#666' }}>
                 {author && <span>Author: {author}</span>}

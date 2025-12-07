@@ -8,23 +8,37 @@ export interface TabGroupProps {
 
 export const TabGroup: React.FC<TabGroupProps> = ({ pages }) => {
     const [activeIndex, setActiveIndex] = React.useState(0);
+
+    /**
+     * Returns the appropriate shadow class for tabs adjacent to the active tab.
+     * @param index 
+     * @returns 
+     */
+    const getTabShadowClass = (index: number) => {
+        if (index == activeIndex) {
+            return " dl2-tab-inset-shadow-none";
+        }
+        else if (index == activeIndex-1) {
+            return " dl2-tab-inset-shadow-right";
+        } else if (index == activeIndex+1) {
+            return " dl2-tab-inset-shadow-left";
+        }
+        return " dl2-tab-inset-shadow-bottom";
+    }
+
     return (
         <div>
-            <div style={{ display: 'flex', borderBottom: '1px solid #ccc', marginBottom: '20px' }}>
+            <div className="dl2-tab-group">
                 {pages.map((page, index) => (
                     <div
                         key={index}
                         onClick={() => setActiveIndex(index)}
-                        style={{
-                            padding: '10px 20px',
-                            cursor: 'pointer',
-                            borderBottom: activeIndex === index ? '3px solid blue' : 'none',
-                            fontWeight: activeIndex === index ? 'bold' : 'normal'
-                        }}
+                        className={"dl2-tab" + (activeIndex === index ? " dl2-tab--active" : "") + getTabShadowClass(index)}
                     >
                         {page.title}
                     </div>
                 ))}
+                <div className="dl2-tab-group-remaining-border"></div>
             </div>
             <div>
                 <Page page={pages[activeIndex]} />
