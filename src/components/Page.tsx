@@ -2,20 +2,27 @@ import React from "react";
 import { ReportPage } from "../lib/types";
 
 
-export interface PageProps extends ReportPage {}
+export interface PageProps {
+    page: ReportPage;
+}
 
 
 export const Page: React.FC<PageProps> = ({ 
-        title, 
-        description,
-        lastUpdated,
-        rows
+        page
     }) => {
+
+    const { title, description, lastUpdated, rows } = page;
+
     return (
+        
         <div>
-            <h1>{title}</h1>
+            <div className="dl2-page-report-header">
+                <h1>{title}</h1>
+                {lastUpdated && <div><em>Last Updated: {lastUpdated}</em></div>}
+            </div>
+            
             {description && <p>{description}</p>}
-            {lastUpdated && <p><em>Last Updated: {lastUpdated}</em></p>}
+            
             <hr />
             {rows ? rows.map((row, rowIndex) => (
                 <div 

@@ -1,5 +1,6 @@
 import React from "react";
 import { ReportPage } from "../lib/types"
+import { Page } from "./Page";
 
 export interface TabGroupProps {
     pages: ReportPage[];
@@ -26,9 +27,7 @@ export const TabGroup: React.FC<TabGroupProps> = ({ pages }) => {
                 ))}
             </div>
             <div>
-                <h2>{pages[activeIndex].title}</h2>
-                {pages[activeIndex].description && <p>{pages[activeIndex].description}</p>}
-                {pages[activeIndex].lastUpdated && <p><em>Last Updated: {pages[activeIndex].lastUpdated}</em></p>}
+                <Page page={pages[activeIndex]} />
             </div>
         </div>
     );
