@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - CDN Test</title>
+    <meta name="description" content="Test page for Datalys2 Reports library via CDN">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .datalys2-dashboard {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .datalys2-report {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <script id ="report-data" type="application/json">
+{
+  "sales": { "total": 15000, "items": 42 },
+  "analytics": { "users": 1250, "sessions": 3400 }
+}
+    </script>
+    <div id="root"></div>
+
+    <script src="dist/datalys2-reports.min.js"></script>
+
+</body>
+</html>
