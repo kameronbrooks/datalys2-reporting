@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Headbar } from './components/Headbar';
+import { TabGroup } from './components/TabGroup';
 
 function App() {
     // Get data from the script element
@@ -20,7 +21,9 @@ function App() {
                 author={documentAuthor}
                 lastUpdated={documentLastUpdated}
             />
-            <pre>{JSON.stringify(data, null, 2)}</pre>
+            <div>
+                <TabGroup pages={data.pages || []} />
+            </div>
         </div>
     );
 }
