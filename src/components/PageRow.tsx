@@ -24,7 +24,8 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
         <div 
             className="dl2-page-row"
             style={{ 
-                flexDirection: layout.direction || 'row'
+                flexDirection: layout.direction || 'row',
+                flex: 1
             }}
         >
             {layout.children.map((child, index) => (

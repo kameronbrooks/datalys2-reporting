@@ -34,7 +34,6 @@ function App() {
 
 // Mount the React app to the root div
 const rootElement = document.getElementById('root');
-console.log('Root Element:', rootElement);
 if (rootElement) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(<App />);
