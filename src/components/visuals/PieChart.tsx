@@ -68,6 +68,7 @@ export const PieChart: React.FC<PieChartProps> = ({
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
+    const [isLegendCollapsed, setIsLegendCollapsed] = useState(false);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -270,24 +271,59 @@ export const PieChart: React.FC<PieChartProps> = ({
                     </g>
                 </svg>
             </div>
-
 			{showLegend && legendItems.length > 0 && (
-				<div className="dl2-pie-chart-legend">
-					{legendTitle && <div className="dl2-pie-chart-legend-title">{legendTitle}</div>}
-					<ul className="dl2-pie-chart-legend-list">
-						{legendItems.map((item:any) => (
-							<li key={item.key} className="dl2-pie-chart-legend-item">
-								<span
-									className="dl2-pie-chart-legend-swatch"
-									style={{ backgroundColor: item.fill }}
-								/>
-								<span className="dl2-pie-chart-legend-label">{item.label}</span>
-								<span className="dl2-pie-chart-legend-value">
-									{item.value.toLocaleString()} ({item.percentage.toFixed(1)}%)
-								</span>
-							</li>
-						))}
-					</ul>
+				<div className="dl2-pie-chart-legend" style={{ marginTop: '10px' }}>
+                    <div 
+                        className="dl2-pie-chart-legend-header" 
+                        onClick={() => setIsLegendCollapsed(!isLegendCollapsed)}
+                        style={{ 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            paddingBottom: '5px', 
+                            borderBottom: isLegendCollapsed ? 'none' : '1px solid #ccc' 
+                        }}
+                    >
+					    <div className="dl2-pie-chart-legend-title" style={{ fontWeight: 'bold' }}>{legendTitle || 'Legend'}</div>
+                        <span style={{ fontSize: '0.8em' }}>{isLegendCollapsed ? '▼' : '▲'}</span>
+                    </div>
+                    
+                    {!isLegendCollapsed && (
+                        <table className="dl2-pie-chart-legend-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', fontSize: '0.9em' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid #eee', color: '#666' }}>
+                                    <th style={{ textAlign: 'left', padding: '4px' }}>Category</th>
+                                    <th style={{ textAlign: 'right', padding: '4px' }}>Value</th>
+                                    <th style={{ textAlign: 'right', padding: '4px' }}>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {legendItems.map((item:any) => (
+                                    <tr key={item.key} style={{ borderBottom: '1px solid #f5f5f5' }}>
+                                        <td style={{ padding: '4px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <span
+                                                    className="dl2-pie-chart-legend-swatch"
+                                                    style={{ 
+                                                        backgroundColor: item.fill,
+                                                        width: '10px',
+                                                        height: '10px',
+                                                        display: 'inline-block',
+                                                        marginRight: '8px',
+                                                        borderRadius: '50%'
+                                                    }}
+                                                />
+                                                <span className="dl2-pie-chart-legend-label">{item.label}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'right', padding: '4px' }}>{item.value.toLocaleString()}</td>
+                                        <td style={{ textAlign: 'right', padding: '4px' }}>{item.percentage.toFixed(1)}%</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
 				</div>
 			)}
 		</div>
