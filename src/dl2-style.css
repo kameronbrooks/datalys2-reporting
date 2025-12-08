@@ -1,3 +1,6 @@
+
+
+
 body {
     font-family: Arial, sans-serif;
     max-width: 1200px;
@@ -35,6 +38,8 @@ body {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .dl2-page-report-header h1 {
@@ -49,6 +54,7 @@ body {
 
 .dl2-page-row {
     display: flex;
+    width: 100%;
 }
 
 .dl2-no-items-div {
@@ -116,6 +122,8 @@ body {
 .dl2-tab-group-remaining-border {
     flex-grow: 1;
     border-bottom: 1px solid #cccccc;
+    box-shadow: inset 5px -5px 5px -5px rgba(0, 0, 0, 0.2);
+
 }
 
 .dl2-visual {
@@ -127,4 +135,24 @@ body {
 }
 .dl2-visual-shadow {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Desktop */
+@media (min-width: 769px) {
+    
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 100%;
+        margin: 0 auto;
+    }
 }

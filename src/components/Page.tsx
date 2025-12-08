@@ -22,7 +22,7 @@ export const Page: React.FC<PageProps> = ({
                 {lastUpdated && <div className="dl2-last-updated"><em>Last Updated: {lastUpdated}</em></div>}
             </div>
             
-            {description && (<><p>{description}</p></>)}
+            {description && (<><p style={{margin: '10px 10px 10px 10px'}}>{description}</p></>)}
             
             <hr />
             {rows ? rows.map((row, rowIndex) => (
