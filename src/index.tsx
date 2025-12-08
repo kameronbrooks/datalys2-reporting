@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { AppContext } from './components/context/AppContext';
 import { Headbar } from './components/Headbar';
 import { TabGroup } from './components/TabGroup';
+import { ApplicationData } from './lib/types';
 
 function App() {
     // Get data from the script element
@@ -11,20 +13,22 @@ function App() {
     const documentLastUpdated = document.querySelector('meta[name="last-updated"]')?.getAttribute('content') || '';
 
     const dataElement = document.getElementById('report-data');
-    const data = dataElement ? JSON.parse(dataElement.textContent || '{}') : {};
+    const data:ApplicationData = dataElement ? JSON.parse(dataElement.textContent || '{}') : {};
 
     return (
-        <div>
-            <Headbar
-                title={documentTitle}
-                description={documentDescription}
-                author={documentAuthor}
-                lastUpdated={documentLastUpdated}
-            />
+        <AppContext.Provider value={{ datasets: data.datasets || {} }}>
             <div>
-                <TabGroup pages={data.pages || []} />
+                <Headbar
+                    title={documentTitle}
+                    description={documentDescription}
+                    author={documentAuthor}
+                    lastUpdated={documentLastUpdated}
+                />
+                <div>
+                    <TabGroup pages={data.pages || []} />
+                </div>
             </div>
-        </div>
+        </AppContext.Provider>
     );
 }
 

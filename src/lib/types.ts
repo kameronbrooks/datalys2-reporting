@@ -4,6 +4,16 @@
  */
 
 
+export interface Dataset {
+    id: string;
+    data: any[];
+    columns: string[];
+    dtypes: string[];
+    format: 'table' | 'records' | 'list';
+}
+
+
+
 /**
  * Base interface for layout and visual elements
  * Includes common styling properties
@@ -16,8 +26,8 @@
  * - shadow?: string - optional CSS box-shadow property
  * - flex?: number - optional flex value for layout sizing
  */
-interface LayoutElement {
-    elementType: 'visual' | 'layout';
+export interface LayoutElement {
+    elementType: string;
     padding?: number;
     margin?: number;
     border?: string;
@@ -34,9 +44,9 @@ interface LayoutElement {
  * - description?: string - optional description of the visual
  * - visualType: string - type of visual (e.g., 'barChart', 'lineChart')
  */
-interface ReportVisual extends LayoutElement {
+export interface ReportVisual extends LayoutElement {
     id: string;
-    dataId: string;
+    datasetId: string;
     description?: string;
     visualType: string;
 }
@@ -48,8 +58,8 @@ interface ReportVisual extends LayoutElement {
  * - type: 'row' | 'column' - layout type
  * - children: LayoutElement[] - array of child layout or visual elements
  */
-interface Layout extends LayoutElement {
-    type: 'row' | 'column';
+export interface Layout extends LayoutElement {
+    direction: 'row' | 'column';
     children: LayoutElement[];
 }
 
@@ -67,4 +77,16 @@ export interface ReportPage {
     description?: string;
     lastUpdated?: string;
     rows?: Layout[];
+}
+
+
+/**
+ * Interface for the overall application data
+ * Properties:
+ * - pages: ReportPage[] - array of report pages
+ * - datasets: Record<string, Dataset> - mapping of dataset IDs to Dataset objects
+ */
+export interface ApplicationData {
+    pages: ReportPage[];
+    datasets: Record<string, Dataset>;
 }

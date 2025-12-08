@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datalys2 Reports - CDN Test</title>
     <meta name="description" content="Test page for Datalys2 Reports library via CDN">
+    <meta name="author" content="Brooks, Kameron">
+    <meta name="support-email" content="support@example.com">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,6 +51,14 @@
         .dl2-page-report-header h1 {
             margin: 0;
             font-size: medium;
+        }
+        .dl2-page-report-header > .dl2-last-updated {
+            font-size: small;
+            color: #666666;
+        }
+
+        .dl2-page-row {
+            display: flex;
         }
 
         .dl2-no-items-div {
@@ -101,7 +111,7 @@
         }
 
         .dl2-tab:hover {
-            background: #f2f2f2;
+            background: #ffffff;
         }
 
         .dl2-tab--active {
@@ -128,7 +138,21 @@
             "title": "Overview",
             "description": "This is the overview page of the report.",
             "lastUpdated": "2024-06-15T10:00:00Z",
-            "rows" : null
+            "rows" : [
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "top10things-pie",
+                            "elementType": "pie",
+                            "type": "pie",
+                            "datasetId": "top10things",
+                            "title": "Top 10 Things",
+                            "description": "A dataset showing the top 10 things."
+                        }
+                    ]
+                }
+            ]
         },
         {
             "title": "Page 2",
@@ -136,7 +160,26 @@
             "lastUpdated": "2024-06-15T10:00:00Z",
             "rows" : null
         }
-    ]
+    ],
+    "datasets": {
+        "top10things" : {
+            "format": "table",
+            "dtypes": ["string", "number"],
+            "columns": ["Thing", "Value"],
+            "data": [
+                ["Thing A", 100],
+                ["Thing B", 90],
+                ["Thing C", 80],
+                ["Thing D", 70],
+                ["Thing E", 60],
+                ["Thing F", 50],
+                ["Thing G", 40],
+                ["Thing H", 30],
+                ["Thing I", 20],
+                ["Thing J", 10]
+            ]
+        }
+    }
 }
     </script>
     <div id="root"></div>
