@@ -3,6 +3,7 @@ import { Card } from "./visuals/Card";
 import { PieChart } from "./visuals/PieChart";
 import { StackedBarChart } from "./visuals/StackedBarChart";
 import { ClusteredBarChart } from "./visuals/ClusteredBarChart";
+import { KPI } from "./visuals/KPI";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
@@ -10,6 +11,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'pie': PieChart,
     'stackedBar': StackedBarChart,
     'clusteredBar': ClusteredBarChart,
+    'kpi': KPI,
     // Add other components here as needed
 };
 

@@ -35,6 +35,55 @@
                     "type": "layout",
                     "children": [
                         {
+                            "id": "kpi-revenue",
+                            "elementType": "visual",
+                            "type": "kpi",
+                            "datasetId": "kpiData",
+                            "rowIndex": 0,
+                            "valueColumn": "Value",
+                            "changeColumn": "Change",
+                            "title": "Total Revenue",
+                            "format": "currency",
+                            "goodDirection": "higher",
+                            "breachValue": 140000,
+                            "border": true,
+                            "shadow": true
+                        },
+                        {
+                            "id": "kpi-users",
+                            "elementType": "visual",
+                            "type": "kpi",
+                            "datasetId": "kpiData",
+                            "rowIndex": 1,
+                            "valueColumn": "Value",
+                            "changeColumn": "Change",
+                            "title": "Active Users",
+                            "format": "number",
+                            "goodDirection": "higher",
+                            "border": true,
+                            "shadow": true,
+                            "breachValue": 1300
+                        },
+                        {
+                            "id": "kpi-bounce",
+                            "elementType": "visual",
+                            "type": "kpi",
+                            "datasetId": "kpiData",
+                            "rowIndex": 2,
+                            "valueColumn": "Value",
+                            "changeColumn": "Change",
+                            "title": "Bounce Rate",
+                            "format": "percent",
+                            "goodDirection": "lower",
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
                             "id": "top10things-pie-1",
                             "elementType": "pie",
                             "type": "pie",
@@ -70,7 +119,9 @@
                             "xColumn": "Quarter",
                             "yColumns": ["Electronics", "Clothing", "Home"],
                             "border": true,
-                            "shadow": true
+                            "shadow": true,
+                            "height": 200
+
                         }
                     ]
                 }
@@ -110,6 +161,16 @@
                 ["Q2", 6000, 3500, 2500],
                 ["Q3", 5500, 4000, 3000],
                 ["Q4", 8000, 5000, 4000]
+            ]
+        },
+        "kpiData": {
+            "format": "table",
+            "dtypes": ["string", "number", "number"],
+            "columns": ["Metric", "Value", "Change"],
+            "data": [
+                ["Total Revenue", 150000, 0.05],
+                ["Active Users", 1200, -0.02],
+                ["Bounce Rate", 0.45, -0.05]
             ]
         }
     }

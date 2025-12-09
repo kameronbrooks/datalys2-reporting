@@ -1,12 +1,6 @@
 
 
 
-body {
-    font-family: Arial, sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
 .datalys2-dashboard {
     border: 2px solid #007bff;
     border-radius: 8px;
@@ -138,17 +132,17 @@ body {
 }
 
 /* Desktop */
-@media (min-width: 769px) {
+@media (min-width: 1200px) {
     
     body {
         font-family: Arial, sans-serif;
-        max-width: 1200px;
+        max-width: 85%;
         margin: 0 auto;
     }
 }
 
 /* Mobile */
-@media (max-width: 768px) {
+@media (max-width: 1199px) {
     
     body {
         font-family: Arial, sans-serif;
