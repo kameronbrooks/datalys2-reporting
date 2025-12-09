@@ -41,7 +41,7 @@
                             "datasetId": "kpiData",
                             "rowIndex": 0,
                             "valueColumn": "Value",
-                            "changeColumn": "Change",
+                            "comparisonColumn": "Yesterday",
                             "title": "Total Revenue",
                             "format": "currency",
                             "goodDirection": "higher",
@@ -56,7 +56,7 @@
                             "datasetId": "kpiData",
                             "rowIndex": 1,
                             "valueColumn": "Value",
-                            "changeColumn": "Change",
+                            "comparisonColumn": "Yesterday",
                             "title": "Active Users",
                             "format": "number",
                             "goodDirection": "higher",
@@ -71,10 +71,12 @@
                             "datasetId": "kpiData",
                             "rowIndex": 2,
                             "valueColumn": "Value",
-                            "changeColumn": "Change",
+                            "comparisonColumn": "Yesterday",
                             "title": "Bounce Rate",
                             "format": "percent",
                             "goodDirection": "lower",
+                            "breachValue": 0.6,
+                            "warningValue": 0.44,
                             "border": true,
                             "shadow": true
                         }
@@ -166,11 +168,11 @@
         "kpiData": {
             "format": "table",
             "dtypes": ["string", "number", "number"],
-            "columns": ["Metric", "Value", "Change"],
+            "columns": ["Metric", "Value", "Yesterday"],
             "data": [
-                ["Total Revenue", 150000, 0.05],
-                ["Active Users", 1200, -0.02],
-                ["Bounce Rate", 0.45, -0.05]
+                ["Total Revenue", 150000, 142500],
+                ["Active Users", 1200, 1200],
+                ["Bounce Rate", 0.45, 0.50]
             ]
         }
     }

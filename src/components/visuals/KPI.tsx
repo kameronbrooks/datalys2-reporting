@@ -1,10 +1,13 @@
 import React, { useContext, useMemo } from "react";
 import { AppContext } from "../context/AppContext";
-import type { ReportVisual, Dataset } from "../../lib/types";
+import type { ReportVisual, Dataset } from "@/types";
+import { TrendIndicator } from "./TrendIndicator";
+import { BreachIndicator, getBreachStatus, getBreachColor } from "./BreachIndicator";
+import { findColumnIndex } from '@/dataset-utility'
 
 export interface KPIProps extends ReportVisual {
     valueColumn?: string | number;
-    changeColumn?: string | number;
+    comparisonColumn?: string | number;
     
     rowIndex?: number;
     
@@ -13,6 +16,7 @@ export interface KPIProps extends ReportVisual {
     
     goodDirection?: 'higher' | 'lower';
     breachValue?: number;
+    warningValue?: number;
     
     title?: string;
     width?: number;
@@ -21,7 +25,7 @@ export interface KPIProps extends ReportVisual {
 
 export const KPI: React.FC<KPIProps> = ({
     valueColumn = 0,
-    changeColumn,
+    comparisonColumn = 1,
     rowIndex = 0,
     datasetId,
     title,
@@ -35,35 +39,33 @@ export const KPI: React.FC<KPIProps> = ({
     format = 'number',
     currencySymbol = '$',
     goodDirection = 'higher',
-    breachValue
+    breachValue,
+    warningValue
 }) => {
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
-
-    const findColumnIndex = (column: string | number, dataset: Dataset): number | undefined => {
-        if (!dataset) return undefined;
-        if ((typeof column === "number") && (column >= 0) && (column < dataset.columns.length)) {
-            return column;
-        } else if (typeof column === "string") {
-            const colIndex = dataset.columns.indexOf(column);
-            return colIndex >= 0 ? colIndex : 0;
-        }
-        return undefined;
-    };
 
     const data = useMemo(() => {
         if (!dataset || !dataset.data[rowIndex]) return null;
         
         const valIdx = findColumnIndex(valueColumn, dataset);
-        const changeIdx = changeColumn !== undefined ? findColumnIndex(changeColumn, dataset) : undefined;
+        const comparisonIdx = comparisonColumn !== undefined ? findColumnIndex(comparisonColumn, dataset) : undefined;
         
         const row = dataset.data[rowIndex];
+
+        const value = valIdx !== undefined ? Number(row[valIdx]) : 0;
+        const comparisonValue = comparisonIdx !== undefined ? Number(row[comparisonIdx]) : undefined;
+        let change: number | undefined = undefined;
+        if (comparisonValue !== undefined && comparisonValue !== 0) {
+            change = (value - comparisonValue) / Math.abs(comparisonValue);
+        }
         
         return {
-            value: valIdx !== undefined ? Number(row[valIdx]) : 0,
-            change: changeIdx !== undefined ? Number(row[changeIdx]) : undefined
+            value: value,
+            change: change,
+            comparisonValue: comparisonValue
         };
-    }, [dataset, valueColumn, changeColumn, rowIndex]);
+    }, [dataset, valueColumn, comparisonColumn, rowIndex]);
 
     if (!data) {
         return (
@@ -73,7 +75,7 @@ export const KPI: React.FC<KPIProps> = ({
         );
     }
 
-    const { value, change } = data;
+    const { value, change, comparisonValue } = data;
 
     // Format Value
     let formattedValue = String(value);
@@ -85,42 +87,15 @@ export const KPI: React.FC<KPIProps> = ({
         formattedValue = value.toLocaleString();
     }
 
-    // Trend Logic
-    let trendColor = '#666'; // Grey for no change
-    let Caret = null;
-    
-    if (change !== undefined && change !== 0) {
-        const isPositive = change > 0;
-        const isGood = goodDirection === 'higher' ? isPositive : !isPositive;
-        
-        trendColor = isGood ? '#2e7d32' : '#c62828'; // Green : Red
-        
-        if (isPositive) {
-            Caret = (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill={trendColor} style={{ marginRight: 2 }}>
-                    <path d="M7 14l5-5 5 5z" />
-                </svg>
-            );
-        } else {
-            Caret = (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill={trendColor} style={{ marginRight: 2 }}>
-                    <path d="M7 10l5 5 5-5z" />
-                </svg>
-            );
-        }
-    } else if (change === 0) {
-        Caret = <span style={{ marginRight: 4 }}>-</span>;
-    }
-
     // Breach Logic
     let valueColor = 'inherit';
+    let breachIcon = null;
+
+    const changeAdjective = (change !== undefined) ? (change > 0 ? 'above' : (change < 0 ? 'below' : '')) : 'no data';
+    const textSuffix = (comparisonColumn !== undefined) ? `${changeAdjective} ${comparisonColumn}` : undefined;
+
     if (breachValue !== undefined) {
-        const isBreached = goodDirection === 'higher' ? value < breachValue : value > breachValue;
-        if (isBreached) {
-            valueColor = '#c62828'; // Red if breached (bad)
-        } else {
-             valueColor = '#2e7d32'; // Green if good
-        }
+        breachIcon = <BreachIndicator status={getBreachStatus(value, breachValue, warningValue, goodDirection)} />;
     }
 
     const containerStyle: React.CSSProperties = {
@@ -140,18 +115,14 @@ export const KPI: React.FC<KPIProps> = ({
 
     return (
         <div className="dl2-kpi" style={containerStyle}>
-            {title && <div className="dl2-kpi-title" style={{ fontSize: '0.9em', color: '#666', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
+            {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: '#333', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
             
-            <div className="dl2-kpi-value" style={{ fontSize: '2em', fontWeight: 'bold', color: valueColor }}>
+            <div className="dl2-kpi-value" style={{ fontSize: '2em', fontWeight: 'bold', color: valueColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {formattedValue}
+                {breachIcon}
             </div>
             
-            {change !== undefined && (
-                <div className="dl2-kpi-trend" style={{ display: 'flex', alignItems: 'center', fontSize: '0.9em', color: trendColor, marginTop: 5 }}>
-                    {Caret}
-                    <span>{Math.abs(change * 100).toFixed(1)}%</span>
-                </div>
-            )}
+            <TrendIndicator change={change} goodDirection={goodDirection} textSuffix={textSuffix} />
             
             {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: '#999', marginTop: 10, textAlign: 'center' }}>{description}</div>}
         </div>
