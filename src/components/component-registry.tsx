@@ -1,11 +1,15 @@
 import React from "react";
 import { Card } from "./visuals/Card";
 import { PieChart } from "./visuals/PieChart";
+import { StackedBarChart } from "./visuals/StackedBarChart";
+import { ClusteredBarChart } from "./visuals/ClusteredBarChart";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
     'card': Card,
     'pie': PieChart,
+    'stackedBar': StackedBarChart,
+    'clusteredBar': ClusteredBarChart,
     // Add other components here as needed
 };
 

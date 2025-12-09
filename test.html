@@ -55,6 +55,24 @@
                             "shadow": true
                         }
                     ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "sales-clustered-bar",
+                            "elementType": "visual",
+                            "type": "clusteredBar",
+                            "showLabels": true,
+                            "datasetId": "quarterlySales",
+                            "title": "Quarterly Sales by Category",
+                            "description": "Sales breakdown by quarter and category.",
+                            "xColumn": "Quarter",
+                            "yColumns": ["Electronics", "Clothing", "Home"],
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
                 }
             ]
         },
@@ -81,6 +99,17 @@
                 ["Thing H", 30],
                 ["Thing I", 20],
                 ["Thing J", 10]
+            ]
+        },
+        "quarterlySales": {
+            "format": "table",
+            "dtypes": ["string", "number", "number", "number"],
+            "columns": ["Quarter", "Electronics", "Clothing", "Home"],
+            "data": [
+                ["Q1", 5000, 3000, 2000],
+                ["Q2", 6000, 3500, 2500],
+                ["Q3", 5500, 4000, 3000],
+                ["Q4", 8000, 5000, 4000]
             ]
         }
     }
