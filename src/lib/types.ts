@@ -9,7 +9,7 @@ export interface Dataset {
     data: any[];
     columns: string[];
     dtypes: string[];
-    format: 'table' | 'records' | 'list';
+    format: 'table' | 'records' | 'list' | 'record';
 }
 
 
@@ -59,6 +59,7 @@ export interface ReportVisual extends LayoutElement {
  * - children: LayoutElement[] - array of child layout or visual elements
  */
 export interface Layout extends LayoutElement {
+    title?: string;
     direction: 'row' | 'column';
     children: LayoutElement[];
 }
