@@ -228,7 +228,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                     height={chartHeight}
                     role="img"
                     aria-label={title ?? "Pie chart"}
-                    style={{ display: "block" }}
+                    style={{ display: "block", maxWidth: "100%" }}
                 >
                     <g transform={`translate(${resolvedMargin.left + innerWidth / 2}, ${resolvedMargin.top + innerHeight / 2})`}>
                         {pieData.map((datum: PieArcDatum<PieChartDatum>, index: number) => {
