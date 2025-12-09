@@ -97,13 +97,13 @@ export const KPI: React.FC<KPIProps> = ({
         
         if (isPositive) {
             Caret = (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill={trendColor} style={{ marginRight: 4 }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={trendColor} style={{ marginRight: 2 }}>
                     <path d="M7 14l5-5 5 5z" />
                 </svg>
             );
         } else {
             Caret = (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill={trendColor} style={{ marginRight: 4 }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={trendColor} style={{ marginRight: 2 }}>
                     <path d="M7 10l5 5 5-5z" />
                 </svg>
             );
