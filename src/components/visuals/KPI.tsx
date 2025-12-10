@@ -3,6 +3,7 @@ import { AppContext } from "../context/AppContext";
 import type { ReportVisual, Dataset } from "@/types";
 import { TrendIndicator } from "./TrendIndicator";
 import { BreachIndicator, getBreachStatus, getBreachColor } from "./BreachIndicator";
+import { Tooltip } from "./Tooltip";
 import { findColumnIndex } from '@/dataset-utility'
 
 export interface KPIProps extends ReportVisual {
@@ -77,26 +78,65 @@ export const KPI: React.FC<KPIProps> = ({
 
     const { value, change, comparisonValue } = data;
 
+    // Helper function to format values consistently
+    const formatValue = (val: number): string => {
+        if (format === 'currency') {
+            return `${currencySymbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+        } else if (format === 'percent') {
+            return `${(val * 100).toFixed(1)}%`;
+        } else {
+            return val.toLocaleString();
+        }
+    };
+
     // Format Value
-    let formattedValue = String(value);
-    if (format === 'currency') {
-        formattedValue = `${currencySymbol}${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-    } else if (format === 'percent') {
-        formattedValue = `${(value * 100).toFixed(1)}%`;
-    } else {
-        formattedValue = value.toLocaleString();
-    }
+    const formattedValue = formatValue(value);
 
     // Breach Logic
     let valueColor = 'inherit';
     let breachIcon = null;
+    let breachStatus = null;
 
     const changeAdjective = (change !== undefined) ? (change > 0 ? 'above' : (change < 0 ? 'below' : '')) : 'no data';
     const textSuffix = (comparisonColumn !== undefined) ? `${changeAdjective} ${comparisonColumn}` : undefined;
 
     if (breachValue !== undefined) {
-        breachIcon = <BreachIndicator status={getBreachStatus(value, breachValue, warningValue, goodDirection)} />;
+        breachStatus = getBreachStatus(value, breachValue, warningValue, goodDirection);
+        breachIcon = <BreachIndicator status={breachStatus} />;
     }
+
+    // Build tooltip content
+    const tooltipContent = useMemo(() => {
+        const lines: string[] = [];
+        
+        lines.push(`Value: ${formattedValue}`);
+        
+        if (comparisonValue !== undefined) {
+            lines.push(`Comparison: ${formatValue(comparisonValue)}`);
+        }
+        
+        if (change !== undefined) {
+            const changePercent = (change * 100).toFixed(1);
+            lines.push(`Change: ${change >= 0 ? '+' : ''}${changePercent}%`);
+        }
+        
+        if (breachValue !== undefined) {
+            lines.push(`Breach Threshold: ${formatValue(breachValue)}`);
+        }
+        
+        if (warningValue !== undefined) {
+            lines.push(`Warning Threshold: ${formatValue(warningValue)}`);
+        }
+        
+        if (breachStatus) {
+            const statusText = breachStatus === 'breach' ? '⚠️ BREACHED' : 
+                             breachStatus === 'warning' ? '⚡ WARNING' : 
+                             '✓ Good';
+            lines.push(`Status: ${statusText}`);
+        }
+        
+        return lines.join('\n');
+    }, [value, comparisonValue, change, breachValue, warningValue, breachStatus, formattedValue, format, currencySymbol]);
 
     const containerStyle: React.CSSProperties = {
         padding: padding || 15,
@@ -117,10 +157,12 @@ export const KPI: React.FC<KPIProps> = ({
         <div className="dl2-kpi" style={containerStyle}>
             {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: '#333', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
             
-            <div className="dl2-kpi-value" style={{ fontSize: '2em', fontWeight: 'bold', color: valueColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {formattedValue}
-                {breachIcon}
-            </div>
+            <Tooltip content={tooltipContent}>
+                <div className="dl2-kpi-value" style={{ fontSize: '2em', fontWeight: 'bold', color: valueColor, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'help' }}>
+                    {formattedValue}
+                    {breachIcon}
+                </div>
+            </Tooltip>
             
             <TrendIndicator change={change} goodDirection={goodDirection} textSuffix={textSuffix} />
             
