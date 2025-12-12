@@ -1,78 +1,80 @@
 # Datalys2 Reports
 
-A React-based framework for showing dashboards and reports, designed to be loaded from CDN.
+A configuration-driven React framework for generating dynamic dashboards and reports.
 
-## Development
+## Overview
 
-```bash
-# Install dependencies
-npm install
+Datalys2 Reports allows you to create rich, interactive reports by simply defining a JSON configuration embedded in your HTML. It handles the layout, data visualization, and interactivity, so you don't need to write custom React code for every report.
 
-# Build the library
-npm run build
+## Features
 
-# Watch for changes during development
-npm run dev
-```
+*   **JSON Configuration**: Define your report structure, pages, and data in a simple JSON format.
+*   **Multiple Visuals**: Includes built-in components like KPIs, Pie Charts, Stacked Bar Charts, Clustered Bar Charts, and Cards.
+*   **Layout System**: Flexible row/column layout system.
+*   **Data Handling**: Supports multiple datasets in 'records' or 'table' formats.
+*   **Theming**: Customizable via CSS.
 
-## CDN Usage
+## Usage
 
-After building, your library can be loaded from a CDN or directly from the `dist` folder:
+1.  **Include the assets**: Add the `dl2-style.css` and the compiled JavaScript bundle to your HTML file.
+2.  **Add the container**: Create a `<div id="root"></div>` element.
+3.  **Define the data**: Add a `<script id="report-data" type="application/json">` tag containing your report configuration.
 
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Dashboard</title>
+    <meta charset="UTF-8">
+    <title>My Report</title>
+    <link rel="stylesheet" href="dl2-style.css">
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- Load React from CDN -->
-    <script crossorigin src="https://unpkg.com/react@19/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@19/umd/react-dom.production.min.js"></script>
-    
-    <!-- Load Datalys2 Reports -->
-    <script src="https://your-cdn.com/datalys2-reports.min.js"></script>
-
-    <script>
-        const { Dashboard, Report } = Datalys2Reports;
-        
-        const app = React.createElement(
-            Dashboard,
-            { title: 'Sales Dashboard' },
-            React.createElement(Report, {
-                type: 'sales',
-                data: { revenue: 50000 }
-            })
-        );
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(app);
+    <script id="report-data" type="application/json">
+    {
+        "pages": [ ... ],
+        "datasets": { ... }
+    }
     </script>
+
+    <script src="datalys2-reports.min.js"></script>
 </body>
 </html>
 ```
 
-## NPM Usage
+For detailed documentation on the configuration schema and available components, please refer to [DOCUMENTATION.md](./DOCUMENTATION.md).
 
-You can also use this library via NPM:
+## Development
 
-```javascript
-import { Dashboard, Report } from 'datalys2-reports';
+### Prerequisites
 
-function App() {
-  return (
-    <Dashboard title="My Dashboard">
-      <Report type="sales" data={{ revenue: 50000 }} />
-    </Dashboard>
-  );
-}
+*   Node.js
+*   npm
+
+### Setup
+
+```bash
+# Install dependencies
+npm install
 ```
 
-## Features
+### Build
 
-- UMD module format (works in browsers, CommonJS, AMD)
-- React and ReactDOM are external dependencies (must be loaded separately)
-- Global variable: `Datalys2Reports`
-- Compatible with CDN loading
+To build the production bundle:
+
+```bash
+npm run build
+```
+
+### Watch Mode
+
+To watch for changes during development:
+
+```bash
+npm run dev
+```
+
+## License
+
+ISC
