@@ -126,6 +126,40 @@
 
                         }
                     ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "ad-spend-scatter",
+                            "elementType": "visual",
+                            "type": "scatter",
+                            "datasetId": "adSpendVsSales",
+                            "title": "Ad Spend vs Sales Correlation",
+                            "description": "Analysis of how advertising spend impacts sales across regions.",
+                            "xColumn": "AdSpend",
+                            "yColumn": "Sales",
+                            "categoryColumn": "Region",
+                            "xAxisLabel": "Ad Spend ($)",
+                            "yAxisLabel": "Sales ($)",
+                            "showTrendline": true,
+                            "showCorrelation": true,
+                            "border": true,
+                            "shadow": true,
+                            "height": 400
+                        },
+                        {
+                            "id": "ad-spend-table",
+                            "elementType": "visual",
+                            "type": "table",
+                            "datasetId": "adSpendVsSales",
+                            "title": "Ad Spend vs Sales Data",
+                            "description": "Raw data for Ad Spend vs Sales.",
+                            "border": true,
+                            "shadow": true
+                            
+                        }
+                    ]
                 }
             ]
         },
@@ -173,6 +207,53 @@
                 ["Total Revenue", 150000, 142500],
                 ["Active Users", 1200, 1200],
                 ["Bounce Rate", 0.45, 0.50]
+            ]
+        },
+        "adSpendVsSales": {
+            "format": "records",
+            "dtypes": ["number", "number", "string"],
+            "columns": ["AdSpend", "Sales", "Region"],
+            "data": [
+                { "AdSpend": 800, "Sales": 3200, "Region": "North" },
+                { "AdSpend": 1200, "Sales": 5800, "Region": "North" },
+                { "AdSpend": 1500, "Sales": 5500, "Region": "North" },
+                { "AdSpend": 1900, "Sales": 8100, "Region": "North" },
+                { "AdSpend": 2200, "Sales": 7900, "Region": "North" },
+                { "AdSpend": 2600, "Sales": 11000, "Region": "North" },
+                { "AdSpend": 3100, "Sales": 12500, "Region": "North" },
+                { "AdSpend": 3500, "Sales": 14000, "Region": "North" },
+                { "AdSpend": 3800, "Sales": 13500, "Region": "North" },
+                { "AdSpend": 4000, "Sales": 16000, "Region": "North" },
+                { "AdSpend": 600, "Sales": 2500, "Region": "South" },
+                { "AdSpend": 1100, "Sales": 4200, "Region": "South" },
+                { "AdSpend": 1400, "Sales": 6100, "Region": "South" },
+                { "AdSpend": 1800, "Sales": 5900, "Region": "South" },
+                { "AdSpend": 2300, "Sales": 9500, "Region": "South" },
+                { "AdSpend": 2700, "Sales": 9200, "Region": "South" },
+                { "AdSpend": 3000, "Sales": 11800, "Region": "South" },
+                { "AdSpend": 3300, "Sales": 13000, "Region": "South" },
+                { "AdSpend": 3600, "Sales": 12500, "Region": "South" },
+                { "AdSpend": 3900, "Sales": 15500, "Region": "South" },
+                { "AdSpend": 700, "Sales": 3800, "Region": "East" },
+                { "AdSpend": 1300, "Sales": 4500, "Region": "East" },
+                { "AdSpend": 1600, "Sales": 7200, "Region": "East" },
+                { "AdSpend": 2000, "Sales": 6800, "Region": "East" },
+                { "AdSpend": 2400, "Sales": 10200, "Region": "East" },
+                { "AdSpend": 2800, "Sales": 9800, "Region": "East" },
+                { "AdSpend": 3200, "Sales": 13500, "Region": "East" },
+                { "AdSpend": 3400, "Sales": 12200, "Region": "East" },
+                { "AdSpend": 3700, "Sales": 14800, "Region": "East" },
+                { "AdSpend": 4100, "Sales": 16500, "Region": "East" },
+                { "AdSpend": 900, "Sales": 2800, "Region": "West" },
+                { "AdSpend": 1250, "Sales": 5100, "Region": "West" },
+                { "AdSpend": 1750, "Sales": 6500, "Region": "West" },
+                { "AdSpend": 2100, "Sales": 8800, "Region": "West" },
+                { "AdSpend": 2550, "Sales": 8400, "Region": "West" },
+                { "AdSpend": 2950, "Sales": 11500, "Region": "West" },
+                { "AdSpend": 3250, "Sales": 11000, "Region": "West" },
+                { "AdSpend": 3550, "Sales": 14200, "Region": "West" },
+                { "AdSpend": 3850, "Sales": 13800, "Region": "West" },
+                { "AdSpend": 4200, "Sales": 17000, "Region": "West" }
             ]
         }
     }

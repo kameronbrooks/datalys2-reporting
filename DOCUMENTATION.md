@@ -185,6 +185,31 @@ Displays a Key Performance Indicator with optional comparison and breach status.
 | `showLegend` | `boolean` | Whether to show the legend. |
 | `showLabels` | `boolean` | Whether to show value labels on bars. |
 
+**5. Scatter Plot (`type: "scatter"`)**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `xColumn` | `string \| number` | Column for X-axis values (numeric). |
+| `yColumn` | `string \| number` | Column for Y-axis values (numeric). |
+| `categoryColumn` | `string \| number` | Optional column for coloring points by category. |
+| `showTrendline` | `boolean` | Whether to show a linear regression trendline. |
+| `showCorrelation` | `boolean` | Whether to show correlation stats (r, r², equation). |
+| `pointSize` | `number` | Size of the data points (default 5). |
+| `xAxisLabel` | `string` | Label for X-axis. |
+| `yAxisLabel` | `string` | Label for Y-axis. |
+
+**6. Table (`type: "table"`)**
+
+Displays data in a tabular format with sorting, filtering, and pagination.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `columns` | `string[]` | Optional array of column names to display. Defaults to all. |
+| `pageSize` | `number` | Number of rows per page (default 10). |
+| `tableStyle` | `'plain' \| 'bordered' \| 'alternating'` | Visual style of the table (default 'plain'). |
+| `showSearch` | `boolean` | Whether to show the search bar (default true). |
+| `title` | `string` | Optional title for the table. |
+
 ## Example Configuration
 
 ```json

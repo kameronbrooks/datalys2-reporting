@@ -2,8 +2,8 @@ import React from "react";
 export interface VisualLegendItem {
     key: string;
     label: string;
-    value: number;
-    percentage: number;
+    value?: number;
+    percentage?: number;
     fill: string;
 }
 export interface VisualLegendProps {

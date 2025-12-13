@@ -3,8 +3,8 @@ import React, { useState } from "react";
 export interface VisualLegendItem {
     key: string;
     label: string;
-    value: number;
-    percentage: number;
+    value?: number;
+    percentage?: number;
     fill: string;
 }
 
@@ -19,6 +19,9 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
     if (!items || items.length === 0) {
         return null;
     }
+
+    const showValues = items.some(item => item.value !== undefined);
+    const showPercentages = items.some(item => item.percentage !== undefined);
 
     return (
         <div className="dl2-visual-legend" style={{ marginTop: '10px' }}>
@@ -43,8 +46,8 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
                     <thead>
                         <tr style={{ borderBottom: '1px solid #eee', color: '#666' }}>
                             <th style={{ textAlign: 'left', padding: '4px' }}>Category</th>
-                            <th style={{ textAlign: 'right', padding: '4px' }}>Value</th>
-                            <th style={{ textAlign: 'right', padding: '4px' }}>%</th>
+                            {showValues && <th style={{ textAlign: 'right', padding: '4px' }}>Value</th>}
+                            {showPercentages && <th style={{ textAlign: 'right', padding: '4px' }}>%</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -66,8 +69,8 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
                                         <span className="dl2-visual-legend-label">{item.label}</span>
                                     </div>
                                 </td>
-                                <td style={{ textAlign: 'right', padding: '4px' }}>{item.value.toLocaleString()}</td>
-                                <td style={{ textAlign: 'right', padding: '4px' }}>{item.percentage.toFixed(1)}%</td>
+                                {showValues && <td style={{ textAlign: 'right', padding: '4px' }}>{item.value?.toLocaleString()}</td>}
+                                {showPercentages && <td style={{ textAlign: 'right', padding: '4px' }}>{item.percentage?.toFixed(1)}%</td>}
                             </tr>
                         ))}
                     </tbody>
