@@ -16,7 +16,9 @@ Datalys2 Reports allows you to create rich, interactive reports by simply defini
 
 ## Usage
 
-1.  **Include the assets**: Add the `dl2-style.css` and the compiled JavaScript bundle to your HTML file.
+You can use the library directly from a CDN without installing anything.
+
+1.  **Include the assets**: Add the CSS and JavaScript from jsDelivr.
 2.  **Add the container**: Create a `<div id="root"></div>` element.
 3.  **Define the data**: Add a `<script id="report-data" type="application/json">` tag containing your report configuration.
 
@@ -26,7 +28,8 @@ Datalys2 Reports allows you to create rich, interactive reports by simply defini
 <head>
     <meta charset="UTF-8">
     <title>My Report</title>
-    <link rel="stylesheet" href="dl2-style.css">
+    <!-- Include styles from CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kameronbrooks/datalys2-reporting@latest/dist/dl2-style.css">
 </head>
 <body>
     <div id="root"></div>
@@ -38,7 +41,8 @@ Datalys2 Reports allows you to create rich, interactive reports by simply defini
     }
     </script>
 
-    <script src="datalys2-reports.min.js"></script>
+    <!-- Include script from CDN -->
+    <script src="https://cdn.jsdelivr.net/gh/kameronbrooks/datalys2-reporting@latest/dist/datalys2-reports.min.js"></script>
 </body>
 </html>
 ```

@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: 'production',
@@ -11,6 +12,13 @@ module.exports = {
     globalObject: 'this',
     umdNamedDefine: true
   },
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: "src/dl2-style.css", to: "dl2-style.css" },
+      ],
+    }),
+  ],
   module: {
     rules: [
       {
