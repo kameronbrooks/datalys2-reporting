@@ -217,6 +217,27 @@
                             "shadow": true
                         }
                     ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "tasks-heatmap",
+                            "elementType": "visual",
+                            "type": "heatmap",
+                            "datasetId": "tasksHeatmap",
+                            "title": "Open Tasks by Assignee (Weekly)",
+                            "description": "Demo heatmap showing open task counts by assignee and week.",
+                            "xColumn": "Week",
+                            "yColumn": "Assignee",
+                            "valueColumn": "OpenTasks",
+                            "xAxisLabel": "Week",
+                            "yAxisLabel": "Assignee",
+                            "border": true,
+                            "shadow": true,
+                            "height": 340
+                        }
+                    ]
                 }
             ]
         }
@@ -319,6 +340,32 @@
                 { "AdSpend": 3550, "Sales": 14200, "Region": "West" },
                 { "AdSpend": 3850, "Sales": 13800, "Region": "West" },
                 { "AdSpend": 4200, "Sales": 17000, "Region": "West" }
+            ]
+        },
+        "tasksHeatmap": {
+            "format": "records",
+            "columns": ["Assignee", "Week", "OpenTasks"],
+            "dtypes": ["string", "string", "number"],
+            "data": [
+                { "Assignee": "Alice", "Week": "Wk 1", "OpenTasks": 2 },
+                { "Assignee": "Alice", "Week": "Wk 2", "OpenTasks": 4 },
+                { "Assignee": "Alice", "Week": "Wk 3", "OpenTasks": 3 },
+                { "Assignee": "Alice", "Week": "Wk 4", "OpenTasks": 1 },
+
+                { "Assignee": "Bob", "Week": "Wk 1", "OpenTasks": 5 },
+                { "Assignee": "Bob", "Week": "Wk 2", "OpenTasks": 6 },
+                { "Assignee": "Bob", "Week": "Wk 3", "OpenTasks": 4 },
+                { "Assignee": "Bob", "Week": "Wk 4", "OpenTasks": 3 },
+
+                { "Assignee": "Charlie", "Week": "Wk 1", "OpenTasks": 1 },
+                { "Assignee": "Charlie", "Week": "Wk 2", "OpenTasks": 3 },
+                { "Assignee": "Charlie", "Week": "Wk 3", "OpenTasks": 5 },
+                { "Assignee": "Charlie", "Week": "Wk 4", "OpenTasks": 4 },
+
+                { "Assignee": "Dave", "Week": "Wk 1", "OpenTasks": 3 },
+                { "Assignee": "Dave", "Week": "Wk 2", "OpenTasks": 2 },
+                { "Assignee": "Dave", "Week": "Wk 3", "OpenTasks": 2 },
+                { "Assignee": "Dave", "Week": "Wk 4", "OpenTasks": 1 }
             ]
         }
     }

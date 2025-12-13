@@ -11,12 +11,14 @@ export interface PageRowProps {
 export const PageRow: React.FC<PageRowProps> = ({layout}) => {
 
     const renderChild = (child: LayoutElement, index: number) => {
-        if (child.elementType === 'layout') {
+        const childType = (typeof (child as any).type === 'string' ? (child as any).type : child.elementType) as string;
+
+        if (childType === 'layout') {
             return <PageRow key={index} layout={child as Layout} />;
         }
 
-        // For other visual types, use the Visual component from the registry
-        return <Visual key={index} type={child.elementType} {...child} />;
+        // For visual types, use the Visual component from the registry
+        return <Visual key={index} {...(child as any)} type={childType} />;
     }
     return (
         <div 
