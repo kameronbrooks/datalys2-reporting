@@ -235,3 +235,48 @@
     border-color: #007bff;
 }
 
+
+/* Checklist Styles */
+.dl2-checklist-row.complete {
+    background-color: #f0fff4;
+    color: #2f855a;
+}
+
+.dl2-checklist-row.complete td {
+    text-decoration: line-through;
+    color: #666;
+}
+
+.dl2-checklist-row.warning {
+    background-color: #fffaf0;
+}
+
+.dl2-checklist-row.overdue {
+    background-color: #fff5f5;
+}
+
+.dl2-checklist-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-left: 8px;
+    text-transform: uppercase;
+}
+
+.dl2-checklist-badge.warning {
+    background-color: #feebc8;
+    color: #c05621;
+}
+
+.dl2-checklist-badge.overdue {
+    background-color: #fed7d7;
+    color: #c53030;
+}
+
+.dl2-checklist input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+}
+

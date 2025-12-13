@@ -11,6 +11,11 @@
 </head>
 
 <body>
+    <script type="text/javascript">
+        window.printRandomNumber = function() {
+            return Math.random();
+        }
+    </script>
     <script id="report-data" type="application/json">
 {
     "pages" : [
@@ -24,7 +29,7 @@
                     "children": [
                         {
                             "type": "card",
-                            "title": "Welcome to the Report",
+                            "title": "Welcome to the Report {{printRandomNumber()}}",
                             "content": "This report provides insights into the top 10 things. Explore the visualizations below to understand the data better.",
                             "border": true,
                             "shadow": true
@@ -157,20 +162,70 @@
                             "description": "Raw data for Ad Spend vs Sales.",
                             "border": true,
                             "shadow": true
-                            
+
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "overview-checklist",
+                            "elementType": "visual",
+                            "type": "checklist",
+                            "datasetId": "tasksData",
+                            "title": "Overview Checklist",
+                            "statusColumn": "Completed",
+                            "warningColumn": "DueDate",
+                            "warningThreshold": 5,
+                            "columns": ["Task", "State", "Assignee", "DueDate"],
+                            "border": true,
+                            "shadow": true
                         }
                     ]
                 }
             ]
         },
         {
-            "title": "Page 2",
-            "description": "This is the second page of the report.",
-            "lastUpdated": "2024-06-15T10:00:00Z",
-            "rows" : null
+            "title": "Tasks",
+            "description": "Project task tracking.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "project-tasks",
+                            "elementType": "visual",
+                            "type": "checklist",
+                            "datasetId": "tasksData",
+                            "title": "Project Milestones",
+                            "statusColumn": "Completed",
+                            "warningColumn": "DueDate",
+                            "warningThreshold": 5,
+                            "columns": ["Task", "Assignee", "DueDate"],
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "datasets": {
+        "tasksData": {
+            "format": "records",
+            "columns": ["Task", "Assignee", "DueDate", "Completed"],
+            "dtypes": ["string", "string", "date", "boolean"],
+            "data": [
+                { "Task": "Initial Planning", "State": "Complete", "Assignee": "Alice", "DueDate": "2024-01-15", "Completed": true },
+                { "Task": "Design Mockups", "State": "Complete", "Assignee": "Bob", "DueDate": "2024-02-01", "Completed": true },
+                { "Task": "Frontend Development", "State": "In-Progress", "Assignee": "Charlie", "DueDate": "2025-12-15", "Completed": false },
+                { "Task": "Backend API", "State": "In-Progress", "Assignee": "Dave", "DueDate": "2025-12-10", "Completed": false },
+                { "Task": "Testing", "State": "In-Progress", "Assignee": "Eve", "DueDate": "2024-03-15", "Completed": false },
+                { "Task": "Deployment", "State": "Pending", "Assignee": "Frank", "DueDate": "2024-04-01", "Completed": false },
+                { "Task": "Follow up", "State": "Pending", "Assignee": "Frank", "DueDate": "2026-04-01", "Completed": false }
+            ]
+        },
         "top10things" : {
             "format": "table",
             "dtypes": ["string", "number"],

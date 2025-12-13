@@ -6,6 +6,7 @@ import { ClusteredBarChart } from "./visuals/ClusteredBarChart";
 import { KPI } from "./visuals/KPI";
 import { ScatterPlot } from "./visuals/ScatterPlot";
 import { Table } from "./visuals/Table";
+import { Checklist } from "./visuals/Checklist";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
@@ -16,6 +17,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'kpi': KPI,
     'scatter': ScatterPlot,
     'table': Table,
+    'checklist': Checklist,
     // Add other components here as needed
 };
 

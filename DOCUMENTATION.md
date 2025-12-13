@@ -150,6 +150,42 @@ Displays a simple text card.
 | `title` | `string` | Optional title header. |
 | `text` | `string` | The main content text. |
 
+`title` and `text` support a template syntax using `{{ ... }}` placeholders. The contents of each placeholder are evaluated as a **JavaScript expression**.
+
+Available variables inside `{{ ... }}`:
+
+- `datasets`: the datasets object from `report-data`
+- `props`: reserved for future use (currently `{}` for cards)
+- `helpers`: helper functions
+
+Convenience: the following helper functions are also available directly (they are destructured from `helpers`):
+
+- `count(datasetId)`
+- `sum(datasetId, column)`, `avg(datasetId, column)`, `min(datasetId, column)`, `max(datasetId, column)` (these operate on `table`-format datasets)
+- `formatNumber(value, digits?)`, `formatPercent(value, digits?)`, `formatCurrency(value, symbol?, digits?)`
+
+⚠️ **Security note:** because `report-data` is embedded in the HTML, this means your report configuration can execute arbitrary code in the viewer’s browser. Only use this if the HTML/JSON is trusted.
+
+**Example Card with computed text:**
+
+```json
+{
+    "type": "card",
+    "title": "Dataset Summary",
+    "text": "Rows in tasksData: {{count('tasksData')}}"
+}
+```
+
+You can also provide an object form if you want the whole value to be a single expression:
+
+```json
+{
+    "type": "card",
+    "title": { "expr": "'Rows: ' + count('tasksData')" },
+    "text": { "expr": "formatCurrency(sum('kpiData', 'Value'), '$', 0)" }
+}
+```
+
 **2. KPI (`type: "kpi"`)**
 
 Displays a Key Performance Indicator with optional comparison and breach status.
@@ -209,6 +245,19 @@ Displays data in a tabular format with sorting, filtering, and pagination.
 | `tableStyle` | `'plain' \| 'bordered' \| 'alternating'` | Visual style of the table (default 'plain'). |
 | `showSearch` | `boolean` | Whether to show the search bar (default true). |
 | `title` | `string` | Optional title for the table. |
+
+**7. Checklist (`type: "checklist"`)**
+
+Displays a list of tasks with completion status and due date warnings.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `statusColumn` | `string` | **Required**. Column name containing boolean/truthy value for completion. |
+| `warningColumn` | `string` | Optional. Column name containing a date to check against. |
+| `warningThreshold` | `number` | Optional. Days before due date to trigger warning (default 3). |
+| `columns` | `string[]` | Optional array of column names to display. |
+| `pageSize` | `number` | Number of rows per page (default 10). |
+| `showSearch` | `boolean` | Whether to show the search bar (default true). |
 
 ## Example Configuration
 
