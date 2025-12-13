@@ -97,7 +97,7 @@ export const KPI: React.FC<KPIProps> = ({
     let breachIcon = null;
     let breachStatus = null;
 
-    const changeAdjective = (change !== undefined) ? (change > 0 ? 'above' : (change < 0 ? 'below' : '')) : 'no data';
+    const changeAdjective = (change !== undefined) ? (change > 0 ? 'above' : (change < 0 ? 'below' : 'from')) : 'no data';
     const textSuffix = (comparisonColumn !== undefined) ? `${changeAdjective} ${comparisonColumn}` : undefined;
 
     if (breachValue !== undefined) {

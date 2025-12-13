@@ -43,6 +43,7 @@ export interface ReportVisual extends LayoutElement {
     datasetId: string;
     description?: string;
     visualType: string;
+    otherElements?: ReportVisualElement[];
 }
 /**
  * An element that can be added to a report visual

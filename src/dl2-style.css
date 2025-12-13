@@ -240,6 +240,7 @@
 .dl2-checklist-row.complete {
     background-color: #f0fff4;
     color: #2f855a;
+    border-bottom: #2f855a 1px solid;
 }
 
 .dl2-checklist-row.complete td {
@@ -249,10 +250,12 @@
 
 .dl2-checklist-row.warning {
     background-color: #fffaf0;
+    border-bottom: #c05621 1px solid;
 }
 
 .dl2-checklist-row.overdue {
     background-color: #fff5f5;
+    border-bottom: #c53030 1px solid;
 }
 
 .dl2-checklist-badge {
