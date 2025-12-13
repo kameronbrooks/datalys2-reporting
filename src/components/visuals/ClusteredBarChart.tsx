@@ -1,10 +1,12 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scaleBand, scaleLinear, scaleOrdinal, max, schemeTableau10 } from "d3";
-import type { ReportVisual, Dataset } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
+import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 
 export interface ClusteredBarChartProps extends ReportVisual {
+    otherElements?: ReportVisualElement[];
     xColumn?: string | number;
     yColumns?: string | string[];
     title?: string;
@@ -27,6 +29,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     xColumn = 0,
     yColumns = [1],
     datasetId,
+    otherElements,
     title,
     description,
     padding,
@@ -354,6 +357,15 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                 </text>
                             )}
                         </g>
+
+                        <ReportVisualElementsLayer
+                            elements={otherElements}
+                            innerWidth={innerWidth}
+                            innerHeight={innerHeight}
+                            xScale={x0Scale as any}
+                            yScale={yScale as any}
+                            defaultValueAxis="y"
+                        />
                     </g>
                 </svg>
 
@@ -388,3 +400,4 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
         </div>
     );
 };
+

@@ -1,6 +1,7 @@
 import React from "react";
-import type { ReportVisual } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement } from "../../lib/types";
 export interface ScatterPlotProps extends ReportVisual {
+    otherElements?: ReportVisualElement[];
     xColumn?: string | number;
     yColumn?: string | number;
     categoryColumn?: string | number;

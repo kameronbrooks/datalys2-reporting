@@ -1,11 +1,13 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scaleLinear, scaleOrdinal, max, min, schemeTableau10, axisBottom, axisLeft, select } from "d3";
-import type { ReportVisual, Dataset } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { findColumnIndex } from "../../lib/dataset-utility";
+import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 
 export interface ScatterPlotProps extends ReportVisual {
+    otherElements?: ReportVisualElement[];
     xColumn?: string | number;
     yColumn?: string | number;
     categoryColumn?: string | number;
@@ -34,6 +36,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     yColumn = 1,
     categoryColumn,
     datasetId,
+    otherElements,
     title,
     description,
     padding,
@@ -294,6 +297,16 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                 <title>{`X: ${d.x}\nY: ${d.y}\nCategory: ${d.category}`}</title>
                             </circle>
                         ))}
+
+                        <ReportVisualElementsLayer
+                            elements={otherElements}
+                            innerWidth={innerWidth}
+                            innerHeight={innerHeight}
+                            xScale={xScale as any}
+                            yScale={yScale as any}
+                            xDomain={xScale.domain() as [number, number]}
+                            defaultValueAxis="y"
+                        />
                     </g>
                 </svg>
 
@@ -356,3 +369,4 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         </div>
     );
 };
+

@@ -1,6 +1,7 @@
 import React from "react";
-import type { ReportVisual } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement } from "../../lib/types";
 export interface ClusteredBarChartProps extends ReportVisual {
+    otherElements?: ReportVisualElement[];
     xColumn?: string | number;
     yColumns?: string | string[];
     title?: string;

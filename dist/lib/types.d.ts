@@ -45,6 +45,71 @@ export interface ReportVisual extends LayoutElement {
     visualType: string;
 }
 /**
+ * An element that can be added to a report visual
+ *
+ */
+export interface ReportVisualElement {
+    visualElementType: 'trend' | 'yAxis' | 'xAxis' | 'marker' | 'label';
+    color?: string;
+    lineStyle?: 'solid' | 'dashed' | 'dotted';
+    lineWidth?: number;
+    label?: string;
+}
+/**
+ * Display a trend line on the visualization
+ *
+ * Properties:
+ * - visualElementType: 'trend' - indicates this is a trend line element
+ * - lineStyle: 'solid' | 'dashed' | 'dotted' - style of the trend line
+ * - coefficients: number[] - coefficients for the trend line equation
+ */
+export interface TrendVisualElement extends ReportVisualElement {
+    visualElementType: 'trend';
+    lineStyle: 'solid' | 'dashed' | 'dotted';
+    coefficients: number[];
+}
+/**
+ * Display an axis on the visualization
+ *
+ * Properties:
+ * - visualElementType: 'yAxis' | 'xAxis' - indicates this is an axis element
+ * - lineStyle: 'solid' | 'dashed' | 'dotted' - style of the axis line
+ * - value?: number | Date | string - optional value for the axis
+ */
+export interface AxisVisualElement extends ReportVisualElement {
+    visualElementType: 'yAxis' | 'xAxis';
+    lineStyle: 'solid' | 'dashed' | 'dotted';
+    value?: number | Date | string;
+}
+/**
+ * Display a marker on the visualization
+ * * Properties:
+ * - visualElementType: 'marker' - indicates this is a marker element
+ * - value: number | Date | string - value for the marker
+ * - size?: number - optional size of the marker
+ * - shape?: 'circle' | 'square' | 'triangle' - optional shape of the marker
+ */
+export interface MarkerVisualElement extends ReportVisualElement {
+    visualElementType: 'marker';
+    value: number | Date | string;
+    size?: number;
+    shape?: 'circle' | 'square' | 'triangle';
+}
+/**
+ * Display a label on the visualization
+ * * Properties:
+ * - visualElementType: 'label' - indicates this is a label element
+ * - value: number | Date | string - value for the label
+ * - fontSize?: number - optional font size for the label
+ * - fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' - optional font weight for the label
+ */
+export interface LabelVisualElement extends ReportVisualElement {
+    visualElementType: 'label';
+    value: number | Date | string;
+    fontSize?: number;
+    fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter';
+}
+/**
  * Interface for report layout elements
  * Extends LayoutElement with layout-specific properties
  * Properties:

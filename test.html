@@ -29,7 +29,7 @@
                     "children": [
                         {
                             "type": "card",
-                            "title": "Welcome to the Report {{printRandomNumber()}}",
+                            "title": "Welcome to the Report {{printRandomNumber1()}}",
                             "content": "This report provides insights into the top 10 things. Explore the visualizations below to understand the data better.",
                             "border": true,
                             "shadow": true
@@ -127,7 +127,17 @@
                             "yColumns": ["Electronics", "Clothing", "Home"],
                             "border": true,
                             "shadow": true,
-                            "height": 200
+                            "height": 200,
+                            "otherElements": [
+                                {
+                                    "visualElementType": "xAxis",
+                                    "value": 4500,
+                                    "color": "green",
+                                    "lineStyle": "dashed",
+                                    "lineWidth": 2,
+                                    "label": "Target"
+                                }
+                            ]
 
                         }
                     ]
