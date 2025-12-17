@@ -9,6 +9,7 @@ import { Table } from "./visuals/Table";
 import { Checklist } from "./visuals/Checklist";
 import { Heatmap } from "./visuals/Heatmap";
 import { Histogram } from "./visuals/Histogram";
+import { LineChart } from "./visuals/LineChart";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
@@ -16,6 +17,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'pie': PieChart,
     'stackedBar': StackedBarChart,
     'clusteredBar': ClusteredBarChart,
+    'line': LineChart,
     'kpi': KPI,
     'scatter': ScatterPlot,
     'table': Table,
