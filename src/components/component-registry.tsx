@@ -8,6 +8,7 @@ import { ScatterPlot } from "./visuals/ScatterPlot";
 import { Table } from "./visuals/Table";
 import { Checklist } from "./visuals/Checklist";
 import { Heatmap } from "./visuals/Heatmap";
+import { Histogram } from "./visuals/Histogram";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
@@ -20,6 +21,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'table': Table,
     'checklist': Checklist,
     'heatmap': Heatmap,
+    'histogram': Histogram,
     // Add other components here as needed
 };
 

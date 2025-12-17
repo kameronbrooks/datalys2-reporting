@@ -193,6 +193,27 @@
                             "shadow": true
                         }
                     ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "sales-histogram",
+                            "elementType": "visual",
+                            "type": "histogram",
+                            "datasetId": "adSpendVsSales",
+                            "title": "Sales Distribution",
+                            "description": "Histogram of sales data.",
+                            "column": "Sales",
+                            "bins": 10,
+                            "xAxisLabel": "Sales ($)",
+                            "yAxisLabel": "Frequency",
+                            "color": "#8884d8",
+                            "border": true,
+                            "shadow": true,
+                            "height": 300
+                        }
+                    ]
                 }
             ]
         },
