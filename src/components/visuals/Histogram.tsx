@@ -137,12 +137,12 @@ export const Histogram: React.FC<HistogramProps> = ({
             ref={containerRef}
             className="relative flex flex-col"
             style={{ 
-                padding, 
-                margin, 
-                border, 
-                boxShadow: shadow,
+                padding: padding || 10, 
+                margin: margin || 10, 
+                border: border ? '1px solid #ccc' : undefined, 
+                boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
                 width: '100%',
-                maxWidth: width,
+                flex: 1,
                 position: 'relative'
             }}
         >
