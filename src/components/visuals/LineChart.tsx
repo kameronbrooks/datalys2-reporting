@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import { scalePoint, scaleLinear, scaleOrdinal, max, schemeTableau10, line, curveLinear } from "d3";
+import { scalePoint, scaleLinear, scaleOrdinal, max, schemeTableau10, line, curveLinear, curveMonotoneX } from "d3";
 import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
@@ -21,6 +21,7 @@ export interface LineChartProps extends ReportVisual {
     showLegend?: boolean;
     legendTitle?: string;
     showLabels?: boolean;
+    smooth?: boolean;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
@@ -46,7 +47,8 @@ export const LineChart: React.FC<LineChartProps> = ({
     colors,
     showLegend = true,
     legendTitle,
-    showLabels = false
+    showLabels = false,
+    smooth = false
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
@@ -173,8 +175,8 @@ export const LineChart: React.FC<LineChartProps> = ({
         return line<any>()
             .x(d => xScale(d.x) ?? 0)
             .y(d => yScale(d.value))
-            .curve(curveLinear);
-    }, [xScale, yScale]);
+            .curve(smooth ? curveMonotoneX : curveLinear);
+    }, [xScale, yScale, smooth]);
 
     if (!dataset || data.length === 0) {
         return (

@@ -16,5 +16,6 @@ export interface LineChartProps extends ReportVisual {
     showLegend?: boolean;
     legendTitle?: string;
     showLabels?: boolean;
+    smooth?: boolean;
 }
 export declare const LineChart: React.FC<LineChartProps>;
