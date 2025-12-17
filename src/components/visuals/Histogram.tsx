@@ -41,6 +41,7 @@ export const Histogram: React.FC<HistogramProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
     const [hoveredBin, setHoveredBin] = useState<{ x0: number | undefined, x1: number | undefined, length: number } | null>(null);
+    const [tooltipPos, setTooltipPos] = useState<{ x: number, y: number } | null>(null);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -141,7 +142,8 @@ export const Histogram: React.FC<HistogramProps> = ({
                 border, 
                 boxShadow: shadow,
                 width: '100%',
-                maxWidth: width 
+                maxWidth: width,
+                position: 'relative'
             }}
         >
             {title && <h3 className="text-lg font-semibold mb-2 text-center">{title}</h3>}
@@ -177,11 +179,33 @@ export const Histogram: React.FC<HistogramProps> = ({
                                     x={barX}
                                     y={yScale(d.length)}
                                     width={barWidth}
-                                    height={barHeight}
+                                    height={innerHeight - yScale(d.length)}
                                     fill={color}
                                     opacity={hoveredBin === d ? 0.8 : 1}
-                                    onMouseEnter={() => setHoveredBin(d)}
-                                    onMouseLeave={() => setHoveredBin(null)}
+                                    style={{ cursor: 'pointer' }}
+                                    onMouseEnter={(e) => {
+                                        setHoveredBin(d);
+                                        const rect = containerRef.current?.getBoundingClientRect();
+                                        if (rect) {
+                                            setTooltipPos({
+                                                x: e.clientX - rect.left,
+                                                y: e.clientY - rect.top
+                                            });
+                                        }
+                                    }}
+                                    onMouseMove={(e) => {
+                                        const rect = containerRef.current?.getBoundingClientRect();
+                                        if (rect) {
+                                            setTooltipPos({
+                                                x: e.clientX - rect.left,
+                                                y: e.clientY - rect.top
+                                            });
+                                        }
+                                    }}
+                                    onMouseLeave={() => {
+                                        setHoveredBin(null);
+                                        setTooltipPos(null);
+                                    }}
                                 />
                             );
                         })}
@@ -272,22 +296,31 @@ export const Histogram: React.FC<HistogramProps> = ({
                         )}
                     </g>
                 </svg>
-
-                {/* Tooltip */}
-                {hoveredBin && (
-                    <div
-                        className="absolute bg-white p-2 rounded shadow-lg border border-gray-200 text-xs pointer-events-none z-10"
-                        style={{
-                            left: resolvedMargin.left + xScale(hoveredBin.x0 ?? 0) + (xScale(hoveredBin.x1 ?? 0) - xScale(hoveredBin.x0 ?? 0)) / 2,
-                            top: resolvedMargin.top + yScale(hoveredBin.length) - 10,
-                            transform: 'translate(-50%, -100%)'
-                        }}
-                    >
-                        <div className="font-semibold">Range: {hoveredBin.x0} - {hoveredBin.x1}</div>
-                        <div>Count: {hoveredBin.length}</div>
-                    </div>
-                )}
             </div>
+
+            {/* Tooltip */}
+            {hoveredBin && tooltipPos && (
+                <div
+                    style={{
+                        position: "absolute",
+                        left: tooltipPos.x,
+                        top: tooltipPos.y,
+                        transform: "translate(-50%, -100%)",
+                        backgroundColor: "rgba(0, 0, 0, 0.8)",
+                        color: "white",
+                        padding: "8px",
+                        borderRadius: "4px",
+                        pointerEvents: "none",
+                        fontSize: "12px",
+                        zIndex: 1000,
+                        whiteSpace: "nowrap",
+                        marginTop: "-10px"
+                    }}
+                >
+                    <div style={{ fontWeight: "bold" }}>Range: {hoveredBin.x0} - {hoveredBin.x1}</div>
+                    <div>Count: {hoveredBin.length}</div>
+                </div>
+            )}
         </div>
     );
 };
