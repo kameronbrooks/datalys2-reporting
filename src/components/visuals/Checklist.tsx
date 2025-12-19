@@ -117,17 +117,17 @@ export const Checklist: React.FC<ChecklistProps> = ({
     };
 
     if (!dataset) {
-        return <div style={{ padding: 10, color: 'red' }}>Dataset '{datasetId}' not found.</div>;
+        return <div style={{ padding: 10, color: 'var(--dl2-error)' }}>Dataset '{datasetId}' not found.</div>;
     }
 
     return (
         <div className="dl2-visual-container" style={{
             padding: padding || 10,
             margin: margin || 10,
-            border: border ? '1px solid #ccc' : undefined,
-            boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
+            border: border ? '1px solid var(--dl2-border-main)' : undefined,
+            boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
             flex: flex || 1,
-            backgroundColor: 'white',
+            backgroundColor: 'var(--dl2-bg-visual)',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column'
@@ -147,7 +147,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
                         }}
                     />
                 )}
-                <div style={{ fontSize: '0.9em', color: '#666' }}>
+                <div style={{ fontSize: '0.9em', color: 'var(--dl2-text-muted)' }}>
                     {processedData.filter(r => !!r[statusColumn]).length} / {processedData.length} Completed
                 </div>
             </div>
@@ -230,7 +230,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
             )}
 
             {description && (
-                <div style={{ padding: '10px 0 0 0', fontSize: '0.9em', color: '#666' }}>
+                <div style={{ padding: '10px 0 0 0', fontSize: '0.9em', color: 'var(--dl2-text-muted)' }}>
                     {description}
                 </div>
             )}

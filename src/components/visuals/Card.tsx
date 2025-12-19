@@ -27,9 +27,11 @@ export const Card: React.FC<CardProps> = ({ text, title, shadow, border, descrip
         <div className="dl2-card" style={{
             padding: padding || 10,
             margin: margin || 10,
-            border: border ? '1px solid #ccc' : undefined,
-            boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
-            flex: 1
+            border: border ? '1px solid var(--dl2-border-main)' : undefined,
+            boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
+            flex: 1,
+            backgroundColor: 'var(--dl2-bg-visual)',
+            color: 'var(--dl2-text-main)'
         }}>
             {title && <h2>{renderedTitle}</h2>}
             <p>{renderedText}</p>

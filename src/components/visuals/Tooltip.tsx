@@ -66,8 +66,9 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
                         position: 'fixed',
                         top: position.top,
                         left: position.left,
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        color: '#fff',
+                        backgroundColor: 'var(--dl2-bg-main)',
+                        color: 'var(--dl2-text-main)',
+                        border: '1px solid var(--dl2-border-main)',
                         padding: '8px 12px',
                         borderRadius: '4px',
                         fontSize: '0.85em',
@@ -75,7 +76,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
                         pointerEvents: 'none',
                         whiteSpace: 'pre-line',
                         maxWidth: '300px',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                        boxShadow: '0 2px 8px var(--dl2-shadow)'
                     }}
                 >
                     {content}

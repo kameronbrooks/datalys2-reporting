@@ -23,9 +23,9 @@ export const getBreachStatus = (
 
 export const getBreachColor = (status: BreachStatus): string => {
     switch (status) {
-        case 'breach': return '#c62828';
-        case 'warning': return '#f57f17';
-        case 'ok': return '#2e7d32';
+        case 'breach': return 'var(--dl2-error)';
+        case 'warning': return 'var(--dl2-warning)';
+        case 'ok': return 'var(--dl2-success)';
         default: return 'inherit';
     }
 };

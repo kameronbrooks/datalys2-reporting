@@ -34,7 +34,7 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
                     justifyContent: 'space-between', 
                     alignItems: 'center', 
                     paddingBottom: '5px', 
-                    borderBottom: isCollapsed ? 'none' : '1px solid #ccc' 
+                    borderBottom: isCollapsed ? 'none' : '1px solid var(--dl2-border-main)' 
                 }}
             >
                 <div className="dl2-visual-legend-title" style={{ fontWeight: 'bold' }}>{title || 'Legend'}</div>
@@ -44,7 +44,7 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
             {!isCollapsed && (
                 <table className="dl2-visual-legend-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', fontSize: '0.9em' }}>
                     <thead>
-                        <tr style={{ borderBottom: '1px solid #eee', color: '#666' }}>
+                        <tr style={{ borderBottom: '1px solid var(--dl2-border-table)', color: 'var(--dl2-text-muted)' }}>
                             <th style={{ textAlign: 'left', padding: '4px' }}>Category</th>
                             {showValues && <th style={{ textAlign: 'right', padding: '4px' }}>Value</th>}
                             {showPercentages && <th style={{ textAlign: 'right', padding: '4px' }}>%</th>}
@@ -52,7 +52,7 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
                     </thead>
                     <tbody>
                         {items.map((item) => (
-                            <tr key={item.key} style={{ borderBottom: '1px solid #f5f5f5' }}>
+                            <tr key={item.key} style={{ borderBottom: '1px solid var(--dl2-border-table)' }}>
                                 <td style={{ padding: '4px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <span

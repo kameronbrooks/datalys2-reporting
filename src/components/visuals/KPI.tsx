@@ -70,7 +70,7 @@ export const KPI: React.FC<KPIProps> = ({
 
     if (!data) {
         return (
-            <div className="dl2-kpi" style={{ padding: padding || 15, margin: margin || 10, border: border ? "1px solid #ccc" : undefined }}>
+            <div className="dl2-kpi" style={{ padding: padding || 15, margin: margin || 10, border: border ? "1px solid var(--dl2-border-main)" : undefined }}>
                 <div className="dl2-kpi-empty">No data</div>
             </div>
         );
@@ -141,13 +141,13 @@ export const KPI: React.FC<KPIProps> = ({
     const containerStyle: React.CSSProperties = {
         padding: padding || 15,
         margin: margin || 10,
-        border: border ? "1px solid #ccc" : undefined,
-        boxShadow: shadow ? "2px 2px 5px rgba(0, 0, 0, 0.1)" : undefined,
+        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#fff",
+        backgroundColor: "var(--dl2-bg-visual)",
         minWidth: width || 150,
         minHeight: height || 100,
         flex: "1"
@@ -155,7 +155,7 @@ export const KPI: React.FC<KPIProps> = ({
 
     return (
         <div className="dl2-kpi" style={containerStyle}>
-            {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: '#333', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
+            {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: 'var(--dl2-text-main)', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
             
             <Tooltip content={tooltipContent}>
                 <div className="dl2-kpi-value" style={{ fontSize: '2em', fontWeight: 'bold', color: valueColor, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'help' }}>
@@ -166,7 +166,7 @@ export const KPI: React.FC<KPIProps> = ({
             
             <TrendIndicator change={change} goodDirection={goodDirection} textSuffix={textSuffix} />
             
-            {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: '#999', marginTop: 10, textAlign: 'center' }}>{description}</div>}
+            {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: 'var(--dl2-text-muted)', marginTop: 10, textAlign: 'center' }}>{description}</div>}
         </div>
     );
 };

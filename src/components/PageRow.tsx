@@ -28,8 +28,8 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
                 flex: 1,
                 padding: layout.padding || 0,
                 margin: layout.margin || 0,
-                border: layout.border ? "1px solid #ccc" : undefined,
-                boxShadow: layout.shadow ? "2px 2px 5px rgba(0, 0, 0, 0.1)" : undefined,
+                border: layout.border ? "1px solid var(--dl2-border-main)" : undefined,
+                boxShadow: layout.shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
             }}
         >
             {layout.title && <h3 style={{width: '100%'}}>{layout.title}</h3>}

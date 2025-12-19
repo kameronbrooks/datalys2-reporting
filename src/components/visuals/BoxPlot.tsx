@@ -252,8 +252,8 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
         margin: margin || 10,
-        border: border ? "1px solid #ccc" : undefined,
-        boxShadow: shadow ? "2px 2px 5px rgba(0, 0, 0, 0.1)" : undefined,
+        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
@@ -287,11 +287,11 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                     {direction === 'vertical' ? (
                         <>
                             {/* Y Axis */}
-                            <line x1={0} y1={0} x2={0} y2={innerHeight} stroke="black" />
+                            <line x1={0} y1={0} x2={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks && yScale.ticks(5).map((tick: any, i: number) => (
                                 <g key={i} transform={`translate(0,${yScale(tick)})`}>
-                                    <line x1={-5} y1={0} x2={0} y2={0} stroke="black" />
-                                    <text x={-10} y={5} textAnchor="end" fontSize={10}>{tick}</text>
+                                    <line x1={-5} y1={0} x2={0} y2={0} stroke="var(--dl2-text-main)" />
+                                    <text x={-10} y={5} textAnchor="end" fontSize={10} fill="var(--dl2-text-main)">{tick}</text>
                                 </g>
                             ))}
                             {yAxisLabel && (
@@ -301,17 +301,18 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y={-35} 
                                     textAnchor="middle" 
                                     fontSize={12}
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {yAxisLabel}
                                 </text>
                             )}
 
                             {/* X Axis */}
-                            <line x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke="black" />
+                            <line x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {processedData.map((d, i) => (
                                 <g key={i} transform={`translate(${xScale(d.category)! + xScale.bandwidth() / 2},${innerHeight})`}>
-                                    <line x1={0} y1={0} x2={0} y2={5} stroke="black" />
-                                    <text x={0} y={20} textAnchor="middle" fontSize={10}>{d.category}</text>
+                                    <line x1={0} y1={0} x2={0} y2={5} stroke="var(--dl2-text-main)" />
+                                    <text x={0} y={20} textAnchor="middle" fontSize={10} fill="var(--dl2-text-main)">{d.category}</text>
                                 </g>
                             ))}
                             {xAxisLabel && (
@@ -320,6 +321,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y={innerHeight + 40} 
                                     textAnchor="middle" 
                                     fontSize={12}
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {xAxisLabel}
                                 </text>
@@ -328,11 +330,11 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                     ) : (
                         <>
                             {/* X Axis (Values) */}
-                            <line x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke="black" />
+                            <line x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {xScale.ticks && xScale.ticks(5).map((tick: any, i: number) => (
                                 <g key={i} transform={`translate(${xScale(tick)},${innerHeight})`}>
-                                    <line x1={0} y1={0} x2={0} y2={5} stroke="black" />
-                                    <text x={0} y={20} textAnchor="middle" fontSize={10}>{tick}</text>
+                                    <line x1={0} y1={0} x2={0} y2={5} stroke="var(--dl2-text-main)" />
+                                    <text x={0} y={20} textAnchor="middle" fontSize={10} fill="var(--dl2-text-main)">{tick}</text>
                                 </g>
                             ))}
                             {xAxisLabel && (
@@ -341,17 +343,18 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y={innerHeight + 40} 
                                     textAnchor="middle" 
                                     fontSize={12}
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {xAxisLabel}
                                 </text>
                             )}
 
                             {/* Y Axis (Categories) */}
-                            <line x1={0} y1={0} x2={0} y2={innerHeight} stroke="black" />
+                            <line x1={0} y1={0} x2={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {processedData.map((d, i) => (
                                 <g key={i} transform={`translate(0,${yScale(d.category)! + yScale.bandwidth() / 2})`}>
-                                    <line x1={-5} y1={0} x2={0} y2={0} stroke="black" />
-                                    <text x={-10} y={5} textAnchor="end" fontSize={10}>{d.category}</text>
+                                    <line x1={-5} y1={0} x2={0} y2={0} stroke="var(--dl2-text-main)" />
+                                    <text x={-10} y={5} textAnchor="end" fontSize={10} fill="var(--dl2-text-main)">{d.category}</text>
                                 </g>
                             ))}
                             {yAxisLabel && (
@@ -361,6 +364,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y={-resolvedMargin.left + 15} 
                                     textAnchor="middle" 
                                     fontSize={12}
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {yAxisLabel}
                                 </text>
@@ -405,7 +409,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y1={direction === 'vertical' ? minPos : center} 
                                     x2={direction === 'vertical' ? center : maxPos} 
                                     y2={direction === 'vertical' ? maxPos : center} 
-                                    stroke="black" 
+                                    stroke="var(--dl2-text-main)" 
                                 />
                                 {/* Whisker Caps */}
                                 <line 
@@ -413,14 +417,14 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y1={direction === 'vertical' ? minPos : center - bandWidth/4} 
                                     x2={direction === 'vertical' ? center + bandWidth/4 : minPos} 
                                     y2={direction === 'vertical' ? minPos : center + bandWidth/4} 
-                                    stroke="black" 
+                                    stroke="var(--dl2-text-main)" 
                                 />
                                 <line 
                                     x1={direction === 'vertical' ? center - bandWidth/4 : maxPos} 
                                     y1={direction === 'vertical' ? maxPos : center - bandWidth/4} 
                                     x2={direction === 'vertical' ? center + bandWidth/4 : maxPos} 
                                     y2={direction === 'vertical' ? maxPos : center + bandWidth/4} 
-                                    stroke="black" 
+                                    stroke="var(--dl2-text-main)" 
                                 />
 
                                 {/* Box */}
@@ -430,7 +434,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     width={direction === 'vertical' ? bandWidth : boxSize}
                                     height={direction === 'vertical' ? boxSize : bandWidth}
                                     fill={getColor(resolvedColors, i)}
-                                    stroke="black"
+                                    stroke="var(--dl2-text-main)"
                                 />
 
                                 {/* Median Line */}
@@ -439,7 +443,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     y1={direction === 'vertical' ? medianPos : center - bandWidth/2} 
                                     x2={direction === 'vertical' ? center + bandWidth/2 : medianPos} 
                                     y2={direction === 'vertical' ? medianPos : center + bandWidth/2} 
-                                    stroke="black" 
+                                    stroke="var(--dl2-text-main)" 
                                     strokeWidth={2}
                                 />
 
@@ -474,14 +478,15 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                     position: 'fixed',
                     left: tooltipPos.x + 10,
                     top: tooltipPos.y + 10,
-                    backgroundColor: 'white',
-                    border: '1px solid #ccc',
+                    backgroundColor: 'var(--dl2-bg-main)',
+                    color: 'var(--dl2-text-main)',
+                    border: '1px solid var(--dl2-border-main)',
                     padding: '5px',
                     borderRadius: '4px',
                     pointerEvents: 'none',
                     zIndex: 1000,
                     fontSize: '12px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    boxShadow: '0 2px 4px var(--dl2-shadow)'
                 }}>
                     <strong>{hoveredItem.category}</strong><br/>
                     Max: {hoveredItem.max.toFixed(2)}<br/>

@@ -134,7 +134,7 @@ export const Histogram: React.FC<HistogramProps> = ({
 
     if (!dataset) {
         return (
-            <div className="dl2-histogram dl2-visual-container" style={{ padding: padding || 10, margin: margin || 10, border: border ? '1px solid #ccc' : undefined }}>
+            <div className="dl2-histogram dl2-visual-container" style={{ padding: padding || 10, margin: margin || 10, border: border ? '1px solid var(--dl2-border-main)' : undefined }}>
                 <div className="dl2-chart-empty">Dataset not found: {datasetId}</div>
             </div>
         );
@@ -147,8 +147,8 @@ export const Histogram: React.FC<HistogramProps> = ({
             style={{ 
                 padding: padding || 10, 
                 margin: margin || 10, 
-                border: border ? '1px solid #ccc' : undefined, 
-                boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
+                border: border ? '1px solid var(--dl2-border-main)' : undefined, 
+                boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
                 width: '100%',
                 flex: flex || 1,
                 display: 'flex',
@@ -170,7 +170,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                                 x2={innerWidth}
                                 y1={yScale(tickValue)}
                                 y2={yScale(tickValue)}
-                                stroke="#e5e7eb"
+                                stroke="var(--dl2-border-table)"
                                 strokeDasharray="4 4"
                             />
                         ))}
@@ -221,7 +221,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                         })}
 
                         {/* X Axis */}
-                        <g transform={`translate(0,${innerHeight})`}>
+                        <g transform={`translate(0,${innerHeight})`} color="var(--dl2-text-main)">
                             <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="currentColor" />
                             {xScale.ticks(bins).map(tickValue => (
                                 <g key={tickValue} transform={`translate(${xScale(tickValue)},0)`}>
@@ -246,7 +246,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                         </g>
 
                         {/* Y Axis */}
-                        <g>
+                        <g color="var(--dl2-text-main)">
                             <line y1={0} y2={innerHeight} stroke="currentColor" />
                             {yScale.ticks(5).map(tickValue => (
                                 <g key={tickValue} transform={`translate(0,${yScale(tickValue)})`}>
@@ -287,7 +287,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                                     y={yScale(d.length) - 5}
                                     textAnchor="middle"
                                     fontSize={10}
-                                    fill="currentColor"
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {d.length}
                                 </text>

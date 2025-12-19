@@ -1,29 +1,119 @@
 
 
 
+:root {
+    --dl2-bg-main: #ffffff;
+    --dl2-bg-report: #f8f9fa;
+    --dl2-bg-tab: #edf1f3;
+    --dl2-bg-tab-hover: #ffffff;
+    --dl2-bg-tab-active: #ffffff;
+    --dl2-bg-no-items: #dddddd;
+    --dl2-bg-table-alt: #f9f9f9;
+    --dl2-bg-visual: #ffffff;
+    
+    --dl2-text-main: #333333;
+    --dl2-text-secondary: #666666;
+    --dl2-text-no-items: #555555;
+    --dl2-text-chart-title: #333333;
+    --dl2-text-chart-desc: #666666;
+    
+    --dl2-border-main: #cccccc;
+    --dl2-border-table: #dddddd;
+    --dl2-border-no-items: #888888;
+    --dl2-border-plain-th: #333333;
+    --dl2-border-plain-td: #eeeeee;
+    
+    --dl2-shadow: rgba(0, 0, 0, 0.1);
+    --dl2-shadow-inset: rgba(0, 0, 0, 0.2);
+
+    --dl2-checklist-complete-bg: #f0fff4;
+    --dl2-checklist-complete-text: #2f855a;
+    --dl2-checklist-warning-bg: #fffaf0;
+    --dl2-checklist-warning-text: #c05621;
+    --dl2-checklist-overdue-bg: #fff5f5;
+    --dl2-checklist-overdue-text: #c53030;
+
+    --dl2-headbar-bg: linear-gradient(to right, #155799, #159957);
+    --dl2-headbar-text: #ffffff;
+
+    --dl2-primary: #007bff;
+    --dl2-primary-text: #ffffff;
+    --dl2-success: #2e7d32;
+    --dl2-warning: #f57f17;
+    --dl2-error: #c62828;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dl2-bg-main: #1a1a1a;
+        --dl2-bg-report: #2d2d2d;
+        --dl2-bg-tab: #333333;
+        --dl2-bg-tab-hover: #444444;
+        --dl2-bg-tab-active: #1a1a1a;
+        --dl2-bg-no-items: #2d2d2d;
+        --dl2-bg-table-alt: #252525;
+        --dl2-bg-visual: #2d2d2d;
+        
+        --dl2-text-main: #e0e0e0;
+        --dl2-text-secondary: #b0b0b0;
+        --dl2-text-no-items: #a0a0a0;
+        --dl2-text-chart-title: #ffffff;
+        --dl2-text-chart-desc: #b0b0b0;
+        
+        --dl2-border-main: #444444;
+        --dl2-border-table: #444444;
+        --dl2-border-no-items: #555555;
+        --dl2-border-plain-th: #ffffff;
+        --dl2-border-plain-td: #444444;
+        
+        --dl2-shadow: rgba(0, 0, 0, 0.5);
+        --dl2-shadow-inset: rgba(0, 0, 0, 0.4);
+
+        --dl2-checklist-complete-bg: #1c2d24;
+        --dl2-checklist-complete-text: #48bb78;
+        --dl2-checklist-warning-bg: #2d261c;
+        --dl2-checklist-warning-text: #ed8936;
+        --dl2-checklist-overdue-bg: #2d1c1c;
+        --dl2-checklist-overdue-text: #f56565;
+
+        --dl2-headbar-bg: linear-gradient(to right, #0d2c4d, #0d4d2c);
+        --dl2-headbar-text: #e0e0e0;
+
+        --dl2-primary: #3794ff;
+        --dl2-primary-text: #ffffff;
+        --dl2-success: #48bb78;
+        --dl2-warning: #ed8936;
+        --dl2-error: #f56565;
+    }
+}
+
+body {
+    background-color: var(--dl2-bg-main);
+    color: var(--dl2-text-main);
+    margin: 0;
+    padding: 0;
+}
+
 .datalys2-dashboard {
     border: 2px solid #007bff;
     border-radius: 8px;
     padding: 20px;
     margin: 20px 0;
+    background-color: var(--dl2-bg-main);
+    color: var(--dl2-text-main);
 }
 
 .datalys2-report {
-    background: #f8f9fa;
+    background: var(--dl2-bg-report);
     border-radius: 4px;
     padding: 15px;
     margin: 10px 0;
+    color: var(--dl2-text-main);
 }
 
 .dl2-head-bar {
-    background: #159957;
-    /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #155799, #159957);
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to right, #155799, #159957);
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-    color: white;
+    background: var(--dl2-headbar-bg);
+    color: var(--dl2-headbar-text);
     padding: 10px;
 }
 
@@ -34,6 +124,7 @@
     align-items: center;
     padding-left: 10px;
     padding-right: 10px;
+    color: var(--dl2-text-main);
 }
 
 .dl2-page-report-header h1 {
@@ -43,7 +134,7 @@
 
 .dl2-page-report-header>.dl2-last-updated {
     font-size: small;
-    color: #666666;
+    color: var(--dl2-text-secondary);
 }
 
 .dl2-page-row {
@@ -54,9 +145,9 @@
 .dl2-no-items-div {
     padding: 20px;
     text-align: center;
-    background-color: #dddddd;
-    color: #555555;
-    border: 1px solid #888888;
+    background-color: var(--dl2-bg-no-items);
+    color: var(--dl2-text-no-items);
+    border: 1px solid var(--dl2-border-no-items);
 }
 
 /* Tab group styles */
@@ -75,25 +166,25 @@
                     #edf1f3 55%,
                     #edf1f3 80%,
                     #d6dde1 100%); */
-    background: #edf1f3;
-    color: #333333;
+    background: var(--dl2-bg-tab);
+    color: var(--dl2-text-main);
     transition: background-color 0.15s ease, font-weight 0.15s ease;
-    border-top: 1px solid #cccccc;
-    border-right: 1px solid #cccccc;
-    border-left: 1px solid #cccccc;
-    border-bottom: 1px solid #cccccc;
+    border-top: 1px solid var(--dl2-border-main);
+    border-right: 1px solid var(--dl2-border-main);
+    border-left: 1px solid var(--dl2-border-main);
+    border-bottom: 1px solid var(--dl2-border-main);
 }
 
 .dl2-tab-inset-shadow-right {
-    box-shadow: inset -5px -5px 5px -5px rgba(0, 0, 0, 0.2);
+    box-shadow: inset -5px -5px 5px -5px var(--dl2-shadow-inset);
 }
 
 .dl2-tab-inset-shadow-left {
-    box-shadow: inset 5px -5px 5px -5px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 5px -5px 5px -5px var(--dl2-shadow-inset);
 }
 
 .dl2-tab-inset-shadow-bottom {
-    box-shadow: inset 0 -5px 5px -5px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 -5px 5px -5px var(--dl2-shadow-inset);
 }
 
 .dl2-tab-inset-shadow-none {
@@ -101,34 +192,34 @@
 }
 
 .dl2-tab:hover {
-    background: #ffffff;
+    background: var(--dl2-bg-tab-hover);
 }
 
 .dl2-tab--active {
-    border-top: 1px solid #cccccc;
-    border-right: 1px solid #cccccc;
-    border-left: 1px solid #cccccc;
+    border-top: 1px solid var(--dl2-border-main);
+    border-right: 1px solid var(--dl2-border-main);
+    border-left: 1px solid var(--dl2-border-main);
     border-bottom: 0px;
     font-weight: 700;
-    background: #ffffff;
+    background: var(--dl2-bg-tab-active);
 }
 
 .dl2-tab-group-remaining-border {
     flex-grow: 1;
-    border-bottom: 1px solid #cccccc;
-    box-shadow: inset 5px -5px 5px -5px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--dl2-border-main);
+    box-shadow: inset 5px -5px 5px -5px var(--dl2-shadow-inset);
 
 }
 
 .dl2-visual {
     padding: 10px;
-    background: #ffffff;
+    background: var(--dl2-bg-visual);
 }
 .dl2-visual-border {
-    border: 1px solid #cccccc;
+    border: 1px solid var(--dl2-border-main);
 }
 .dl2-visual-shadow {
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 2px 5px var(--dl2-shadow);
 }
 
 /* Desktop */
@@ -179,20 +270,20 @@
 
 /* Style: Bordered */
 .dl2-table.bordered th, .dl2-table.bordered td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--dl2-border-table);
 }
 
 /* Style: Alternating */
 .dl2-table.alternating tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: var(--dl2-bg-table-alt);
 }
 
 /* Style: Plain (Minimal) */
 .dl2-table.plain th {
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid var(--dl2-border-plain-th);
 }
 .dl2-table.plain td {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--dl2-border-plain-td);
 }
 
 /* Controls */
@@ -202,12 +293,15 @@
     align-items: center;
     margin-bottom: 10px;
     padding: 5px;
+    color: var(--dl2-text-main);
 }
 
 .dl2-table-search {
     padding: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--dl2-border-main);
     border-radius: 4px;
+    background-color: var(--dl2-bg-main);
+    color: var(--dl2-text-main);
 }
 
 .dl2-table-pagination {
@@ -218,8 +312,9 @@
 
 .dl2-table-pagination button {
     padding: 5px 10px;
-    border: 1px solid #ccc;
-    background: white;
+    border: 1px solid var(--dl2-border-main);
+    background: var(--dl2-bg-main);
+    color: var(--dl2-text-main);
     cursor: pointer;
     border-radius: 4px;
 }
@@ -230,32 +325,32 @@
 }
 
 .dl2-table-pagination button.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
+    background-color: var(--dl2-primary);
+    color: var(--dl2-primary-text);
+    border-color: var(--dl2-primary);
 }
 
 
 /* Checklist Styles */
 .dl2-checklist-row.complete {
-    background-color: #f0fff4;
-    color: #2f855a;
-    border-bottom: #2f855a 1px solid;
+    background-color: var(--dl2-checklist-complete-bg);
+    color: var(--dl2-checklist-complete-text);
+    border-bottom: var(--dl2-checklist-complete-text) 1px solid;
 }
 
 .dl2-checklist-row.complete td {
     text-decoration: line-through;
-    color: #666;
+    color: var(--dl2-text-secondary);
 }
 
 .dl2-checklist-row.warning {
-    background-color: #fffaf0;
-    border-bottom: #c05621 1px solid;
+    background-color: var(--dl2-checklist-warning-bg);
+    border-bottom: var(--dl2-checklist-warning-text) 1px solid;
 }
 
 .dl2-checklist-row.overdue {
-    background-color: #fff5f5;
-    border-bottom: #c53030 1px solid;
+    background-color: var(--dl2-checklist-overdue-bg);
+    border-bottom: var(--dl2-checklist-overdue-text) 1px solid;
 }
 
 .dl2-checklist-badge {
@@ -269,13 +364,13 @@
 }
 
 .dl2-checklist-badge.warning {
-    background-color: #feebc8;
-    color: #c05621;
+    background-color: var(--dl2-checklist-warning-bg);
+    color: var(--dl2-checklist-warning-text);
 }
 
 .dl2-checklist-badge.overdue {
-    background-color: #fed7d7;
-    color: #c53030;
+    background-color: var(--dl2-checklist-overdue-bg);
+    color: var(--dl2-checklist-overdue-text);
 }
 
 .dl2-checklist input[type='checkbox'] {
@@ -288,13 +383,13 @@
     margin: 0 0 10px 0;
     font-size: 1.2em;
     font-weight: bold;
-    color: #333;
+    color: var(--dl2-text-chart-title);
 }
 
 .dl2-chart-description {
     margin: 0 0 15px 0;
     font-size: 0.9em;
-    color: #666;
+    color: var(--dl2-text-chart-desc);
 }
 
 .dl2-chart-empty {
@@ -302,12 +397,11 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #999;
+    color: var(--dl2-text-secondary);
     font-style: italic;
 }
 
 .dl2-visual-container {
-    background-color: white;
-    border-radius: 4px;
+    background-color: var(--dl2-bg-visual);
 }
 

@@ -11,7 +11,7 @@ export const Headbar: React.FC<HeadbarProps> = ({ title, description, author, la
     return (
         <header className='dl2-head-bar'>
             <h1>{title}</h1>
-            <div style={{ fontSize: '0.9em', color: '#ffffff' }}>
+            <div style={{ fontSize: '0.9em', color: 'inherit', opacity: 0.9 }}>
                 {author && <span>Author: {author}</span>}
                 {lastUpdated && <span> | Last Updated: {lastUpdated}</span>}
             </div>

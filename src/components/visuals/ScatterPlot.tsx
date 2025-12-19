@@ -186,12 +186,11 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             style={{
                 padding: padding || 10,
                 margin: margin || 10,
-                border: border ? '1px solid #ccc' : undefined,
-                boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
+                border: border ? '1px solid var(--dl2-border-main)' : undefined,
+                boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
                 flex: flex || 1,
                 display: 'flex',
                 flexDirection: 'column',
-                backgroundColor: 'white',
                 overflow: 'hidden'
             }}
         >
@@ -210,7 +209,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                     x2={innerWidth}
                                     y1={yScale(tick)}
                                     y2={yScale(tick)}
-                                    stroke="#e0e0e0"
+                                    stroke="var(--dl2-border-table)"
                                     strokeDasharray="3,3"
                                 />
                             ))}
@@ -221,7 +220,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                     x2={xScale(tick)}
                                     y1={0}
                                     y2={innerHeight}
-                                    stroke="#e0e0e0"
+                                    stroke="var(--dl2-border-table)"
                                     strokeDasharray="3,3"
                                 />
                             ))}
@@ -229,11 +228,11 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
 
                         {/* Axes */}
                         <g transform={`translate(0,${innerHeight})`}>
-                            <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="black" />
+                            <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="var(--dl2-text-main)" />
                             {xScale.ticks(10).map(tick => (
                                 <g key={tick} transform={`translate(${xScale(tick)},0)`}>
-                                    <line y2={6} stroke="black" />
-                                    <text y={20} textAnchor="middle" fontSize="10">{tick}</text>
+                                    <line y2={6} stroke="var(--dl2-text-main)" />
+                                    <text y={20} textAnchor="middle" fontSize="10" fill="var(--dl2-text-main)">{tick}</text>
                                 </g>
                             ))}
                             {xAxisLabel && (
@@ -243,6 +242,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                     textAnchor="middle"
                                     fontSize="12"
                                     fontWeight="bold"
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {xAxisLabel}
                                 </text>
@@ -250,11 +250,11 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                         </g>
 
                         <g>
-                            <line y1={0} y2={innerHeight} stroke="black" />
+                            <line y1={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks(5).map(tick => (
                                 <g key={tick} transform={`translate(0,${yScale(tick)})`}>
-                                    <line x2={-6} stroke="black" />
-                                    <text x={-10} dy=".32em" textAnchor="end" fontSize="10">{tick}</text>
+                                    <line x2={-6} stroke="var(--dl2-text-main)" />
+                                    <text x={-10} dy=".32em" textAnchor="end" fontSize="10" fill="var(--dl2-text-main)">{tick}</text>
                                 </g>
                             ))}
                             {yAxisLabel && (
@@ -265,6 +265,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                     textAnchor="middle"
                                     fontSize="12"
                                     fontWeight="bold"
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {yAxisLabel}
                                 </text>
@@ -293,7 +294,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                 cy={yScale(d.y)}
                                 r={pointSize}
                                 fill={colorScale(d.category)}
-                                stroke="white"
+                                stroke="var(--dl2-bg-visual)"
                                 strokeWidth={1}
                                 opacity={0.8}
                                 onMouseEnter={() => setHoveredData(d)}
@@ -341,11 +342,13 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                         position: 'absolute',
                         top: resolvedMargin.top + 10,
                         right: resolvedMargin.right + 10,
-                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        backgroundColor: 'var(--dl2-bg-report)',
+                        color: 'var(--dl2-text-main)',
                         padding: '5px',
-                        border: '1px solid #ccc',
+                        border: '1px solid var(--dl2-border-main)',
                         borderRadius: '4px',
-                        fontSize: '11px'
+                        fontSize: '11px',
+                        opacity: 0.9
                     }}>
                         <div><strong>Correlation</strong></div>
                         <div>r: {stats.r.toFixed(3)}</div>
@@ -367,7 +370,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             )}
             
             {description && (
-                <div style={{ padding: '10px', fontSize: '0.9em', color: '#666' }}>
+                <div style={{ padding: '10px', fontSize: '0.9em', color: 'var(--dl2-text-secondary)' }}>
                     {description}
                 </div>
             )}

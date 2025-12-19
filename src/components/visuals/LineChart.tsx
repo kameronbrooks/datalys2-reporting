@@ -149,8 +149,8 @@ export const LineChart: React.FC<LineChartProps> = ({
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
         margin: margin || 10,
-        border: border ? "1px solid #ccc" : undefined,
-        boxShadow: shadow ? "2px 2px 5px rgba(0, 0, 0, 0.1)" : undefined,
+        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
@@ -216,7 +216,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                     x2={innerWidth}
                                     y1={yScale(tick)}
                                     y2={yScale(tick)}
-                                    stroke="#e0e0e0"
+                                    stroke="var(--dl2-border-table)"
                                     strokeDasharray="3 3"
                                 />
                             ))}
@@ -252,7 +252,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                     cy={cy}
                                                     r={4}
                                                     fill={color}
-                                                    stroke="white"
+                                                    stroke="var(--dl2-bg-visual)"
                                                     strokeWidth={1}
                                                     onMouseEnter={(e) => {
                                                         const rect = containerRef.current?.getBoundingClientRect();
@@ -286,9 +286,9 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                         x={cx}
                                                         y={cy - 10}
                                                         textAnchor="middle"
-                                                        fill="black"
+                                                        fill="var(--dl2-text-main)"
                                                         fontSize="10px"
-                                                        style={{ pointerEvents: "none", textShadow: "0px 0px 2px white" }}
+                                                        style={{ pointerEvents: "none", textShadow: "0px 0px 2px var(--dl2-bg-visual)" }}
                                                     >
                                                         {d.value.toLocaleString()}
                                                     </text>
@@ -302,7 +302,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
                         {/* X Axis */}
                         <g transform={`translate(0, ${innerHeight})`}>
-                            <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="black" />
+                            <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="var(--dl2-text-main)" />
                             {xScale.domain().map((d, i) => {
                                 // Simple logic to skip labels if too many
                                 const skip = Math.ceil(xScale.domain().length / 10);
@@ -313,12 +313,12 @@ export const LineChart: React.FC<LineChartProps> = ({
                                 
                                 return (
                                     <g key={d} transform={`translate(${x}, 0)`}>
-                                        <line y2={6} stroke="black" />
+                                        <line y2={6} stroke="var(--dl2-text-main)" />
                                         <text
                                             y={20}
                                             textAnchor="middle"
                                             fontSize="10px"
-                                            fill="black"
+                                            fill="var(--dl2-text-main)"
                                         >
                                             {d}
                                         </text>
@@ -332,7 +332,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                     textAnchor="middle"
                                     fontSize="12px"
                                     fontWeight="bold"
-                                    fill="black"
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {xAxisLabel}
                                 </text>
@@ -341,16 +341,16 @@ export const LineChart: React.FC<LineChartProps> = ({
 
                         {/* Y Axis */}
                         <g>
-                            <line y1={0} y2={innerHeight} stroke="black" />
+                            <line y1={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks(5).map(tick => (
                                 <g key={tick} transform={`translate(0, ${yScale(tick)})`}>
-                                    <line x2={-6} stroke="black" />
+                                    <line x2={-6} stroke="var(--dl2-text-main)" />
                                     <text
                                         x={-10}
                                         dy="0.32em"
                                         textAnchor="end"
                                         fontSize="10px"
-                                        fill="black"
+                                        fill="var(--dl2-text-main)"
                                     >
                                         {tick}
                                     </text>
@@ -364,7 +364,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                     textAnchor="middle"
                                     fontSize="12px"
                                     fontWeight="bold"
-                                    fill="black"
+                                    fill="var(--dl2-text-main)"
                                 >
                                     {yAxisLabel}
                                 </text>

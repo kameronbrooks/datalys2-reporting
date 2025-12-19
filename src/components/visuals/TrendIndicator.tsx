@@ -13,14 +13,14 @@ export const TrendIndicator: React.FC<TrendIndicatorProps> = ({
 }) => {
     if (change === undefined) return null;
 
-    let trendColor = '#666';
+    let trendColor = 'var(--dl2-text-muted)';
     let Caret = <span style={{ marginRight: 4 }}>-</span>;
 
     if (change !== 0) {
         const isPositive = change > 0;
         const isGood = goodDirection === 'higher' ? isPositive : !isPositive;
         
-        trendColor = isGood ? '#2e7d32' : '#c62828';
+        trendColor = isGood ? 'var(--dl2-success)' : 'var(--dl2-error)';
         
         if (isPositive) {
             Caret = (

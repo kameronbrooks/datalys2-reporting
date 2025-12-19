@@ -185,12 +185,13 @@ export const PieChart: React.FC<PieChartProps> = ({
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
         margin: margin || 10,
-        border: border ? "1px solid #ccc" : undefined,
-        boxShadow: shadow ? "2px 2px 5px rgba(0, 0, 0, 0.1)" : undefined,
+        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
-        flex: "1"
+        flex: "1",
+        backgroundColor: "var(--dl2-bg-visual)"
     };
 
     const legendItems = useMemo(
@@ -289,7 +290,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                                     <path
                                         d={path}
                                         fill={fill}
-                                        stroke="#ffffff"
+                                        stroke="var(--dl2-bg-visual)"
                                         strokeWidth={1}
                                         style={{ transition: "d 0.2s ease-in-out" }}
                                     />
@@ -325,15 +326,17 @@ export const PieChart: React.FC<PieChartProps> = ({
                         left: tooltipData.x,
                         top: tooltipData.y,
                         transform: "translate(-50%, -100%)",
-                        backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        color: "white",
+                        backgroundColor: "var(--dl2-bg-main)",
+                        color: "var(--dl2-text-main)",
+                        border: "1px solid var(--dl2-border-main)",
                         padding: "8px",
                         borderRadius: "4px",
                         pointerEvents: "none",
                         fontSize: "12px",
                         zIndex: 10,
                         marginTop: "-10px",
-                        whiteSpace: "nowrap"
+                        whiteSpace: "nowrap",
+                        boxShadow: "0 2px 4px var(--dl2-shadow)"
                     }}>
                         <div style={{ fontWeight: "bold" }}>{tooltipData.label}</div>
                         <div>{tooltipData.value.toLocaleString()} ({tooltipData.percentage.toFixed(1)}%)</div>

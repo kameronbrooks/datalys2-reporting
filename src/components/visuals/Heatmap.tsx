@@ -197,13 +197,13 @@ export const Heatmap: React.FC<HeatmapProps> = ({
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
         margin: margin || 10,
-        border: border ? "1px solid #ccc" : undefined,
-        boxShadow: shadow ? "2px 2px 5px rgba(0, 0, 0, 0.1)" : undefined,
+        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         flex: flex || 1,
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "white",
+        backgroundColor: "var(--dl2-bg-visual)",
         overflow: "hidden"
     };
 
@@ -305,7 +305,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                             textAnchor="middle"
                                             dominantBaseline="middle"
                                             fontSize={Math.min(12, Math.max(9, Math.min(cellWidth, cellHeight) / 3))}
-                                            fill="rgba(0,0,0,0.75)"
+                                            fill="var(--dl2-text-main)"
+                                            opacity={0.75}
                                         >
                                             {formatCellLabel(cell.value)}
                                         </text>
@@ -316,20 +317,20 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
                         {/* X axis labels */}
                         {showAxisLabels && (
-                            <g transform={`translate(0, ${innerHeight})`}>
+                            <g transform={`translate(0, ${innerHeight})`} color="var(--dl2-text-main)">
                                 {processed.xCategories.map((cat) => {
                                     const x = xScale(cat);
                                     if (x === undefined) return null;
                                     const cx = x + cellWidth / 2;
                                     return (
                                         <g key={cat} transform={`translate(${cx}, 0)`}>
-                                            <line y2={6} stroke="black" opacity={0.35} />
+                                            <line y2={6} stroke="currentColor" opacity={0.35} />
                                             <text
                                                 y={18}
                                                 textAnchor="end"
                                                 fontSize={10}
                                                 transform="rotate(-35)"
-                                                fill="black"
+                                                fill="currentColor"
                                                 opacity={0.8}
                                             >
                                                 {cat}
@@ -345,7 +346,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                         textAnchor="middle"
                                         fontSize={12}
                                         fontWeight="bold"
-                                        fill="black"
+                                        fill="currentColor"
                                     >
                                         {xAxisLabel}
                                     </text>
@@ -355,20 +356,20 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
                         {/* Y axis labels */}
                         {showAxisLabels && (
-                            <g>
+                            <g color="var(--dl2-text-main)">
                                 {processed.yCategories.map((cat) => {
                                     const y = yScale(cat);
                                     if (y === undefined) return null;
                                     const cy = y + cellHeight / 2;
                                     return (
                                         <g key={cat} transform={`translate(0, ${cy})`}>
-                                            <line x1={0} x2={-6} stroke="black" opacity={0.35} />
+                                            <line x1={0} x2={-6} stroke="currentColor" opacity={0.35} />
                                             <text
                                                 x={-10}
                                                 textAnchor="end"
                                                 dominantBaseline="middle"
                                                 fontSize={10}
-                                                fill="black"
+                                                fill="currentColor"
                                                 opacity={0.8}
                                             >
                                                 {cat}
@@ -383,7 +384,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                         textAnchor="middle"
                                         fontSize={12}
                                         fontWeight="bold"
-                                        fill="black"
+                                        fill="currentColor"
                                     >
                                         {yAxisLabel}
                                     </text>
@@ -393,16 +394,16 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
                         {/* Gradient legend */}
                         {showGradientLegend && (
-                            <g transform={`translate(0, ${innerHeight + 42})`}>
+                            <g transform={`translate(0, ${innerHeight + 42})`} color="var(--dl2-text-main)">
                                 <rect
                                     x={0}
                                     y={0}
                                     width={Math.min(innerWidth, 260)}
                                     height={10}
                                     fill={`url(#${gradientId})`}
-                                    stroke="rgba(0,0,0,0.12)"
+                                    stroke="var(--dl2-border-main)"
                                 />
-                                <text x={0} y={24} fontSize={10} fill="rgba(0,0,0,0.8)">
+                                <text x={0} y={24} fontSize={10} fill="currentColor" opacity={0.8}>
                                     {valueExtent.min.toLocaleString()}
                                 </text>
                                 <text
@@ -410,7 +411,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                     y={24}
                                     fontSize={10}
                                     textAnchor="end"
-                                    fill="rgba(0,0,0,0.8)"
+                                    fill="currentColor"
+                                    opacity={0.8}
                                 >
                                     {valueExtent.max.toLocaleString()}
                                 </text>
@@ -426,15 +428,17 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                             left: hoveredData.x,
                             top: hoveredData.y,
                             transform: "translate(-50%, -110%)",
-                            backgroundColor: "rgba(0, 0, 0, 0.8)",
-                            color: "white",
+                            backgroundColor: "var(--dl2-bg-main)",
+                            color: "var(--dl2-text-main)",
+                            border: "1px solid var(--dl2-border-main)",
                             padding: "8px",
                             borderRadius: "4px",
                             pointerEvents: "none",
                             fontSize: "12px",
                             zIndex: 10,
                             marginTop: "-10px",
-                            whiteSpace: "nowrap"
+                            whiteSpace: "nowrap",
+                            boxShadow: "0 2px 4px var(--dl2-shadow)"
                         }}
                     >
                         <div style={{ fontWeight: "bold" }}>{hoveredData.yLabel} · {hoveredData.xLabel}</div>
