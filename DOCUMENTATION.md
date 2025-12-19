@@ -259,6 +259,51 @@ Displays a list of tasks with completion status and due date warnings.
 | `pageSize` | `number` | Number of rows per page (default 10). |
 | `showSearch` | `boolean` | Whether to show the search bar (default true). |
 
+**8. Histogram (`type: "histogram"`)**
+
+Displays the distribution of a numerical dataset.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `column` | `string \| number` | Column containing the numerical values to bin. |
+| `bins` | `number` | Number of bins to divide the data into (default 10). |
+| `color` | `string` | Color of the bars (default "#69b3a2"). |
+| `showLabels` | `boolean` | Whether to show count labels on top of bars. |
+| `xAxisLabel` | `string` | Label for X-axis. |
+| `yAxisLabel` | `string` | Label for Y-axis. |
+
+**9. Heatmap (`type: "heatmap"`)**
+
+Displays data in a matrix where values are represented by colors.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `xColumn` | `string \| number` | Column for X-axis categories. |
+| `yColumn` | `string \| number` | Column for Y-axis categories. |
+| `valueColumn` | `string \| number` | Column for the heat value. |
+| `showCellLabels` | `boolean` | Whether to show the value text inside cells. |
+| `minValue` | `number` | Optional minimum value for color scale. |
+| `maxValue` | `number` | Optional maximum value for color scale. |
+| `xAxisLabel` | `string` | Label for X-axis. |
+| `yAxisLabel` | `string` | Label for Y-axis. |
+
+**10. Line Chart (`type: "line"`)**
+
+Displays data points connected by straight or smooth lines.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `xColumn` | `string \| number` | Column for X-axis values (usually time or category). |
+| `yColumns` | `string \| string[]` | Column(s) for Y-axis values (series). |
+| `smooth` | `boolean` | Whether to use a smooth curve instead of straight lines. |
+| `showLegend` | `boolean` | Whether to show the legend. |
+| `showLabels` | `boolean` | Whether to show value labels on points. |
+| `minY` | `number` | Optional minimum Y-axis value. |
+| `maxY` | `number` | Optional maximum Y-axis value. |
+| `colors` | `string[]` | Array of colors for the lines. |
+| `xAxisLabel` | `string` | Label for X-axis. |
+| `yAxisLabel` | `string` | Label for Y-axis. |
+
 ## Example Configuration
 
 ```json
