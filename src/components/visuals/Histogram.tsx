@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scaleLinear, max, bin, min } from "d3";
-import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "../../lib/types";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
+import { resolveColors, getColor } from "../../lib/color-utility";
 
 export interface HistogramProps extends ReportVisual {
     column?: string | number;
@@ -13,7 +14,7 @@ export interface HistogramProps extends ReportVisual {
     xAxisLabel?: string;
     yAxisLabel?: string;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    color?: string;
+    color?: ColorProperty;
     showLabels?: boolean;
 }
 
@@ -30,6 +31,7 @@ export const Histogram: React.FC<HistogramProps> = ({
     margin,
     border,
     shadow,
+    flex,
     width = 600,
     height = 400,
     xAxisLabel,
@@ -77,6 +79,8 @@ export const Histogram: React.FC<HistogramProps> = ({
         bottom: chartMargin?.bottom ?? defaultMargin.bottom,
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
+
+    const resolvedColors = useMemo(() => resolveColors(color), [color]);
 
     const processedData = useMemo(() => {
         if (!dataset) return { binsData: [], xDomain: [0, 1], yMax: 0 };
@@ -129,28 +133,34 @@ export const Histogram: React.FC<HistogramProps> = ({
     }, [yMax, innerHeight]);
 
     if (!dataset) {
-        return <div className="p-4 text-red-500">Dataset not found: {datasetId}</div>;
+        return (
+            <div className="dl2-histogram dl2-visual-container" style={{ padding: padding || 10, margin: margin || 10, border: border ? '1px solid #ccc' : undefined }}>
+                <div className="dl2-chart-empty">Dataset not found: {datasetId}</div>
+            </div>
+        );
     }
 
     return (
         <div 
             ref={containerRef}
-            className="relative flex flex-col"
+            className="dl2-histogram dl2-visual-container"
             style={{ 
                 padding: padding || 10, 
                 margin: margin || 10, 
                 border: border ? '1px solid #ccc' : undefined, 
                 boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
                 width: '100%',
-                flex: 1,
+                flex: flex || 1,
+                display: 'flex',
+                flexDirection: 'column',
                 position: 'relative'
             }}
         >
-            {title && <h3 className="text-lg font-semibold mb-2 text-center">{title}</h3>}
-            {description && <p className="text-sm text-gray-500 mb-4 text-center">{description}</p>}
+            {title && <h3 className="dl2-chart-title" style={{ textAlign: 'center' }}>{title}</h3>}
+            {description && <p className="dl2-chart-description" style={{ textAlign: 'center' }}>{description}</p>}
             
             <div className="relative" style={{ height: height }}>
-                <svg width="100%" height={height} viewBox={`0 0 ${chartWidth} ${height}`}>
+                <svg className="dl2-chart-svg" width="100%" height={height} viewBox={`0 0 ${chartWidth} ${height}`}>
                     <g transform={`translate(${resolvedMargin.left},${resolvedMargin.top})`}>
                         {/* Grid lines */}
                         {yScale.ticks(5).map(tickValue => (
@@ -180,7 +190,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                                     y={yScale(d.length)}
                                     width={barWidth}
                                     height={innerHeight - yScale(d.length)}
-                                    fill={color}
+                                    fill={getColor(resolvedColors, i)}
                                     opacity={hoveredBin === d ? 0.8 : 1}
                                     style={{ cursor: 'pointer' }}
                                     onMouseEnter={(e) => {

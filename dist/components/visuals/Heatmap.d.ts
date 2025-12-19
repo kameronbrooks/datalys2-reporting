@@ -1,5 +1,5 @@
 import React from "react";
-import type { ReportVisual } from "../../lib/types";
+import type { ReportVisual, ColorProperty } from "../../lib/types";
 export interface HeatmapProps extends ReportVisual {
     xColumn?: string | number;
     yColumn?: string | number;
@@ -16,5 +16,6 @@ export interface HeatmapProps extends ReportVisual {
     showCellLabels?: boolean;
     cellLabelFormatter?: (value: number) => string;
     emptyLabel?: string;
+    color?: ColorProperty;
 }
 export declare const Heatmap: React.FC<HeatmapProps>;

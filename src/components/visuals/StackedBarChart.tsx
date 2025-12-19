@@ -1,9 +1,10 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scaleBand, scaleLinear, scaleOrdinal, stack, max, schemeTableau10 } from "d3";
-import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
+import { resolveColors } from "../../lib/color-utility";
 
 export interface StackedBarChartProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -17,7 +18,7 @@ export interface StackedBarChartProps extends ReportVisual {
     xAxisLabel?: string;
     yAxisLabel?: string;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    colors?: string[];
+    colors?: ColorProperty;
     showLegend?: boolean;
     legendTitle?: string;
     showLabels?: boolean;
@@ -36,6 +37,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     margin,
     border,
     shadow,
+    flex,
     width = 600,
     height = 400,
     minY,
@@ -108,16 +110,18 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
     const { data, keys } = processedData;
 
+    const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
+
     const colorScale = useMemo(() => {
-        if (colors && colors.length > 0) {
+        if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
                 .domain(keys)
-                .range(colors);
+                .range(resolvedColors);
         }
         return scaleOrdinal<string, string>()
             .domain(keys)
             .range(schemeTableau10);
-    }, [keys, colors]);
+    }, [keys, resolvedColors]);
 
     const stackedData = useMemo(() => {
         if (keys.length === 0) return [];
@@ -152,7 +156,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
-        flex: "1"
+        flex: flex || "1"
     };
 
     const legendItems: VisualLegendItem[] = useMemo(() => {
@@ -174,7 +178,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
     if (!dataset || data.length === 0) {
         return (
-            <div className="dl2-stacked-bar-chart" style={containerStyle} ref={containerRef}>
+            <div className="dl2-stacked-bar-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
                 {title && <h3 className="dl2-chart-title">{title}</h3>}
                 {description && <p className="dl2-chart-description">{description}</p>}
                 <div className="dl2-chart-empty">No data available.</div>
@@ -183,7 +187,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     }
 
     return (
-        <div className="dl2-stacked-bar-chart" style={containerStyle} ref={containerRef}>
+        <div className="dl2-stacked-bar-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
             {title && <h3 className="dl2-chart-title">{title}</h3>}
             {description && <p className="dl2-chart-description">{description}</p>}
 

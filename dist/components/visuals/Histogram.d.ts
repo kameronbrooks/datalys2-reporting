@@ -1,5 +1,5 @@
 import React from "react";
-import type { ReportVisual } from "../../lib/types";
+import type { ReportVisual, ColorProperty } from "../../lib/types";
 export interface HistogramProps extends ReportVisual {
     column?: string | number;
     bins?: number;
@@ -9,7 +9,7 @@ export interface HistogramProps extends ReportVisual {
     xAxisLabel?: string;
     yAxisLabel?: string;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    color?: string;
+    color?: ColorProperty;
     showLabels?: boolean;
 }
 export declare const Histogram: React.FC<HistogramProps>;

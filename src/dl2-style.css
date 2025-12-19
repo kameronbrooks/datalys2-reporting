@@ -283,3 +283,31 @@
     height: 16px;
 }
 
+/* Chart Styles */
+.dl2-chart-title {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.dl2-chart-description {
+    margin: 0 0 15px 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.dl2-chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    font-style: italic;
+}
+
+.dl2-visual-container {
+    background-color: white;
+    border-radius: 4px;
+}
+

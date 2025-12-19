@@ -10,6 +10,7 @@ import { Checklist } from "./visuals/Checklist";
 import { Heatmap } from "./visuals/Heatmap";
 import { Histogram } from "./visuals/Histogram";
 import { LineChart } from "./visuals/LineChart";
+import { BoxPlot } from "./visuals/BoxPlot";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
@@ -24,6 +25,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'checklist': Checklist,
     'heatmap': Heatmap,
     'histogram': Histogram,
+    'boxplot': BoxPlot,
     // Add other components here as needed
 };
 

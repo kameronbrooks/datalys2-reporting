@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { scaleBand, scaleLinear, interpolateYlOrRd, min, max } from "d3";
-import type { Dataset, ReportVisual } from "../../lib/types";
+import { scaleBand, scaleLinear, min, max } from "d3";
+import type { Dataset, ReportVisual, ColorProperty } from "../../lib/types";
 import { findColumnIndex } from "../../lib/dataset-utility";
+import { resolveInterpolator } from "../../lib/color-utility";
 
 export interface HeatmapProps extends ReportVisual {
     xColumn?: string | number;
@@ -27,6 +28,7 @@ export interface HeatmapProps extends ReportVisual {
     cellLabelFormatter?: (value: number) => string;
 
     emptyLabel?: string;
+    color?: ColorProperty;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 70, left: 90 };
@@ -44,6 +46,7 @@ function getCellValue(row: any, dataset: Dataset, columnIndex: number): any {
 }
 
 export const Heatmap: React.FC<HeatmapProps> = ({
+    id,
     datasetId,
     xColumn = 0,
     yColumn = 1,
@@ -71,7 +74,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
     showCellLabels = false,
     cellLabelFormatter,
 
-    emptyLabel = "No data available."
+    emptyLabel = "No data available.",
+    color
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
@@ -105,6 +109,9 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         bottom: chartMargin?.bottom ?? defaultMargin.bottom,
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
+
+    const interpolator = useMemo(() => resolveInterpolator(color), [color]);
+    const gradientId = useMemo(() => `dl2-heatmap-gradient-${id.replace(/\s+/g, '-')}`, [id]);
 
     const processed = useMemo(() => {
         if (!dataset) {
@@ -181,11 +188,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         const denom = valueExtent.max - valueExtent.min;
         return (value: number) => {
             if (!Number.isFinite(value)) return "#ccc";
-            if (denom <= 0) return interpolateYlOrRd(0.7);
+            if (denom <= 0) return interpolator(0.7);
             const t = Math.max(0, Math.min(1, (value - valueExtent.min) / denom));
-            return interpolateYlOrRd(t);
+            return interpolator(t);
         };
-    }, [valueExtent]);
+    }, [valueExtent, interpolator]);
 
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
@@ -207,7 +214,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
     if (!dataset || processed.cells.length === 0 || processed.xCategories.length === 0 || processed.yCategories.length === 0) {
         return (
-            <div className="dl2-heatmap" style={containerStyle} ref={containerRef}>
+            <div className="dl2-heatmap dl2-visual-container" style={containerStyle} ref={containerRef}>
                 {title && <h3 className="dl2-chart-title">{title}</h3>}
                 {description && <p className="dl2-chart-description">{description}</p>}
                 <div className="dl2-chart-empty">{emptyLabel}</div>
@@ -221,7 +228,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
     const showGradientLegend = Number.isFinite(valueExtent.min) && Number.isFinite(valueExtent.max);
 
     return (
-        <div className="dl2-heatmap" style={containerStyle} ref={containerRef}>
+        <div className="dl2-heatmap dl2-visual-container" style={containerStyle} ref={containerRef}>
             {title && <h3 className="dl2-chart-title">{title}</h3>}
             {description && <p className="dl2-chart-description">{description}</p>}
 
@@ -235,14 +242,14 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                     style={{ display: "block", maxWidth: "100%" }}
                 >
                     <defs>
-                        <linearGradient id="dl2-heatmap-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
                             {Array.from({ length: 8 }).map((_, i) => {
                                 const t = i / 7;
                                 return (
                                     <stop
                                         key={i}
                                         offset={`${t * 100}%`}
-                                        stopColor={interpolateYlOrRd(t)}
+                                        stopColor={interpolator(t)}
                                     />
                                 );
                             })}
@@ -392,7 +399,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                     y={0}
                                     width={Math.min(innerWidth, 260)}
                                     height={10}
-                                    fill="url(#dl2-heatmap-gradient)"
+                                    fill={`url(#${gradientId})`}
                                     stroke="rgba(0,0,0,0.12)"
                                 />
                                 <text x={0} y={24} fontSize={10} fill="rgba(0,0,0,0.8)">

@@ -10,6 +10,11 @@ export interface Dataset {
     format: 'table' | 'records' | 'list' | 'record';
 }
 /**
+ * Type for color properties in visuals
+ * Can be a single color string, a d3 color scheme name, or an array of colors
+ */
+export type ColorProperty = string | string[];
+/**
  * Base interface for layout and visual elements
  * Includes common styling properties
  *
@@ -25,8 +30,8 @@ export interface LayoutElement {
     elementType: string;
     padding?: number;
     margin?: number;
-    border?: string;
-    shadow?: string;
+    border?: string | boolean;
+    shadow?: string | boolean;
     flex?: number;
 }
 /**

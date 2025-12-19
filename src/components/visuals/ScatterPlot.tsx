@@ -1,10 +1,11 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scaleLinear, scaleOrdinal, max, min, schemeTableau10, axisBottom, axisLeft, select } from "d3";
-import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
+import { resolveColors } from "../../lib/color-utility";
 
 export interface ScatterPlotProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -21,7 +22,7 @@ export interface ScatterPlotProps extends ReportVisual {
     xAxisLabel?: string;
     yAxisLabel?: string;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    colors?: string[];
+    colors?: ColorProperty;
     showLegend?: boolean;
     legendTitle?: string;
     pointSize?: number;
@@ -43,6 +44,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     margin,
     border,
     shadow,
+    flex,
     width = 600,
     height = 400,
     minX,
@@ -159,10 +161,12 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             .range([innerHeight, 0]);
     }, [processedData.data, minY, maxY, innerHeight]);
 
+    const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
+
     const colorScale = useMemo(() => {
-        return scaleOrdinal(colors || schemeTableau10)
+        return scaleOrdinal(resolvedColors.length > 0 ? resolvedColors : schemeTableau10)
             .domain(processedData.categories);
-    }, [processedData.categories, colors]);
+    }, [processedData.categories, resolvedColors]);
 
     // Generate trendline points
     const trendlinePoints = useMemo(() => {
@@ -178,23 +182,24 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     return (
         <div 
             ref={containerRef}
-            className="dl2-visual-container"
+            className="dl2-scatter-plot dl2-visual-container"
             style={{
                 padding: padding || 10,
                 margin: margin || 10,
                 border: border ? '1px solid #ccc' : undefined,
                 boxShadow: shadow ? '2px 2px 5px rgba(0, 0, 0, 0.1)' : undefined,
-                flex: 1,
+                flex: flex || 1,
                 display: 'flex',
                 flexDirection: 'column',
                 backgroundColor: 'white',
                 overflow: 'hidden'
             }}
         >
-            {title && <h3 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>{title}</h3>}
+            {title && <h3 className="dl2-chart-title" style={{ textAlign: 'center' }}>{title}</h3>}
+            {description && <p className="dl2-chart-description" style={{ textAlign: 'center' }}>{description}</p>}
             
             <div style={{ position: 'relative', width: '100%', height: height }}>
-                <svg width={chartWidth} height={height}>
+                <svg className="dl2-chart-svg" width={chartWidth} height={height}>
                     <g transform={`translate(${resolvedMargin.left},${resolvedMargin.top})`}>
                         {/* Grid lines */}
                         <g className="grid-lines">

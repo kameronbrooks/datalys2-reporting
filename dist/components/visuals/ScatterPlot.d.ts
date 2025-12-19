@@ -1,5 +1,5 @@
 import React from "react";
-import type { ReportVisual, ReportVisualElement } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, ColorProperty } from "../../lib/types";
 export interface ScatterPlotProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
     xColumn?: string | number;
@@ -15,7 +15,7 @@ export interface ScatterPlotProps extends ReportVisual {
     xAxisLabel?: string;
     yAxisLabel?: string;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    colors?: string[];
+    colors?: ColorProperty;
     showLegend?: boolean;
     legendTitle?: string;
     pointSize?: number;

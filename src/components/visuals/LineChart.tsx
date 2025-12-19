@@ -1,9 +1,10 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scalePoint, scaleLinear, scaleOrdinal, max, schemeTableau10, line, curveLinear, curveMonotoneX } from "d3";
-import type { ReportVisual, ReportVisualElement, Dataset } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
+import { resolveColors } from "../../lib/color-utility";
 
 export interface LineChartProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -17,7 +18,7 @@ export interface LineChartProps extends ReportVisual {
     xAxisLabel?: string;
     yAxisLabel?: string;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    colors?: string[];
+    colors?: ColorProperty;
     showLegend?: boolean;
     legendTitle?: string;
     showLabels?: boolean;
@@ -37,6 +38,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     margin,
     border,
     shadow,
+    flex,
     width = 600,
     height = 400,
     minY,
@@ -110,16 +112,18 @@ export const LineChart: React.FC<LineChartProps> = ({
 
     const { data, keys } = processedData;
 
+    const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
+
     const colorScale = useMemo(() => {
-        if (colors && colors.length > 0) {
+        if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
                 .domain(keys)
-                .range(colors);
+                .range(resolvedColors);
         }
         return scaleOrdinal<string, string>()
             .domain(keys)
             .range(schemeTableau10);
-    }, [keys, colors]);
+    }, [keys, resolvedColors]);
 
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
@@ -150,7 +154,7 @@ export const LineChart: React.FC<LineChartProps> = ({
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
-        flex: "1"
+        flex: flex || "1"
     };
 
     const legendItems: VisualLegendItem[] = useMemo(() => {
@@ -180,7 +184,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
     if (!dataset || data.length === 0) {
         return (
-            <div className="dl2-line-chart" style={containerStyle} ref={containerRef}>
+            <div className="dl2-line-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
                 {title && <h3 className="dl2-chart-title">{title}</h3>}
                 {description && <p className="dl2-chart-description">{description}</p>}
                 <div className="dl2-chart-empty">No data available.</div>
@@ -189,7 +193,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     }
 
     return (
-        <div className="dl2-line-chart" style={containerStyle} ref={containerRef}>
+        <div className="dl2-line-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
             {title && <h3 className="dl2-chart-title">{title}</h3>}
             {description && <p className="dl2-chart-description">{description}</p>}
 

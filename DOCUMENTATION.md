@@ -304,6 +304,26 @@ Displays data points connected by straight or smooth lines.
 | `xAxisLabel` | `string` | Label for X-axis. |
 | `yAxisLabel` | `string` | Label for Y-axis. |
 
+**11. Box Plot (`type: "boxplot"`)**
+
+Displays the distribution of data through their quartiles. Supports two modes: raw data calculation and pre-calculated values.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `dataColumn` | `string \| number` | **Data Mode**. Column containing raw numerical values to calculate box stats. |
+| `categoryColumn` | `string \| number` | Optional. Column to group data by (Data Mode) or label rows (Pre-calc Mode). |
+| `minColumn` | `string \| number` | **Pre-calc Mode**. Column for minimum value. |
+| `q1Column` | `string \| number` | **Pre-calc Mode**. Column for first quartile. |
+| `medianColumn` | `string \| number` | **Pre-calc Mode**. Column for median. |
+| `q3Column` | `string \| number` | **Pre-calc Mode**. Column for third quartile. |
+| `maxColumn` | `string \| number` | **Pre-calc Mode**. Column for maximum value. |
+| `meanColumn` | `string \| number` | Optional. Column for mean value. |
+| `direction` | `'vertical' \| 'horizontal'` | Orientation of the boxes (default 'vertical'). |
+| `showOutliers` | `boolean` | Whether to show outliers as rhombus shapes (Data Mode only, default true). |
+| `color` | `string` | Fill color for the boxes (default "#69b3a2"). |
+| `xAxisLabel` | `string` | Label for X-axis. |
+| `yAxisLabel` | `string` | Label for Y-axis. |
+
 ## Example Configuration
 
 ```json

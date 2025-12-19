@@ -3,8 +3,9 @@ import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { arc, pie, scaleOrdinal, schemeTableau10 } from "d3";
 import type { PieArcDatum } from "d3";
-import type { ReportVisual, Dataset } from "../../lib/types";
+import type { ReportVisual, Dataset, ColorProperty } from "../../lib/types";
 import { VisualLegend } from "./VisualLegend";
+import { resolveColors } from "../../lib/color-utility";
 
 export interface PieChartDatum {
     id?: string;
@@ -39,7 +40,7 @@ export interface PieChartProps extends ReportVisual {
 
     padAngle?: number;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    colors?: string[];
+    colors?: ColorProperty;
     showLegend?: boolean;
     legendTitle?: string;
 
@@ -57,6 +58,7 @@ export const PieChart: React.FC<PieChartProps> = ({
     margin,
     border,
     shadow,
+    flex,
     width = 320,
     height = 320,
     innerRadius = 40,
@@ -166,17 +168,19 @@ export const PieChart: React.FC<PieChartProps> = ({
         [radius]
     );
 
+    const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
+
     const colorScale = useMemo(() => {
-        if (colors && colors.length > 0) {
+        if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
                 .domain(sanitizedData.map((datum) => datum.label))
-                .range(colors);
+                .range(resolvedColors);
         }
 
         return scaleOrdinal<string, string>()
             .domain(sanitizedData.map((datum) => datum.label))
             .range(schemeTableau10);
-    }, [colors, sanitizedData]);
+    }, [resolvedColors, sanitizedData]);
 
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
@@ -209,21 +213,21 @@ export const PieChart: React.FC<PieChartProps> = ({
 
     if (!sanitizedData.length) {
         return (
-            <div className="dl2-pie-chart" style={containerStyle} ref={containerRef}>
-                {title && <h3 className="dl2-pie-chart-title">{title}</h3>}
-                {description && <p className="dl2-pie-chart-description">{description}</p>}
-                <div className="dl2-pie-chart-empty">No data available.</div>
+            <div className="dl2-pie-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
+                {title && <h3 className="dl2-chart-title">{title}</h3>}
+                {description && <p className="dl2-chart-description">{description}</p>}
+                <div className="dl2-chart-empty">No data available.</div>
             </div>
         );
     }
     return (
-        <div className="dl2-pie-chart" style={containerStyle} ref={containerRef}>
-            {title && <h3 className="dl2-pie-chart-title">{title}</h3>}
-            {description && <p className="dl2-pie-chart-description">{description}</p>}
+        <div className="dl2-pie-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
+            {title && <h3 className="dl2-chart-title">{title}</h3>}
+            {description && <p className="dl2-chart-description">{description}</p>}
 
             <div style={{ flex: 1, width: "100%", minHeight: 0, position: "relative" }}>
                 <svg
-                    className="dl2-pie-chart-svg"
+                    className="dl2-chart-svg"
                     width={chartWidth}
                     height={chartHeight}
                     role="img"

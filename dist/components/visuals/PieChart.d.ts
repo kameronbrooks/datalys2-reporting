@@ -1,5 +1,5 @@
 import React from "react";
-import type { ReportVisual } from "../../lib/types";
+import type { ReportVisual, ColorProperty } from "../../lib/types";
 export interface PieChartDatum {
     id?: string;
     label: string;
@@ -31,7 +31,7 @@ export interface PieChartProps extends ReportVisual {
     cornerRadius?: number;
     padAngle?: number;
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    colors?: string[];
+    colors?: ColorProperty;
     showLegend?: boolean;
     legendTitle?: string;
 }

@@ -256,7 +256,25 @@
                             "yAxisLabel": "Assignee",
                             "border": true,
                             "shadow": true,
-                            "height": 340
+                            "height": 340,
+                            "color": "cool"
+                        },
+                        {
+                            "id": "tasks-heatmap-2",
+                            "elementType": "visual",
+                            "type": "heatmap",
+                            "datasetId": "tasksHeatmap",
+                            "title": "Sequential Heatmap (Blues)",
+                            "description": "Same data using a sequential Blues scheme.",
+                            "xColumn": "Week",
+                            "yColumn": "Assignee",
+                            "valueColumn": "OpenTasks",
+                            "xAxisLabel": "Week",
+                            "yAxisLabel": "Assignee",
+                            "border": true,
+                            "shadow": true,
+                            "height": 340,
+                            "color": "turbo"
                         }
                     ]
                 },
@@ -279,11 +297,59 @@
                             "smooth": true
                         }
                     ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "boxplot-data-mode",
+                            "elementType": "visual",
+                            "type": "boxplot",
+                            "datasetId": "adSpendVsSales",
+                            "title": "Sales Distribution by Region (Data Mode)",
+                            "dataColumn": "Sales",
+                            "categoryColumn": "Region",
+                            "showOutliers": true,
+                            "border": true,
+                            "shadow": true,
+                            "height": 300,
+                            "color": "Set3"
+                        },
+                        {
+                            "id": "boxplot-precalc-mode",
+                            "elementType": "visual",
+                            "type": "boxplot",
+                            "datasetId": "boxPlotPreCalc",
+                            "title": "Pre-calculated Box Plot",
+                            "minColumn": "Min",
+                            "q1Column": "Q1",
+                            "medianColumn": "Median",
+                            "q3Column": "Q3",
+                            "maxColumn": "Max",
+                            "meanColumn": "Mean",
+                            "categoryColumn": "Category",
+                            "border": true,
+                            "shadow": true,
+                            "height": 300,
+                            "direction": "horizontal",
+                            "color": "Viridis"
+                        }
+                    ]
                 }
             ]
         }
     ],
     "datasets": {
+        "boxPlotPreCalc": {
+            "format": "records",
+            "columns": ["Category", "Min", "Q1", "Median", "Q3", "Max", "Mean"],
+            "dtypes": ["string", "number", "number", "number", "number", "number", "number"],
+            "data": [
+                { "Category": "Group A", "Min": 10, "Q1": 25, "Median": 40, "Q3": 60, "Max": 90, "Mean": 45 },
+                { "Category": "Group B", "Min": 15, "Q1": 30, "Median": 50, "Q3": 70, "Max": 95, "Mean": 52 },
+                { "Category": "Group C", "Min": 5, "Q1": 20, "Median": 35, "Q3": 55, "Max": 85, "Mean": 38 }
+            ]
+        },
         "tasksData": {
             "format": "records",
             "columns": ["Task", "Assignee", "DueDate", "Completed"],
@@ -380,7 +446,9 @@
                 { "AdSpend": 3250, "Sales": 11000, "Region": "West" },
                 { "AdSpend": 3550, "Sales": 14200, "Region": "West" },
                 { "AdSpend": 3850, "Sales": 13800, "Region": "West" },
-                { "AdSpend": 4200, "Sales": 17000, "Region": "West" }
+                { "AdSpend": 4200, "Sales": 17000, "Region": "West" },
+                { "AdSpend": 15000, "Sales": 29000, "Region": "West" },
+                { "AdSpend": 100, "Sales": 505, "Region": "West" }
             ]
         },
         "tasksHeatmap": {
