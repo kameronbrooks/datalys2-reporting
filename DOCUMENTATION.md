@@ -284,8 +284,22 @@ Displays data in a matrix where values are represented by colors.
 | `showCellLabels` | `boolean` | Whether to show the value text inside cells. |
 | `minValue` | `number` | Optional minimum value for color scale. |
 | `maxValue` | `number` | Optional maximum value for color scale. |
+| `color` | `string \| string[]` | Color scheme or array of colors for the heat scale. Supports D3 interpolator names (e.g., "Viridis", "Magma", "YlOrRd") or an array of color strings for custom interpolation. |
 | `xAxisLabel` | `string` | Label for X-axis. |
 | `yAxisLabel` | `string` | Label for Y-axis. |
+
+**Example Heatmap with custom colors:**
+
+```json
+{
+    "type": "heatmap",
+    "datasetId": "salesMatrix",
+    "xColumn": "Month",
+    "yColumn": "Region",
+    "valueColumn": "Sales",
+    "color": "Viridis"
+}
+```
 
 **10. Line Chart (`type: "line"`)**
 
@@ -320,9 +334,22 @@ Displays the distribution of data through their quartiles. Supports two modes: r
 | `meanColumn` | `string \| number` | Optional. Column for mean value. |
 | `direction` | `'vertical' \| 'horizontal'` | Orientation of the boxes (default 'vertical'). |
 | `showOutliers` | `boolean` | Whether to show outliers as rhombus shapes (Data Mode only, default true). |
-| `color` | `string` | Fill color for the boxes (default "#69b3a2"). |
+| `color` | `string \| string[]` | Fill color for the boxes. Supports a single color string, an array of colors, or D3 scheme names (e.g., "Category10", "Tableau10"). (default "#69b3a2"). |
 | `xAxisLabel` | `string` | Label for X-axis. |
 | `yAxisLabel` | `string` | Label for Y-axis. |
+
+**Example Box Plot (Raw Data Mode):**
+
+```json
+{
+    "type": "boxplot",
+    "datasetId": "surveyResults",
+    "dataColumn": "Score",
+    "categoryColumn": "Department",
+    "color": "Tableau10",
+    "direction": "horizontal"
+}
+```
 
 ## Example Configuration
 
