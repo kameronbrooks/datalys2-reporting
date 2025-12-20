@@ -387,6 +387,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                         
                         const boxStart = direction === 'vertical' ? q3Pos : q1Pos;
                         const boxSize = Math.abs(q3Pos - q1Pos);
+                        const isHovered = hoveredItem === d;
 
                         return (
                             <g 
@@ -402,6 +403,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     setHoveredItem(null);
                                     setTooltipPos(null);
                                 }}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {/* Whisker Line */}
                                 <line 
@@ -410,6 +412,8 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     x2={direction === 'vertical' ? center : maxPos} 
                                     y2={direction === 'vertical' ? maxPos : center} 
                                     stroke="var(--dl2-text-main)" 
+                                    strokeWidth={isHovered ? 2 : 1}
+                                    style={{ transition: 'stroke-width 0.2s' }}
                                 />
                                 {/* Whisker Caps */}
                                 <line 
@@ -418,6 +422,8 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     x2={direction === 'vertical' ? center + bandWidth/4 : minPos} 
                                     y2={direction === 'vertical' ? minPos : center + bandWidth/4} 
                                     stroke="var(--dl2-text-main)" 
+                                    strokeWidth={isHovered ? 2 : 1}
+                                    style={{ transition: 'stroke-width 0.2s' }}
                                 />
                                 <line 
                                     x1={direction === 'vertical' ? center - bandWidth/4 : maxPos} 
@@ -425,6 +431,8 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     x2={direction === 'vertical' ? center + bandWidth/4 : maxPos} 
                                     y2={direction === 'vertical' ? maxPos : center + bandWidth/4} 
                                     stroke="var(--dl2-text-main)" 
+                                    strokeWidth={isHovered ? 2 : 1}
+                                    style={{ transition: 'stroke-width 0.2s' }}
                                 />
 
                                 {/* Box */}
@@ -434,7 +442,10 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     width={direction === 'vertical' ? bandWidth : boxSize}
                                     height={direction === 'vertical' ? boxSize : bandWidth}
                                     fill={getColor(resolvedColors, i)}
+                                    fillOpacity={isHovered ? 0.9 : 0.7}
                                     stroke="var(--dl2-text-main)"
+                                    strokeWidth={isHovered ? 2 : 1}
+                                    style={{ transition: 'all 0.2s' }}
                                 />
 
                                 {/* Median Line */}
@@ -444,13 +455,14 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     x2={direction === 'vertical' ? center + bandWidth/2 : medianPos} 
                                     y2={direction === 'vertical' ? medianPos : center + bandWidth/2} 
                                     stroke="var(--dl2-text-main)" 
-                                    strokeWidth={2}
+                                    strokeWidth={isHovered ? 3 : 2}
+                                    style={{ transition: 'stroke-width 0.2s' }}
                                 />
 
                                 {/* Outliers */}
                                 {d.outliers.map((outlier, oi) => {
                                     const outPos = direction === 'vertical' ? yScale(outlier) : xScale(outlier);
-                                    const r = 4; // radius of rhombus
+                                    const r = isHovered ? 6 : 4; // radius of rhombus
                                     // Rhombus points: (cx, cy-r), (cx+r, cy), (cx, cy+r), (cx-r, cy)
                                     const cx = direction === 'vertical' ? center : outPos;
                                     const cy = direction === 'vertical' ? outPos : center;
@@ -460,9 +472,10 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                         <polygon 
                                             key={`outlier-${oi}`} 
                                             points={points} 
-                                            fill="none" 
+                                            fill={isHovered ? "red" : "none"} 
                                             stroke="red" 
                                             strokeWidth={1} 
+                                            style={{ transition: 'all 0.2s' }}
                                         />
                                     );
                                 })}

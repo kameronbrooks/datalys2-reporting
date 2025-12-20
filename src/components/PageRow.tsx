@@ -16,7 +16,7 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
         if (childType === 'layout') {
             return <PageRow key={index} layout={child as Layout} />;
         }
-
+        
         // For visual types, use the Visual component from the registry
         return <Visual key={index} {...(child as any)} type={childType} />;
     }

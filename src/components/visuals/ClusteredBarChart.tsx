@@ -233,6 +233,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                         const value = d[key];
                                         const barY = yScale(value);
                                         const barHeight = innerHeight - barY;
+                                        const isHovered = hoveredData?.label === d.x && hoveredData?.series === key;
 
                                         if (barX === undefined) return null;
 
@@ -244,6 +245,9 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                                     width={barWidth}
                                                     height={barHeight}
                                                     fill={colorScale(key)}
+                                                    fillOpacity={isHovered ? 0.8 : 1}
+                                                    stroke={isHovered ? "var(--dl2-text-main)" : "none"}
+                                                    strokeWidth={1}
                                                     onMouseEnter={(e) => {
                                                         const rect = containerRef.current?.getBoundingClientRect();
                                                         if (rect) {
@@ -269,7 +273,11 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                                         }
                                                     }}
                                                     onMouseLeave={() => setHoveredData(null)}
-                                                    style={{ transition: "opacity 0.2s" }}
+                                                    style={{ 
+                                                        transition: "all 0.2s",
+                                                        cursor: "pointer",
+                                                        transform: isHovered ? "translateY(-2px)" : "translateY(0)"
+                                                    }}
                                                 />
                                                 {showLabels && barHeight > 15 && (
                                                     <text

@@ -265,6 +265,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
                             const fill = colorScale(cell.value);
                             const stroke = "rgba(0,0,0,0.08)";
+                            const isHovered = hoveredData?.xLabel === cell.x && hoveredData?.yLabel === cell.y;
 
                             return (
                                 <g key={`${cell.x}-${cell.y}-${index}`} transform={`translate(${x}, ${y})`}>
@@ -272,7 +273,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                         width={cellWidth}
                                         height={cellHeight}
                                         fill={fill}
-                                        stroke={stroke}
+                                        stroke={isHovered ? "var(--dl2-text-main)" : stroke}
+                                        strokeWidth={isHovered ? 2 : 1}
                                         onMouseEnter={(e) => {
                                             const rect = containerRef.current?.getBoundingClientRect();
                                             if (!rect) return;
@@ -296,6 +298,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                             });
                                         }}
                                         onMouseLeave={() => setHoveredData(null)}
+                                        style={{ 
+                                            transition: "all 0.2s",
+                                            cursor: "pointer",
+                                            filter: isHovered ? "brightness(1.1)" : "none"
+                                        }}
                                     />
 
                                     {showCellLabels && cellWidth >= 28 && cellHeight >= 18 && (

@@ -225,6 +225,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                                     const y = yScale(d[1]);
                                     const height = yScale(d[0]) - yScale(d[1]);
                                     const value = d[1] - d[0];
+                                    const isHovered = hoveredData?.label === String(d.data.x) && hoveredData?.series === layer.key;
 
                                     if (x === undefined) return null;
 
@@ -235,6 +236,9 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                                                 y={y}
                                                 width={width}
                                                 height={height}
+                                                fillOpacity={isHovered ? 0.8 : 1}
+                                                stroke={isHovered ? "var(--dl2-text-main)" : "none"}
+                                                strokeWidth={1}
                                                 onMouseEnter={(e) => {
                                                     const rect = containerRef.current?.getBoundingClientRect();
                                                     if (rect) {
@@ -260,7 +264,11 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                                                     }
                                                 }}
                                                 onMouseLeave={() => setHoveredData(null)}
-                                                style={{ transition: "opacity 0.2s" }}
+                                                style={{ 
+                                                    transition: "all 0.2s",
+                                                    cursor: "pointer",
+                                                    filter: isHovered ? "brightness(1.1)" : "none"
+                                                }}
                                             />
                                             {showLabels && height > 15 && (
                                                 <text

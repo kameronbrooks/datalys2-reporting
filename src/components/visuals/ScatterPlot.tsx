@@ -292,13 +292,14 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                                 key={i}
                                 cx={xScale(d.x)}
                                 cy={yScale(d.y)}
-                                r={pointSize}
+                                r={hoveredData === d ? pointSize + 3 : pointSize}
                                 fill={colorScale(d.category)}
                                 stroke="var(--dl2-bg-visual)"
                                 strokeWidth={1}
                                 opacity={0.8}
                                 onMouseEnter={() => setHoveredData(d)}
                                 onMouseLeave={() => setHoveredData(null)}
+                                style={{ transition: 'r 0.2s', cursor: 'pointer' }}
                             >
                                 <title>{`X: ${d.x}\nY: ${d.y}\nCategory: ${d.category}`}</title>
                             </circle>

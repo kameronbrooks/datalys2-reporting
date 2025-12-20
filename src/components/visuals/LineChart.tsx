@@ -250,7 +250,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                 <circle
                                                     cx={cx}
                                                     cy={cy}
-                                                    r={4}
+                                                    r={hoveredData?.label === d.x && hoveredData?.series === key ? 7 : 4}
                                                     fill={color}
                                                     stroke="var(--dl2-bg-visual)"
                                                     strokeWidth={1}

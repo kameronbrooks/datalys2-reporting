@@ -192,7 +192,13 @@ export const Histogram: React.FC<HistogramProps> = ({
                                     height={innerHeight - yScale(d.length)}
                                     fill={getColor(resolvedColors, i)}
                                     opacity={hoveredBin === d ? 0.8 : 1}
-                                    style={{ cursor: 'pointer' }}
+                                    stroke={hoveredBin === d ? "var(--dl2-text-main)" : "none"}
+                                    strokeWidth={1}
+                                    style={{ 
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        transform: hoveredBin === d ? 'translateY(-2px)' : 'translateY(0)'
+                                    }}
                                     onMouseEnter={(e) => {
                                         setHoveredBin(d);
                                         const rect = containerRef.current?.getBoundingClientRect();
