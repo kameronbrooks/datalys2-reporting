@@ -7,6 +7,7 @@
     <meta name="description" content="Test page for Datalys2 Reports library via CDN">
     <meta name="author" content="Brooks, Kameron">
     <meta name="support-email" content="support@example.com">
+    <meta name="gc-compressed-data" content="true">
     <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
 </head>
 
@@ -19,6 +20,26 @@
     <script id="report-data" type="application/json">
 {
     "pages" : [
+        {
+            "title": "Compression Test",
+            "description": "Testing gzip decompression of datasets.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "compressed-table",
+                            "elementType": "visual",
+                            "type": "table",
+                            "datasetId": "compressedTest",
+                            "title": "Decompressed Data Table",
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
+                }
+            ]
+        },
         {
             "title": "Overview",
             "description": "This is the overview page of the report.",
@@ -476,10 +497,20 @@
                 { "Assignee": "Dave", "Week": "Wk 3", "OpenTasks": 2 },
                 { "Assignee": "Dave", "Week": "Wk 4", "OpenTasks": 1 }
             ]
+        },
+        "compressedTest": {
+            "id": "compressedTest",
+            "format": "table",
+            "columns": ["Item", "Value"],
+            "dtypes": ["string", "number"],
+            "compression": "gzip",
+            "compressedData": "compressed-data-1",
+            "data": []
         }
     }
 }
     </script>
+    <script id="compressed-data-1" type="text/b64-gzip">H4sIAAAAAAAACouOVvIsSc1VcFTSMTQwiNWBcp2UdIyQuM5KOsYGBrGxAEZgS5ouAAAA</script>
     <div id="root"></div>
     <script src="http://localhost:8080/datalys2-reports.min.js"></script>
 

@@ -10,6 +10,8 @@ export interface Dataset {
     columns: string[];
     dtypes: string[];
     format: 'table' | 'records' | 'list' | 'record';
+    compression?: 'none' | 'gzip';
+    compressedData?: string; // ID of the script tag containing the base64 gzip data
 }
 
 /**

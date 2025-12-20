@@ -8,6 +8,8 @@ export interface Dataset {
     columns: string[];
     dtypes: string[];
     format: 'table' | 'records' | 'list' | 'record';
+    compression?: 'none' | 'gzip';
+    compressedData?: string;
 }
 /**
  * Type for color properties in visuals
