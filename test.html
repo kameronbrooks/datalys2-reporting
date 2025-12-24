@@ -21,6 +21,58 @@
 {
     "pages" : [
         {
+            "title": "Modal Test",
+            "description": "Testing the new modal functionality.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "elementType": "modal",
+                            "id": "test-modal-1",
+                            "title": "Global Modal Example",
+                            "buttonLabel": "Open Global Modal",
+                            "padding": 10
+                        },
+                        {
+                            "elementType": "modal",
+                            "id": "inline-modal-1",
+                            "title": "Inline Modal Example",
+                            "buttonLabel": "Open Inline Modal",
+                            "description": "This modal is defined directly in the layout.",
+                            "padding": 10,
+                            "rows": [
+                                {
+                                    "direction": "row",
+                                    "children": [
+                                        {
+                                            "type": "card",
+                                            "text": "This is a card inside an inline modal!",
+                                            "border": true,
+                                            "shadow": true
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "type": "card",
+                            "title": "Visual with Modal Detail",
+                            "text": "Hover over this card to see the expand icon in the top right.",
+                            "border": true,
+                            "shadow": true,
+                            "modalId": "test-modal-1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "title": "Compression Test",
             "description": "Testing gzip decompression of datasets.",
             "rows": [
@@ -73,7 +125,8 @@
                             "goodDirection": "higher",
                             "breachValue": 140000,
                             "border": true,
-                            "shadow": true
+                            "shadow": true,
+                            "modalId": "test-modal-1"
                         },
                         {
                             "id": "kpi-users",
@@ -507,7 +560,46 @@
             "compressedData": "compressed-data-1",
             "data": []
         }
-    }
+    },
+    "modals": [
+        {
+            "id": "test-modal-1",
+            "title": "Global Modal Content",
+            "description": "This modal is defined in the global 'modals' array.",
+            "rows": [
+                {
+                    "direction": "row",
+                    "children": [
+                        {
+                            "type": "card",
+                            "title": "Global Modal Card",
+                            "text": "You can define modals globally and trigger them from anywhere using their ID.",
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
+                },
+                {
+                    "direction": "row",
+                    "children": [
+                        {
+                            "id": "modal-kpi",
+                            "elementType": "visual",
+                            "type": "kpi",
+                            "datasetId": "kpiData",
+                            "rowIndex": 0,
+                            "valueColumn": "Value",
+                            "comparisonColumn": "Yesterday",
+                            "title": "Revenue in Modal",
+                            "format": "currency",
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }
     </script>
     <script id="compressed-data-1" type="text/b64-gzip">H4sIAAAAAAAACouOVvIsSc1VcFTSMTQwiNWBcp2UdIyQuM5KOsYGBrGxAEZgS5ouAAAA</script>

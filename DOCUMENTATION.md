@@ -71,10 +71,12 @@ Datasets are defined in the `datasets` object. The key is the `datasetId` refere
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | The unique ID of the dataset. |
-| `data` | `any[]` | The actual data records. |
+| `data` | `any[]` | The actual data records (can be empty if using compression). |
 | `columns` | `string[]` | Array of column names. |
 | `dtypes` | `string[]` | Array of data types for columns (e.g., 'string', 'number'). |
 | `format` | `string` | Data format: `'table'`, `'records'`, `'list'`, or `'record'`. |
+| `compression` | `string` | Optional. Set to `'gzip'` to enable decompression. |
+| `compressedData` | `string` | Optional. The ID of a script tag containing the base64-encoded gzip data. |
 
 **Example Dataset (Records Format):**
 ```json
@@ -104,7 +106,57 @@ Datasets are defined in the `datasets` object. The key is the `datasetId` refere
 }
 ```
 
-### Pages
+## Data Compression
+
+For large datasets, you can use gzip compression to reduce the HTML file size. The library uses the built-in `DecompressionStream` API (available in modern browsers) to decompress data on the fly.
+
+### How to use Compression
+
+1.  **Compress your data**: Gzip your JSON data and encode it as a Base64 string.
+2.  **Store in a separate script tag**: Place the Base64 string in a `<script>` tag with `type="text/b64-gzip"`.
+3.  **Reference the script ID**: In your `report-data` JSON, set `compression: "gzip"` and `compressedData` to the ID of that script tag.
+
+**Example:**
+
+```html
+<!-- The compressed data -->
+<script id="large-data-source" type="text/b64-gzip">
+H4sIAAAAAAAACouOVvIsSc1VcFTSMTQwiNWBcp2UdIyQuM5KOsYGBrGxAEZgS5ouAAAA
+</script>
+
+<!-- The report configuration -->
+<script id="report-data" type="application/json">
+{
+    "datasets": {
+        "compressedDataset": {
+            "id": "compressedDataset",
+            "format": "table",
+            "columns": ["Item", "Value"],
+            "dtypes": ["string", "number"],
+            "compression": "gzip",
+            "compressedData": "large-data-source",
+            "data": []
+        }
+    }
+}
+</script>
+```
+
+### Memory Management (GC)
+
+Decompressing large strings can consume significant memory. You can instruct the library to clear the source strings from memory once decompression is complete by adding a meta tag to your `<head>`:
+
+```html
+<meta name="gc-compressed-data" content="true">
+```
+
+When this tag is present, the library will:
+1.  Clear the `textContent` of any script tags referenced by `compressedData`.
+2.  Delete the `compressedData` property from the dataset objects.
+
+This allows the browser's Garbage Collector to reclaim the memory used by the large Base64 strings.
+
+## Pages
 
 Each page in the `pages` array represents a tab in the report.
 

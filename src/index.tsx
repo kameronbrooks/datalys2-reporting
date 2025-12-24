@@ -3,12 +3,14 @@ import ReactDOM from 'react-dom/client';
 import { AppContext } from './components/context/AppContext';
 import { Headbar } from './components/Headbar';
 import { TabGroup } from './components/TabGroup';
-import { ApplicationData, Dataset } from './lib/types';
+import { Modal } from './components/Modal';
+import { ApplicationData, Dataset, ReportModal } from './lib/types';
 import { decompressDatasets } from './lib/dataset-utility';
 
 function App() {
     const [datasets, setDatasets] = useState<Record<string, Dataset>>({});
     const [isLoaded, setIsLoaded] = useState(false);
+    const [activeModal, setActiveModal] = useState<ReportModal | null>(null);
 
     // Get data from the script element only once
     const data = useMemo(() => {
@@ -25,6 +27,24 @@ function App() {
         
         return parsedData;
     }, []);
+
+    const openModal = (modalOrId: ReportModal | string) => {
+        if (typeof modalOrId === 'string') {
+            const found = (data.modals || []).find(m => m.id === modalOrId);
+            if (found) setActiveModal(found);
+        } else {
+            // If the object passed doesn't have rows, try to find it in global modals by ID
+            if (!modalOrId.rows && modalOrId.id) {
+                const found = (data.modals || []).find(m => m.id === modalOrId.id);
+                if (found) {
+                    setActiveModal(found);
+                    return;
+                }
+            }
+            setActiveModal(modalOrId);
+        }
+    };
+    const closeModal = () => setActiveModal(null);
 
     const documentTitle = document.title || 'Datalys2 Report';
     const documentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
@@ -48,7 +68,12 @@ function App() {
     }
 
     return (
-        <AppContext.Provider value={{ datasets: datasets }}>
+        <AppContext.Provider value={{ 
+            datasets: datasets, 
+            modals: data.modals || [],
+            openModal,
+            closeModal
+        }}>
             <div>
                 <Headbar
                     title={documentTitle}
@@ -59,6 +84,7 @@ function App() {
                 <div>
                     <TabGroup pages={data.pages || []} />
                 </div>
+                {activeModal && <Modal modal={activeModal} />}
             </div>
         </AppContext.Provider>
     );

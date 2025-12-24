@@ -35,6 +35,24 @@ export interface LayoutElement {
     border?: string | boolean;
     shadow?: string | boolean;
     flex?: number;
+    modalId?: string;
+}
+/**
+ * Interface for a report modal
+ * Properties:
+ * - id: string - unique identifier for the modal
+ * - title: string - title of the modal
+ * - description?: string - optional description of the modal
+ * - rows?: Layout[] - optional array of layout rows in the modal
+ * - buttonLabel?: string - optional label for the button that opens the modal
+ */
+export interface ReportModal extends LayoutElement {
+    elementType: 'modal';
+    id: string;
+    title: string;
+    description?: string;
+    rows?: Layout[];
+    buttonLabel?: string;
 }
 /**
  * Interface for report visual elements
@@ -147,9 +165,11 @@ export interface ReportPage {
  * Interface for the overall application data
  * Properties:
  * - pages: ReportPage[] - array of report pages
+ * - modals?: ReportModal[] - optional array of report modals
  * - datasets: Record<string, Dataset> - mapping of dataset IDs to Dataset objects
  */
 export interface ApplicationData {
     pages: ReportPage[];
+    modals?: ReportModal[];
     datasets: Record<string, Dataset>;
 }
