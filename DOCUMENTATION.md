@@ -62,6 +62,7 @@ The core of the report configuration lives inside the `<script id="report-data" 
 | Property | Type | Description |
 |----------|------|-------------|
 | `pages` | `ReportPage[]` | An array of page definitions. |
+| `modals` | `ReportModal[]` | Optional. An array of global modal definitions. |
 | `datasets` | `Record<string, Dataset>` | A dictionary of datasets used by the visuals. |
 
 ### Datasets
@@ -181,6 +182,7 @@ The `rows` array contains layout objects. Layouts can contain other layouts or v
 | `border` | `boolean/string` | CSS border or boolean to enable default. |
 | `shadow` | `boolean/string` | CSS box-shadow or boolean to enable default. |
 | `flex` | `number` | Flex grow value. |
+| `modalId` | `string` | Optional. The ID of a modal to open when the element is hovered and the expand icon is clicked. |
 
 #### Layout Component (`type: "layout"`)
 
@@ -400,6 +402,81 @@ Displays the distribution of data through their quartiles. Supports two modes: r
     "categoryColumn": "Department",
     "color": "Tableau10",
     "direction": "horizontal"
+}
+```
+
+## Modals
+
+Modals allow you to display additional details or visualizations in an overlay without leaving the current page. They function similarly to pages, containing their own layouts and visuals.
+
+### Defining Modals
+
+Modals are defined in the global `modals` array in the root of your configuration.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Unique identifier for the modal. |
+| `title` | `string` | The title displayed in the modal header. |
+| `description` | `string` | Optional description text. |
+| `rows` | `Layout[]` | An array of layout rows to display inside the modal. |
+
+**Example Modal Definition:**
+
+```json
+"modals": [
+    {
+        "id": "revenue-details",
+        "title": "Revenue Breakdown",
+        "description": "Detailed view of revenue by region.",
+        "rows": [
+            {
+                "type": "layout",
+                "children": [
+                    {
+                        "type": "table",
+                        "datasetId": "regionalRevenue",
+                        "title": "Regional Data"
+                    }
+                ]
+            }
+        ]
+    }
+]
+```
+
+### Triggering Modals
+
+There are two ways to trigger a modal:
+
+#### 1. Using `modalId` on any Element
+
+You can add the `modalId` property to any layout or visual element. When the user hovers over that element, an "expand" icon will appear in the top-right corner. Clicking this icon will open the modal with the corresponding ID.
+
+```json
+{
+    "type": "kpi",
+    "title": "Total Revenue",
+    "datasetId": "kpiData",
+    "valueColumn": "Revenue",
+    "modalId": "revenue-details"
+}
+```
+
+#### 2. Using a Modal Trigger Button
+
+You can also place a dedicated button in your layout by using the `modal` type directly.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `type` | `string` | Must be `"modal"`. |
+| `id` | `string` | The ID of the global modal to open. |
+| `buttonLabel` | `string` | The text to display on the button. |
+
+```json
+{
+    "type": "modal",
+    "id": "revenue-details",
+    "buttonLabel": "View Detailed Breakdown"
 }
 ```
 
