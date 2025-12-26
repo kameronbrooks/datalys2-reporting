@@ -63,7 +63,10 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
         <div 
             className="dl2-page-row"
             style={{ 
-                flexDirection: layout.direction || 'row',
+                display: layout.direction === 'grid' ? 'grid' : 'flex',
+                flexDirection: layout.direction !== 'grid' ? (layout.direction || 'row') : undefined,
+                gridTemplateColumns: layout.direction === 'grid' ? `repeat(${layout.columns || 3}, 1fr)` : undefined,
+                gap: layout.gap || (layout.direction === 'grid' ? '10px' : 0),
                 flex: 1,
                 padding: layout.padding || 0,
                 margin: layout.margin || 0,
@@ -71,7 +74,14 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
                 boxShadow: layout.shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
             }}
         >
-            {layout.title && <h3 style={{width: '100%'}}>{layout.title}</h3>}
+            {layout.title && (
+                <h3 style={{
+                    width: '100%', 
+                    gridColumn: layout.direction === 'grid' ? `span ${layout.columns || 3}` : undefined
+                }}>
+                    {layout.title}
+                </h3>
+            )}
             {layout.children.map((child, index) => (
                 renderChild(child, index)
             ))}

@@ -111,6 +111,7 @@
                 },
                 {
                     "type": "layout",
+                    "direction": "grid",
                     "children": [
                         {
                             "id": "kpi-revenue",
@@ -158,6 +159,37 @@
                             "warningValue": 0.44,
                             "border": true,
                             "shadow": true
+                        },
+                        {
+                            "id": "kpi-revenue",
+                            "elementType": "visual",
+                            "type": "kpi",
+                            "datasetId": "kpiData",
+                            "rowIndex": 0,
+                            "valueColumn": "Value",
+                            "comparisonColumn": "Yesterday",
+                            "title": "Total Revenue",
+                            "format": "currency",
+                            "goodDirection": "higher",
+                            "breachValue": 140000,
+                            "border": true,
+                            "shadow": true,
+                            "modalId": "test-modal-1"
+                        },
+                        {
+                            "id": "kpi-users",
+                            "elementType": "visual",
+                            "type": "kpi",
+                            "datasetId": "kpiData",
+                            "rowIndex": 1,
+                            "valueColumn": "Value",
+                            "comparisonColumn": "Yesterday",
+                            "title": "Active Users",
+                            "format": "number",
+                            "goodDirection": "higher",
+                            "border": true,
+                            "shadow": true,
+                            "breachValue": 1300
                         }
                     ]
                 },

@@ -144,7 +144,9 @@ export interface LabelVisualElement extends ReportVisualElement {
  */
 export interface Layout extends LayoutElement {
     title?: string;
-    direction: 'row' | 'column';
+    direction: 'row' | 'column' | 'grid';
+    columns?: number;
+    gap?: string | number;
     children: LayoutElement[];
 }
 /**

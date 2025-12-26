@@ -188,7 +188,9 @@ The `rows` array contains layout objects. Layouts can contain other layouts or v
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `direction` | `'row' \| 'column'` | Direction of children. |
+| `direction` | `'row' \| 'column' \| 'grid'` | Direction of children. |
+| `columns` | `number` | Optional. Number of columns for grid layout (default: 3). |
+| `gap` | `string \| number` | Optional. Gap between elements (default: 10px for grid). |
 | `children` | `Array` | Array of child elements (Layouts or Visuals). |
 
 #### Visual Components
