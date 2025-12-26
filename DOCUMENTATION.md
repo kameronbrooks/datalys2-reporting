@@ -193,7 +193,7 @@ The `rows` array contains layout objects. Layouts can contain other layouts or v
 
 #### Visual Components
 
-All visuals require a `datasetId` pointing to a key in the `datasets` object.
+All visuals require a `datasetId` pointing to a key in the `datasets` object. Most visuals also support an optional `otherElements` array for adding annotations like trend lines, markers, and custom axes.
 
 **1. Card (`type: "card"`)**
 
@@ -402,6 +402,77 @@ Displays the distribution of data through their quartiles. Supports two modes: r
     "categoryColumn": "Department",
     "color": "Tableau10",
     "direction": "horizontal"
+}
+```
+
+## Visual Elements
+
+Visual elements are annotations or additional layers that can be added to most chart-based visuals using the `otherElements` property.
+
+### Common Visual Element Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `visualElementType` | `string` | The type of element (`trend`, `xAxis`, `yAxis`, `marker`, `label`). |
+| `color` | `string` | Optional. Color of the element. |
+| `lineStyle` | `string` | Optional. `'solid'`, `'dashed'`, or `'dotted'`. |
+| `lineWidth` | `number` | Optional. Width of the line. |
+| `label` | `string` | Optional. Text label for the element. |
+
+### Element Types
+
+#### 1. Trend Line (`visualElementType: "trend"`)
+
+Displays a trend line based on provided coefficients.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `coefficients` | `number[]` | Array of coefficients for the trend line equation (e.g., `[intercept, slope]`). |
+
+#### 2. Axis Line (`visualElementType: "xAxis" | "yAxis"`)
+
+Displays a custom axis line at a specific value.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number | Date | string` | The value where the axis line should be placed. |
+
+#### 3. Marker (`visualElementType: "marker"`)
+
+Displays a marker at a specific value.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number | Date | string` | The value where the marker should be placed. |
+| `size` | `number` | Optional. Size of the marker. |
+| `shape` | `string` | Optional. `'circle'`, `'square'`, or `'triangle'`. |
+
+#### 4. Label (`visualElementType: "label"`)
+
+Displays a text label at a specific value.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number | Date | string` | The value where the label should be placed. |
+| `fontSize` | `number` | Optional. Font size of the label. |
+| `fontWeight` | `string` | Optional. `'normal'`, `'bold'`, etc. |
+
+**Example Visual with Trend Line:**
+
+```json
+{
+    "type": "line",
+    "datasetId": "salesData",
+    "xColumn": "Month",
+    "yColumns": ["Revenue"],
+    "otherElements": [
+        {
+            "visualElementType": "trend",
+            "color": "#ff0000",
+            "lineStyle": "dashed",
+            "coefficients": [100, 5.5]
+        }
+    ]
 }
 ```
 
