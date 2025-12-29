@@ -4,6 +4,7 @@ import { scaleLinear, scaleBand, min, max, quantile, ascending } from "d3";
 import type { ReportVisual, Dataset, ColorProperty } from "../../lib/types";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveColors, getColor } from "../../lib/color-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface BoxPlotProps extends ReportVisual {
     // Mode 1: Pre-calculated
@@ -122,10 +123,10 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                 
                 if (isNaN(numVal)) return;
 
-                let cat = "All";
+                let cat: any = "All";
                 if (catColIdx !== undefined) {
                     cat = Array.isArray(row) ? row[catColIdx] : row[catColName!];
-                    cat = String(cat);
+                    cat = isDate(cat) ? printDate(cat) : String(cat);
                 }
 
                 if (!groups.has(cat)) groups.set(cat, []);
@@ -187,9 +188,11 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                     return typeof val === 'number' ? val : parseFloat(val);
                 };
 
-                const category = catIdx !== undefined 
-                    ? String(Array.isArray(row) ? row[catIdx] : row[dataset.columns[catIdx]])
+                const catRaw = catIdx !== undefined 
+                    ? (Array.isArray(row) ? row[catIdx] : row[dataset.columns[catIdx]])
                     : `Row ${i + 1}`;
+                
+                const category = isDate(catRaw) ? printDate(catRaw) : String(catRaw);
 
                 return {
                     category,

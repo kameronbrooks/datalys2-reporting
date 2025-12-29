@@ -5,6 +5,7 @@ import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface ClusteredBarChartProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -98,7 +99,8 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
         const keys = yIndices.map(idx => dataset.columns[idx]);
 
         const data = dataset.data.map(row => {
-            const item: any = { x: String(row[xIdx ?? 0]) };
+            const xVal = row[xIdx ?? 0];
+            const item: any = { x: isDate(xVal) ? printDate(xVal) : String(xVal) };
             yIndices.forEach((yIdx, i) => {
                 item[keys[i]] = Number(row[yIdx]);
             });

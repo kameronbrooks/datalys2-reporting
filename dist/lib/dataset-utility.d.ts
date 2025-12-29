@@ -1,5 +1,10 @@
 import { Dataset } from "./types";
 /**
+ * Processes a dataset to convert date columns to Date objects.
+ * @param dataset
+ */
+export declare function processDatasetDates(dataset: Dataset): void;
+/**
  * Find the column index in a dataset based on column name or index.
  * @param column
  * @param dataset

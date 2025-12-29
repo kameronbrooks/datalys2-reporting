@@ -6,6 +6,7 @@ import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface ScatterPlotProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -99,11 +100,16 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         if (xIdx === undefined || yIdx === undefined) return { data: [], categories: [] };
 
         const data = dataset.data.map(row => {
-            const xVal = Number(Array.isArray(row) ? row[xIdx] : row[dataset.columns[xIdx]]);
-            const yVal = Number(Array.isArray(row) ? row[yIdx] : row[dataset.columns[yIdx]]);
-            const category = catIdx !== undefined 
-                ? String(Array.isArray(row) ? row[catIdx] : row[dataset.columns[catIdx]]) 
+            const xRaw = Array.isArray(row) ? row[xIdx] : row[dataset.columns[xIdx]];
+            const yRaw = Array.isArray(row) ? row[yIdx] : row[dataset.columns[yIdx]];
+            const xVal = Number(xRaw);
+            const yVal = Number(yRaw);
+            
+            const catRaw = catIdx !== undefined 
+                ? (Array.isArray(row) ? row[catIdx] : row[dataset.columns[catIdx]])
                 : 'Default';
+            
+            const category = isDate(catRaw) ? printDate(catRaw) : String(catRaw);
             
             return { x: xVal, y: yVal, category };
         }).filter(d => !isNaN(d.x) && !isNaN(d.y));

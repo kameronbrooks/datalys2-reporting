@@ -1,10 +1,11 @@
 import React, { useContext, useMemo } from "react";
 import { AppContext } from "../context/AppContext";
-import type { ReportVisual, Dataset } from "@/types";
+import type { ReportVisual, Dataset } from "../../lib/types";
 import { TrendIndicator } from "./TrendIndicator";
 import { BreachIndicator, getBreachStatus, getBreachColor } from "./BreachIndicator";
 import { Tooltip } from "./Tooltip";
-import { findColumnIndex } from '@/dataset-utility'
+import { findColumnIndex } from "../../lib/dataset-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface KPIProps extends ReportVisual {
     valueColumn?: string | number;
@@ -12,7 +13,7 @@ export interface KPIProps extends ReportVisual {
     
     rowIndex?: number;
     
-    format?: 'number' | 'currency' | 'percent';
+    format?: 'number' | 'currency' | 'percent' | 'date';
     currencySymbol?: string;
     
     goodDirection?: 'higher' | 'lower';
@@ -54,17 +55,23 @@ export const KPI: React.FC<KPIProps> = ({
         
         const row = dataset.data[rowIndex];
 
-        const value = valIdx !== undefined ? Number(row[valIdx]) : 0;
-        const comparisonValue = comparisonIdx !== undefined ? Number(row[comparisonIdx]) : undefined;
+        const rawValue = valIdx !== undefined ? row[valIdx] : 0;
+        const value = isDate(rawValue) ? rawValue.getTime() : Number(rawValue);
+        const isDateValue = isDate(rawValue);
+
+        const rawComparison = comparisonIdx !== undefined ? row[comparisonIdx] : undefined;
+        const comparisonValue = isDate(rawComparison) ? rawComparison.getTime() : (rawComparison !== undefined ? Number(rawComparison) : undefined);
+        
         let change: number | undefined = undefined;
-        if (comparisonValue !== undefined && comparisonValue !== 0) {
+        if (comparisonValue !== undefined && comparisonValue !== 0 && !isDateValue) {
             change = (value - comparisonValue) / Math.abs(comparisonValue);
         }
         
         return {
             value: value,
             change: change,
-            comparisonValue: comparisonValue
+            comparisonValue: comparisonValue,
+            isDateValue: isDateValue
         };
     }, [dataset, valueColumn, comparisonColumn, rowIndex]);
 
@@ -76,10 +83,13 @@ export const KPI: React.FC<KPIProps> = ({
         );
     }
 
-    const { value, change, comparisonValue } = data;
+    const { value, change, comparisonValue, isDateValue } = data;
 
     // Helper function to format values consistently
     const formatValue = (val: number): string => {
+        if (isDateValue || format === 'date') {
+            return printDate(new Date(val));
+        }
         if (format === 'currency') {
             return `${currencySymbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
         } else if (format === 'percent') {

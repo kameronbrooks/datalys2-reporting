@@ -1,7 +1,68 @@
 import { Dataset } from "./types"
 import { decompressGzipB64ToObject } from "./compression-utility";
+import { fromISOString, fromUnixTimestamp, fromUnixTimestampMs } from "./date-utility";
 
+/**
+ * Converts a value to a Date object if it is a string or number.
+ * @param value 
+ * @returns 
+ */
+function convertToDate(value: any): any {
+    if (value === null || value === undefined || value === "") return value;
 
+    if (typeof value === 'string') {
+        const date = fromISOString(value);
+        return isNaN(date.getTime()) ? value : date;
+    } else if (typeof value === 'number') {
+        // Heuristic: if it's a large number, it's likely ms, otherwise seconds
+        if (value > 10000000000) {
+            return fromUnixTimestampMs(value);
+        } else {
+            return fromUnixTimestamp(value);
+        }
+    }
+    return value;
+}
+
+/**
+ * Processes a dataset to convert date columns to Date objects.
+ * @param dataset 
+ */
+export function processDatasetDates(dataset: Dataset): void {
+    if (!dataset || !dataset.data || !dataset.dtypes || !Array.isArray(dataset.data)) return;
+
+    const dateColumnIndices: number[] = [];
+    dataset.dtypes.forEach((dtype, index) => {
+        if (dtype === 'datetime' || dtype === 'date') {
+            dateColumnIndices.push(index);
+        }
+    });
+
+    if (dateColumnIndices.length === 0) return;
+
+    if (dataset.format === 'table') {
+        dataset.data.forEach((row: any) => {
+            if (Array.isArray(row)) {
+                dateColumnIndices.forEach(colIndex => {
+                    row[colIndex] = convertToDate(row[colIndex]);
+                });
+            }
+        });
+    } else if (dataset.format === 'records' || dataset.format === 'record') {
+        const dateColumnNames = dateColumnIndices.map(i => dataset.columns[i]);
+        dataset.data.forEach((row: any) => {
+            if (typeof row === 'object' && row !== null) {
+                dateColumnNames.forEach(colName => {
+                    row[colName] = convertToDate(row[colName]);
+                });
+            }
+        });
+    } else if (dataset.format === 'list') {
+        if (dataset.dtypes[0] === 'datetime' || dataset.dtypes[0] === 'date') {
+            dataset.data = dataset.data.map(val => convertToDate(val));
+        }
+    }
+}
 
 /**
  * Find the column index in a dataset based on column name or index.
@@ -54,6 +115,14 @@ export async function decompressDatasets(datasets: Record<string, Dataset>, shou
             } catch (error) {
                 console.error(`Failed to decompress dataset ${id}:`, error);
             }
+        }
+        
+        // Process dates for all datasets, whether they were compressed or not
+        try {
+            processDatasetDates(dataset);
+        }
+        catch (error) {
+            console.error(`Failed to process dates for dataset ${id}:`, error);
         }
     }
 

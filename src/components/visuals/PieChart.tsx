@@ -6,6 +6,7 @@ import type { PieArcDatum } from "d3";
 import type { ReportVisual, Dataset, ColorProperty } from "../../lib/types";
 import { VisualLegend } from "./VisualLegend";
 import { resolveColors } from "../../lib/color-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface PieChartDatum {
     id?: string;
@@ -102,10 +103,13 @@ export const PieChart: React.FC<PieChartProps> = ({
         if (!dataset) return [];
         const catIdx = findColumnIndex(categoryColumn, dataset);
         const valIdx = findColumnIndex(valueColumn, dataset);
-        return dataset.data.map((row) => ({
-            label: String(row[catIdx ?? 0]),
-            value: Number(row[valIdx ?? 1])
-        }));
+        return dataset.data.map((row) => {
+            const catVal = row[catIdx ?? 0];
+            return {
+                label: isDate(catVal) ? printDate(catVal) : String(catVal),
+                value: Number(row[valIdx ?? 1])
+            };
+        });
     }
 
     const ctx = useContext(AppContext) || { datasets: {} };

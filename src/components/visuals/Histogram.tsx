@@ -4,6 +4,7 @@ import { scaleLinear, max, bin, min } from "d3";
 import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "../../lib/types";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors, getColor } from "../../lib/color-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface HistogramProps extends ReportVisual {
     column?: string | number;
@@ -97,6 +98,8 @@ export const Histogram: React.FC<HistogramProps> = ({
             } else {
                 val = row[colIdx];
             }
+            
+            if (isDate(val)) return val.getTime();
             return typeof val === 'number' ? val : parseFloat(val);
         }).filter(val => !isNaN(val));
 

@@ -4,6 +4,7 @@ import { scaleBand, scaleLinear, min, max } from "d3";
 import type { Dataset, ReportVisual, ColorProperty } from "../../lib/types";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveInterpolator } from "../../lib/color-utility";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface HeatmapProps extends ReportVisual {
     xColumn?: string | number;
@@ -133,8 +134,10 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         const seenY = new Set<string>();
 
         for (const row of dataset.data) {
-            const xVal = String(getCellValue(row, dataset, xIdx));
-            const yVal = String(getCellValue(row, dataset, yIdx));
+            const xRaw = getCellValue(row, dataset, xIdx);
+            const yRaw = getCellValue(row, dataset, yIdx);
+            const xVal = isDate(xRaw) ? printDate(xRaw) : String(xRaw);
+            const yVal = isDate(yRaw) ? printDate(yRaw) : String(yRaw);
             const vRaw = getCellValue(row, dataset, vIdx);
             const vNum = Number(vRaw);
             if (!Number.isFinite(vNum)) continue;

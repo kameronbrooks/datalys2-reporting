@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import type { ReportVisual, Dataset } from "../../lib/types";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface ChecklistProps extends ReportVisual {
     columns?: string[];
@@ -68,9 +69,11 @@ export const Checklist: React.FC<ChecklistProps> = ({
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             data = data.filter(row => 
-                displayColumns.some(col => 
-                    String(row[col]).toLowerCase().includes(lowerTerm)
-                )
+                displayColumns.some(col => {
+                    const val = row[col];
+                    const stringVal = isDate(val) ? printDate(val) : String(val);
+                    return stringVal.toLowerCase().includes(lowerTerm);
+                })
             );
         }
 
@@ -182,17 +185,20 @@ export const Checklist: React.FC<ChecklistProps> = ({
                                             style={{ cursor: 'default' }}
                                         />
                                     </td>
-                                    {displayColumns.map(col => (
-                                        <td key={col} className={col === warningColumn ? 'dl2-checklist-date' : ''}>
-                                            {row[col]}
-                                            {col === warningColumn && status === 'warning' && (
-                                                <span className="dl2-checklist-badge warning">Due Soon</span>
-                                            )}
-                                            {col === warningColumn && status === 'overdue' && (
-                                                <span className="dl2-checklist-badge overdue">Overdue</span>
-                                            )}
-                                        </td>
-                                    ))}
+                                    {displayColumns.map(col => {
+                                        const val = row[col];
+                                        return (
+                                            <td key={col} className={col === warningColumn ? 'dl2-checklist-date' : ''}>
+                                                {isDate(val) ? printDate(val) : String(val)}
+                                                {col === warningColumn && status === 'warning' && (
+                                                    <span className="dl2-checklist-badge warning">Due Soon</span>
+                                                )}
+                                                {col === warningColumn && status === 'overdue' && (
+                                                    <span className="dl2-checklist-badge overdue">Overdue</span>
+                                                )}
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             );
                         })}

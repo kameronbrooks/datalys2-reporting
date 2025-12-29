@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import type { ReportVisual, Dataset } from "../../lib/types";
+import { isDate, printDate } from "../../lib/date-utility";
 
 export interface TableProps extends ReportVisual {
     columns?: string[]; // Optional: specific columns to show. If omitted, show all.
@@ -70,9 +71,11 @@ export const Table: React.FC<TableProps> = ({
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             data = data.filter(row => 
-                displayColumns.some(col => 
-                    String(row[col]).toLowerCase().includes(lowerTerm)
-                )
+                displayColumns.some(col => {
+                    const val = row[col];
+                    const stringVal = isDate(val) ? printDate(val) : String(val);
+                    return stringVal.toLowerCase().includes(lowerTerm);
+                })
             );
         }
 
@@ -157,9 +160,14 @@ export const Table: React.FC<TableProps> = ({
                     <tbody>
                         {paginatedData.map((row, i) => (
                             <tr key={i}>
-                                {displayColumns.map(col => (
-                                    <td key={col}>{row[col]}</td>
-                                ))}
+                                {displayColumns.map(col => {
+                                    const val = row[col];
+                                    return (
+                                        <td key={col}>
+                                            {isDate(val) ? printDate(val) : String(val)}
+                                        </td>
+                                    );
+                                })}
                             </tr>
                         ))}
                         {paginatedData.length === 0 && (
