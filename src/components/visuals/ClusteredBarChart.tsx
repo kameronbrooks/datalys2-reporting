@@ -7,26 +7,44 @@ import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer"
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the ClusteredBarChart component.
+ */
 export interface ClusteredBarChartProps extends ReportVisual {
+    /** Additional visual elements like markers or trend lines. */
     otherElements?: ReportVisualElement[];
+    /** Column to use for the X-axis (categories). */
     xColumn?: string | number;
+    /** Column(s) to use for the Y-axis (values). Multiple columns create clusters. */
     yColumns?: string | string[];
+    
     title?: string;
     width?: number;
     height?: number;
+    /** Minimum value for the Y-axis. Defaults to 0. */
     minY?: number;
+    /** Maximum value for the Y-axis. If not provided, calculated from data. */
     maxY?: number;
     xAxisLabel?: string;
     yAxisLabel?: string;
+    /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
+    /** Color or color palette for the bars. */
     colors?: ColorProperty;
+    /** Whether to show the legend. Defaults to true. */
     showLegend?: boolean;
+    /** Optional title for the legend. */
     legendTitle?: string;
+    /** Whether to show value labels inside the bars. Defaults to false. */
     showLabels?: boolean;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
 
+/**
+ * ClusteredBarChart Component
+ * Renders a bar chart where multiple series are grouped (clustered) for each category.
+ */
 export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     xColumn = 0,
     yColumns = [1],
@@ -55,6 +73,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     const [chartWidth, setChartWidth] = useState(width);
     const [hoveredData, setHoveredData] = useState<{ x: number, y: number, label: string, value: number, series: string } | null>(null);
 
+    // Handle responsive resizing
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -72,6 +91,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
 
+    /** Helper to find column index by name or index. */
     const findColumnIndex = (column: string | number, dataset: Dataset): number | undefined => {
         if (!dataset) return undefined;
         if ((typeof column === "number") && (column >= 0) && (column < dataset.columns.length)) {
@@ -90,6 +110,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
+    // Process dataset into a format suitable for D3
     const processedData = useMemo(() => {
         if (!dataset) return { data: [], keys: [] };
 
@@ -114,6 +135,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
+    // Define color scale for the series
     const colorScale = useMemo(() => {
         if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
@@ -128,7 +150,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
 
-    // Scale for the groups (categories)
+    // Scale for the groups (categories) along the X-axis
     const x0Scale = useMemo(() => {
         return scaleBand()
             .domain(data.map(d => d.x))
@@ -136,7 +158,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
             .padding(0.2);
     }, [data, innerWidth]);
 
-    // Scale for the bars within a group
+    // Scale for the individual bars within each group
     const x1Scale = useMemo(() => {
         return scaleBand()
             .domain(keys)
@@ -144,6 +166,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
             .padding(0.05);
     }, [keys, x0Scale]);
 
+    // Linear scale for the Y-axis (values)
     const yScale = useMemo(() => {
         const maxVal = max(data, d => max(keys, key => d[key])) || 0;
         const computedMaxY = maxY !== undefined ? maxY : maxVal;
@@ -165,6 +188,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
         flex: flex || "1"
     };
 
+    // Prepare items for the legend
     const legendItems: VisualLegendItem[] = useMemo(() => {
         return keys.map((key, index) => {
             const total = data.reduce((acc, item) => acc + (item[key] || 0), 0);
@@ -207,7 +231,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                     style={{ display: "block", maxWidth: "100%" }}
                 >
                     <g transform={`translate(${resolvedMargin.left}, ${resolvedMargin.top})`}>
-                        {/* Grid lines */}
+                        {/* Horizontal Grid lines */}
                         <g className="grid-lines">
                             {yScale.ticks(5).map(tick => (
                                 <line
@@ -222,7 +246,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                             ))}
                         </g>
 
-                        {/* Bars */}
+                        {/* Render Bar Groups */}
                         {data.map((d, i) => {
                             const groupX = x0Scale(d.x);
                             if (groupX === undefined) return null;
@@ -281,6 +305,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                                         transform: isHovered ? "translateY(-2px)" : "translateY(0)"
                                                     }}
                                                 />
+                                                {/* Optional value labels inside bars */}
                                                 {showLabels && barHeight > 15 && (
                                                     <text
                                                         x={barX + barWidth / 2}
@@ -301,11 +326,11 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                             );
                         })}
 
-                        {/* X Axis */}
+                        {/* X Axis Rendering */}
                         <g transform={`translate(0, ${innerHeight})`}>
                             <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="var(--dl2-text-main)" />
                             {x0Scale.domain().map((d, i) => {
-                                // Simple logic to skip labels if too many
+                                // Skip labels if they would overlap
                                 const skip = Math.ceil(x0Scale.domain().length / 10);
                                 if (i % skip !== 0) return null;
                                 
@@ -340,7 +365,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                             )}
                         </g>
 
-                        {/* Y Axis */}
+                        {/* Y Axis Rendering */}
                         <g>
                             <line y1={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks(5).map(tick => (
@@ -372,6 +397,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                             )}
                         </g>
 
+                        {/* Layer for additional visual elements (markers, trends, etc.) */}
                         <ReportVisualElementsLayer
                             elements={otherElements}
                             innerWidth={innerWidth}
@@ -383,6 +409,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                     </g>
                 </svg>
 
+                {/* Floating Tooltip */}
                 {hoveredData && (
                     <div style={{
                         position: "absolute",
@@ -405,6 +432,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                 )}
             </div>
 
+            {/* Legend Rendering */}
             {showLegend && legendItems.length > 0 && (
                 <VisualLegend
                     title={legendTitle}

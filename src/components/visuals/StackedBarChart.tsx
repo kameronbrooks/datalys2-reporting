@@ -55,6 +55,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     const [chartWidth, setChartWidth] = useState(width);
     const [hoveredData, setHoveredData] = useState<{ x: number, y: number, label: string, value: number, series: string } | null>(null);
 
+    // Handle responsive resizing of the chart container
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -72,6 +73,9 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
 
+    /**
+     * Helper to find the index of a column by name or index.
+     */
     const findColumnIndex = (column: string | number, dataset: Dataset): number | undefined => {
         if (!dataset) return undefined;
         if ((typeof column === "number") && (column >= 0) && (column < dataset.columns.length)) {
@@ -83,6 +87,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         return undefined;
     };
 
+    // Resolve margins with defaults
     const resolvedMargin = useMemo(() => ({
         top: chartMargin?.top ?? defaultMargin.top,
         right: chartMargin?.right ?? defaultMargin.right,
@@ -90,6 +95,10 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
+    /**
+     * Process raw dataset into structured data for stacking.
+     * Maps X-axis categories and multiple Y-axis series.
+     */
     const processedData = useMemo(() => {
         if (!dataset) return { data: [], keys: [] };
 
@@ -114,6 +123,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
+    // Map series keys to colors
     const colorScale = useMemo(() => {
         if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
@@ -125,6 +135,10 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
             .range(schemeTableau10);
     }, [keys, resolvedColors]);
 
+    /**
+     * Generate D3 stacked data structure.
+     * Each layer represents a series, and each element in the layer represents a bar segment.
+     */
     const stackedData = useMemo(() => {
         if (keys.length === 0) return [];
         return stack().keys(keys)(data);
@@ -133,6 +147,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
 
+    // X-axis scale (Band)
     const xScale = useMemo(() => {
         return scaleBand()
             .domain(data.map(d => d.x))
@@ -140,6 +155,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
             .padding(0.2);
     }, [data, innerWidth]);
 
+    // Y-axis scale (Linear)
     const yScale = useMemo(() => {
         const maxStack = max(stackedData, layer => max(layer, d => d[1])) || 0;
         const computedMaxY = maxY !== undefined ? maxY : maxStack;
@@ -161,6 +177,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         flex: flex || "1"
     };
 
+    // Prepare items for the legend component
     const legendItems: VisualLegendItem[] = useMemo(() => {
         return keys.map((key, index) => {
             const total = data.reduce((acc, item) => acc + (item[key] || 0), 0);
@@ -203,7 +220,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                     style={{ display: "block", maxWidth: "100%" }}
                 >
                     <g transform={`translate(${resolvedMargin.left}, ${resolvedMargin.top})`}>
-                        {/* Grid lines */}
+                        {/* Background Grid lines */}
                         <g className="grid-lines">
                             {yScale.ticks(5).map(tick => (
                                 <line
@@ -218,7 +235,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                             ))}
                         </g>
 
-                        {/* Bars */}
+                        {/* Render Stacked Bars */}
                         {stackedData.map((layer) => (
                             <g key={layer.key} fill={colorScale(layer.key)}>
                                 {layer.map((d, i) => {
@@ -272,6 +289,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                                                     filter: isHovered ? "brightness(1.1)" : "none"
                                                 }}
                                             />
+                                            {/* Optional value labels inside bars */}
                                             {showLabels && height > 15 && (
                                                 <text
                                                     x={x + width / 2}
@@ -291,11 +309,11 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                             </g>
                         ))}
 
-                        {/* X Axis */}
+                        {/* X Axis Rendering */}
                         <g transform={`translate(0, ${innerHeight})`}>
                             <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="var(--dl2-text-main)" />
                             {xScale.domain().map((d, i) => {
-                                // Simple logic to skip labels if too many
+                                // Simple logic to skip labels if too many to prevent overlap
                                 const skip = Math.ceil(xScale.domain().length / 10);
                                 if (i % skip !== 0) return null;
                                 
@@ -330,7 +348,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                             )}
                         </g>
 
-                        {/* Y Axis */}
+                        {/* Y Axis Rendering */}
                         <g>
                             <line y1={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks(5).map(tick => (
@@ -362,6 +380,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                             )}
                         </g>
 
+                        {/* Overlay layer for additional visual elements */}
                         <ReportVisualElementsLayer
                             elements={otherElements}
                             innerWidth={innerWidth}
@@ -373,6 +392,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                     </g>
                 </svg>
 
+                {/* Interactive Tooltip */}
                 {hoveredData && (
                     <div style={{
                         position: "absolute",
@@ -395,6 +415,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                 )}
             </div>
 
+            {/* Optional Legend */}
             {showLegend && legendItems.length > 0 && (
                 <VisualLegend
                     title={legendTitle}

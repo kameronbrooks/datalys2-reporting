@@ -7,27 +7,44 @@ import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer"
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the LineChart component.
+ */
 export interface LineChartProps extends ReportVisual {
+    /** Additional visual elements like markers or trend lines. */
     otherElements?: ReportVisualElement[];
+    /** Column for the X-axis (categories or time). */
     xColumn?: string | number;
+    /** Column(s) for the Y-axis (numerical values). */
     yColumns?: string | string[];
     title?: string;
     width?: number;
     height?: number;
+    /** Fixed minimum value for the Y-axis. */
     minY?: number;
+    /** Fixed maximum value for the Y-axis. */
     maxY?: number;
     xAxisLabel?: string;
     yAxisLabel?: string;
+    /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
+    /** Color or color palette for the lines. */
     colors?: ColorProperty;
+    /** Whether to show the legend. Defaults to true. */
     showLegend?: boolean;
     legendTitle?: string;
+    /** Whether to show value labels above points. Defaults to false. */
     showLabels?: boolean;
+    /** Whether to use monotone cubic interpolation for smooth lines. Defaults to false. */
     smooth?: boolean;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
 
+/**
+ * LineChart Component
+ * Renders a multi-series line chart with optional smoothing and interactive points.
+ */
 export const LineChart: React.FC<LineChartProps> = ({
     xColumn = 0,
     yColumns = [1],
@@ -57,6 +74,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     const [chartWidth, setChartWidth] = useState(width);
     const [hoveredData, setHoveredData] = useState<{ x: number, y: number, label: string, value: number, series: string } | null>(null);
 
+    // Handle responsive resizing
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -74,6 +92,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
 
+    /** Helper to find column index by name or index. */
     const findColumnIndex = (column: string | number, dataset: Dataset): number | undefined => {
         if (!dataset) return undefined;
         if ((typeof column === "number") && (column >= 0) && (column < dataset.columns.length)) {
@@ -92,6 +111,7 @@ export const LineChart: React.FC<LineChartProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
+    // Process dataset into a format suitable for multi-series line rendering
     const processedData = useMemo(() => {
         if (!dataset) return { data: [], keys: [] };
 
@@ -116,6 +136,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
+    // Ordinal scale for series colors
     const colorScale = useMemo(() => {
         if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
@@ -130,7 +151,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
 
-    // Scale for the x-axis
+    // Point scale for the X-axis (categorical/time labels)
     const xScale = useMemo(() => {
         return scalePoint()
             .domain(data.map(d => d.x))
@@ -138,6 +159,7 @@ export const LineChart: React.FC<LineChartProps> = ({
             .padding(0.5);
     }, [data, innerWidth]);
 
+    // Linear scale for the Y-axis (numerical values)
     const yScale = useMemo(() => {
         const maxVal = max(data, d => max(keys, key => d[key])) || 0;
         const computedMaxY = maxY !== undefined ? maxY : maxVal;
@@ -159,6 +181,7 @@ export const LineChart: React.FC<LineChartProps> = ({
         flex: flex || "1"
     };
 
+    // Prepare items for the legend
     const legendItems: VisualLegendItem[] = useMemo(() => {
         return keys.map((key, index) => {
             const total = data.reduce((acc, item) => acc + (item[key] || 0), 0);
@@ -176,7 +199,7 @@ export const LineChart: React.FC<LineChartProps> = ({
         });
     }, [keys, data, colorScale]);
 
-    // Line generator
+    // D3 Line generator with optional smoothing
     const lineGenerator = useMemo(() => {
         return line<any>()
             .x(d => xScale(d.x) ?? 0)
@@ -209,7 +232,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                     style={{ display: "block", maxWidth: "100%" }}
                 >
                     <g transform={`translate(${resolvedMargin.left}, ${resolvedMargin.top})`}>
-                        {/* Grid lines */}
+                        {/* Horizontal Grid lines */}
                         <g className="grid-lines">
                             {yScale.ticks(5).map(tick => (
                                 <line
@@ -224,7 +247,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                             ))}
                         </g>
 
-                        {/* Lines and Points */}
+                        {/* Render Lines and Points for each series */}
                         {keys.map((key) => {
                             const seriesData = data.map(d => ({ x: d.x, value: d[key] }));
                             const pathD = lineGenerator(seriesData);
@@ -232,7 +255,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
                             return (
                                 <g key={key}>
-                                    {/* Line */}
+                                    {/* Series Line */}
                                     <path
                                         d={pathD || ""}
                                         fill="none"
@@ -240,7 +263,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                         strokeWidth={2}
                                     />
                                     
-                                    {/* Points */}
+                                    {/* Interactive Points */}
                                     {seriesData.map((d, i) => {
                                         const cx = xScale(d.x);
                                         const cy = yScale(d.value);
@@ -283,6 +306,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                     onMouseLeave={() => setHoveredData(null)}
                                                     style={{ transition: "r 0.2s", cursor: "pointer" }}
                                                 />
+                                                {/* Optional value labels above points */}
                                                 {showLabels && (
                                                     <text
                                                         x={cx}
@@ -302,7 +326,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                             );
                         })}
 
-                        {/* X Axis */}
+                        {/* X Axis rendering */}
                         <g transform={`translate(0, ${innerHeight})`}>
                             <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="var(--dl2-text-main)" />
                             {xScale.domain().map((d, i) => {
@@ -341,7 +365,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                             )}
                         </g>
 
-                        {/* Y Axis */}
+                        {/* Y Axis rendering */}
                         <g>
                             <line y1={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks(5).map(tick => (
@@ -373,6 +397,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                             )}
                         </g>
 
+                        {/* Layer for additional visual elements (markers, trends, etc.) */}
                         <ReportVisualElementsLayer
                             elements={otherElements}
                             innerWidth={innerWidth}
@@ -384,6 +409,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                     </g>
                 </svg>
 
+                {/* Floating Tooltip */}
                 {hoveredData && (
                     <div style={{
                         position: "absolute",
@@ -406,6 +432,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                 )}
             </div>
 
+            {/* Optional Legend */}
             {showLegend && legendItems.length > 0 && (
                 <VisualLegend
                     title={legendTitle}

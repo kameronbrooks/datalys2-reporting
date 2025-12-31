@@ -6,9 +6,15 @@ import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveInterpolator } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the Heatmap component.
+ */
 export interface HeatmapProps extends ReportVisual {
+    /** Column for the X-axis categories. */
     xColumn?: string | number;
+    /** Column for the Y-axis categories. */
     yColumn?: string | number;
+    /** Column for the cell values (determines color intensity). */
     valueColumn?: string | number;
 
     title?: string;
@@ -16,36 +22,50 @@ export interface HeatmapProps extends ReportVisual {
     width?: number;
     height?: number;
 
+    /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
 
+    /** Optional fixed minimum value for the color scale. */
     minValue?: number;
+    /** Optional fixed maximum value for the color scale. */
     maxValue?: number;
 
+    /** Whether to show labels for X and Y axes. Defaults to true. */
     showAxisLabels?: boolean;
     xAxisLabel?: string;
     yAxisLabel?: string;
 
+    /** Whether to show the value inside each cell. Defaults to false. */
     showCellLabels?: boolean;
+    /** Optional formatter for cell labels. */
     cellLabelFormatter?: (value: number) => string;
 
+    /** Text to show when no data is available. */
     emptyLabel?: string;
+    /** Color or color interpolator for the heatmap. */
     color?: ColorProperty;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 70, left: 90 };
 
+/** Internal representation of a single heatmap cell. */
 type HeatmapCell = {
     x: string;
     y: string;
     value: number;
 };
 
+/** Helper to extract cell value from a row based on column index. */
 function getCellValue(row: any, dataset: Dataset, columnIndex: number): any {
     if (Array.isArray(row)) return row[columnIndex];
     const columnName = dataset.columns[columnIndex];
     return row?.[columnName];
 }
 
+/**
+ * Heatmap Component
+ * Renders a grid where cell colors represent values across two categorical dimensions.
+ */
 export const Heatmap: React.FC<HeatmapProps> = ({
     id,
     datasetId,
@@ -88,6 +108,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         value: number;
     } | null>(null);
 
+    // Handle responsive resizing
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -111,9 +132,11 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
+    // Resolve the color interpolator (e.g., d3.interpolateBlues)
     const interpolator = useMemo(() => resolveInterpolator(color), [color]);
     const gradientId = useMemo(() => `dl2-heatmap-gradient-${id.replace(/\s+/g, '-')}`, [id]);
 
+    // Process dataset into cells and unique categories for axes
     const processed = useMemo(() => {
         if (!dataset) {
             return { cells: [] as HeatmapCell[], xCategories: [] as string[], yCategories: [] as string[] };
@@ -160,6 +183,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
 
+    // Band scales for X and Y axes
     const xScale = useMemo(() => {
         return scaleBand<string>()
             .domain(processed.xCategories)
@@ -176,6 +200,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
             .paddingOuter(0.04);
     }, [processed.yCategories, innerHeight]);
 
+    // Determine the range of values for color mapping
     const valueExtent = useMemo(() => {
         const values = processed.cells.map(c => c.value);
         const computedMin = min(values) ?? 0;
@@ -187,6 +212,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         };
     }, [processed.cells, minValue, maxValue]);
 
+    // Map values to colors using the interpolator
     const colorScale = useMemo(() => {
         const denom = valueExtent.max - valueExtent.min;
         return (value: number) => {
@@ -245,6 +271,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                     style={{ display: "block", maxWidth: "100%" }}
                 >
                     <defs>
+                        {/* Gradient for the legend */}
                         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
                             {Array.from({ length: 8 }).map((_, i) => {
                                 const t = i / 7;
@@ -260,7 +287,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                     </defs>
 
                     <g transform={`translate(${resolvedMargin.left}, ${resolvedMargin.top})`}>
-                        {/* Cells */}
+                        {/* Render Heatmap Cells */}
                         {processed.cells.map((cell, index) => {
                             const x = xScale(cell.x);
                             const y = yScale(cell.y);
@@ -308,6 +335,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                         }}
                                     />
 
+                                    {/* Optional value labels inside cells */}
                                     {showCellLabels && cellWidth >= 28 && cellHeight >= 18 && (
                                         <text
                                             x={cellWidth / 2}
@@ -325,7 +353,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                             );
                         })}
 
-                        {/* X axis labels */}
+                        {/* X axis labels rendering */}
                         {showAxisLabels && (
                             <g transform={`translate(0, ${innerHeight})`} color="var(--dl2-text-main)">
                                 {processed.xCategories.map((cat) => {
@@ -364,7 +392,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                             </g>
                         )}
 
-                        {/* Y axis labels */}
+                        {/* Y axis labels rendering */}
                         {showAxisLabels && (
                             <g color="var(--dl2-text-main)">
                                 {processed.yCategories.map((cat) => {
@@ -402,7 +430,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                             </g>
                         )}
 
-                        {/* Gradient legend */}
+                        {/* Gradient legend rendering */}
                         {showGradientLegend && (
                             <g transform={`translate(0, ${innerHeight + 42})`} color="var(--dl2-text-main)">
                                 <rect
@@ -431,6 +459,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                     </g>
                 </svg>
 
+                {/* Floating Tooltip */}
                 {hoveredData && (
                     <div
                         style={{

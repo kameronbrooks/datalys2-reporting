@@ -26,6 +26,10 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
         }
     };
 
+    /**
+     * Calculates the optimal position for the tooltip relative to the mouse cursor.
+     * Ensures the tooltip stays within the viewport boundaries.
+     */
     const updatePosition = (e: React.MouseEvent) => {
         if (!containerRef.current || !tooltipRef.current) return;
 
@@ -37,12 +41,12 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
         let left = e.clientX + offsetX;
         let top = e.clientY + offsetY;
 
-        // Adjust if tooltip goes off right edge
+        // Adjust if tooltip goes off right edge of the window
         if (left + tooltipWidth > window.innerWidth) {
             left = e.clientX - tooltipWidth - offsetX;
         }
 
-        // Adjust if tooltip goes off bottom edge
+        // Adjust if tooltip goes off bottom edge of the window
         if (top + tooltipHeight > window.innerHeight) {
             top = e.clientY - tooltipHeight - offsetY;
         }
@@ -63,7 +67,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
                 <div
                     ref={tooltipRef}
                     style={{
-                        position: 'fixed',
+                        position: 'fixed', // Use fixed to avoid clipping by parent overflow
                         top: position.top,
                         left: position.left,
                         backgroundColor: 'var(--dl2-bg-main)',
@@ -73,7 +77,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
                         borderRadius: '4px',
                         fontSize: '0.85em',
                         zIndex: 10000,
-                        pointerEvents: 'none',
+                        pointerEvents: 'none', // Ensure tooltip doesn't interfere with mouse events
                         whiteSpace: 'pre-line',
                         maxWidth: '300px',
                         boxShadow: '0 2px 8px var(--dl2-shadow)'

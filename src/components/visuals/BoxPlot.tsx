@@ -6,8 +6,14 @@ import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveColors, getColor } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the BoxPlot component.
+ * Supports two modes:
+ * 1. Pre-calculated: Provide min, q1, median, q3, max columns.
+ * 2. Raw Data: Provide a dataColumn and it will calculate the statistics.
+ */
 export interface BoxPlotProps extends ReportVisual {
-    // Mode 1: Pre-calculated
+    // Mode 1: Pre-calculated columns
     minColumn?: string | number;
     q1Column?: string | number;
     medianColumn?: string | number;
@@ -15,13 +21,16 @@ export interface BoxPlotProps extends ReportVisual {
     maxColumn?: string | number;
     meanColumn?: string | number;
     
-    // Mode 2: Raw Data
+    // Mode 2: Raw Data column for calculation
     dataColumn?: string | number;
     
-    // Common
+    // Common properties
+    /** Column to group data by. */
     categoryColumn?: string | number;
     
+    /** Orientation of the box plot. Defaults to 'vertical'. */
     direction?: 'horizontal' | 'vertical';
+    /** Whether to show outliers as individual points. Defaults to true. */
     showOutliers?: boolean;
     
     title?: string;
@@ -29,12 +38,15 @@ export interface BoxPlotProps extends ReportVisual {
     height?: number;
     xAxisLabel?: string;
     yAxisLabel?: string;
+    /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
+    /** Color or color palette for the boxes. */
     color?: ColorProperty;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
 
+/** Internal representation of box plot statistics for a category. */
 interface BoxPlotData {
     category: string;
     min: number;
@@ -46,6 +58,10 @@ interface BoxPlotData {
     outliers: number[];
 }
 
+/**
+ * BoxPlot Component
+ * Visualizes the distribution of data through quartiles.
+ */
 export const BoxPlot: React.FC<BoxPlotProps> = ({
     datasetId,
     minColumn,
@@ -77,6 +93,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
     const [hoveredItem, setHoveredItem] = useState<BoxPlotData | null>(null);
     const [tooltipPos, setTooltipPos] = useState<{ x: number, y: number } | null>(null);
 
+    // Handle responsive resizing
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -103,6 +120,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(color), [color]);
 
+    // Process dataset into BoxPlotData format
     const processedData: BoxPlotData[] = useMemo(() => {
         if (!dataset) return [];
 
@@ -115,6 +133,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
             const dataColName = dataset.columns[dataColIdx];
             const catColName = catColIdx !== undefined ? dataset.columns[catColIdx] : undefined;
 
+            // Group raw values by category
             const groups = new Map<string, number[]>();
 
             dataset.data.forEach(row => {
@@ -133,6 +152,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                 groups.get(cat)!.push(numVal);
             });
 
+            // Calculate statistics for each group
             const results: BoxPlotData[] = [];
             groups.forEach((values, category) => {
                 values.sort(ascending);
@@ -147,6 +167,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                 let whiskerMax = maxVal;
                 let outliers: number[] = [];
 
+                // Outlier detection using IQR method
                 if (showOutliers) {
                     const iqr = q3 - q1;
                     const lowerFence = q1 - 1.5 * iqr;
@@ -170,7 +191,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
             });
             return results;
         } 
-        // Mode 1: Pre-calculated
+        // Mode 1: Pre-calculated statistics from columns
         else if (minColumn !== undefined && q1Column !== undefined && medianColumn !== undefined && q3Column !== undefined && maxColumn !== undefined) {
             const minIdx = findColumnIndex(minColumn, dataset);
             const q1Idx = findColumnIndex(q1Column, dataset);
@@ -213,6 +234,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
 
+    // Define scales based on orientation
     const { xScale, yScale } = useMemo<{xScale: any, yScale: any}>(() => {
         if (processedData.length === 0) {
             return { xScale: null, yScale: null };
@@ -221,7 +243,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
         const allValues = processedData.flatMap(d => [d.min, d.max, ...d.outliers]);
         const minValue = min(allValues) || 0;
         const maxValue = max(allValues) || 0;
-        // Add some padding to the value domain
+        // Add some padding to the value domain for better visualization
         const valuePadding = (maxValue - minValue) * 0.05;
         const valueDomain = [minValue - valuePadding, maxValue + valuePadding];
 
@@ -286,10 +308,10 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
             
             <svg className="dl2-chart-svg" width={chartWidth} height={height}>
                 <g transform={`translate(${resolvedMargin.left},${resolvedMargin.top})`}>
-                    {/* Axes */}
+                    {/* Render Axes */}
                     {direction === 'vertical' ? (
                         <>
-                            {/* Y Axis */}
+                            {/* Y Axis (Values) */}
                             <line x1={0} y1={0} x2={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks && yScale.ticks(5).map((tick: any, i: number) => (
                                 <g key={i} transform={`translate(0,${yScale(tick)})`}>
@@ -310,7 +332,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                 </text>
                             )}
 
-                            {/* X Axis */}
+                            {/* X Axis (Categories) */}
                             <line x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {processedData.map((d, i) => (
                                 <g key={i} transform={`translate(${xScale(d.category)! + xScale.bandwidth() / 2},${innerHeight})`}>
@@ -375,7 +397,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                         </>
                     )}
 
-                    {/* Boxes */}
+                    {/* Render Boxes and Whiskers */}
                     {processedData.map((d, i) => {
                         const bandWidth = direction === 'vertical' ? xScale.bandwidth() : yScale.bandwidth();
                         const center = direction === 'vertical' 
@@ -438,7 +460,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     style={{ transition: 'stroke-width 0.2s' }}
                                 />
 
-                                {/* Box */}
+                                {/* Main Box */}
                                 <rect
                                     x={direction === 'vertical' ? center - bandWidth/2 : boxStart}
                                     y={direction === 'vertical' ? boxStart : center - bandWidth/2}
@@ -462,11 +484,10 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                                     style={{ transition: 'stroke-width 0.2s' }}
                                 />
 
-                                {/* Outliers */}
+                                {/* Outliers (rendered as rhombuses) */}
                                 {d.outliers.map((outlier, oi) => {
                                     const outPos = direction === 'vertical' ? yScale(outlier) : xScale(outlier);
                                     const r = isHovered ? 6 : 4; // radius of rhombus
-                                    // Rhombus points: (cx, cy-r), (cx+r, cy), (cx, cy+r), (cx-r, cy)
                                     const cx = direction === 'vertical' ? center : outPos;
                                     const cy = direction === 'vertical' ? outPos : center;
                                     const points = `${cx},${cy-r} ${cx+r},${cy} ${cx},${cy+r} ${cx-r},${cy}`;
@@ -488,7 +509,7 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
                 </g>
             </svg>
 
-            {/* Tooltip */}
+            {/* Floating Tooltip */}
             {hoveredItem && tooltipPos && (
                 <div style={{
                     position: 'fixed',

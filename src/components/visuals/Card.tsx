@@ -3,21 +3,34 @@ import { ReportVisual } from "../../lib/types";
 import { AppContext } from "../context/AppContext";
 import { renderTemplate, type TemplateValue } from "../../lib/template-utility";
 
+/**
+ * Props for the Card component.
+ * Uses TemplateValue for text and title to allow dynamic data injection.
+ */
 export interface CardProps extends ReportVisual {
+    /** The main content of the card. Can include template placeholders. */
     text: TemplateValue;
+    /** Optional title for the card. Can include template placeholders. */
     title?: TemplateValue;
 }
 
+/**
+ * Card Component
+ * A simple container for displaying text or HTML content, with support for template rendering.
+ */
 export const Card: React.FC<CardProps> = ({ text, title, shadow, border, description, padding, margin }) => {
     const ctx = useContext(AppContext) || { datasets: {} };
 
+    // Prepare context for template rendering, including all available datasets
     const templateCtx = useMemo(() => ({ datasets: ctx.datasets, props: {} }), [ctx.datasets]);
 
+    // Render title template if provided
     const renderedTitle = useMemo(
         () => (title ? renderTemplate(title, templateCtx) : ""),
         [title, templateCtx]
     );
 
+    // Render main text template
     const renderedText = useMemo(
         () => renderTemplate(text, templateCtx),
         [text, templateCtx]

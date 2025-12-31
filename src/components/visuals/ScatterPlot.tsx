@@ -66,6 +66,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     const [chartWidth, setChartWidth] = useState(width);
     const [hoveredData, setHoveredData] = useState<{ x: number, y: number, category: string } | null>(null);
 
+    // Handle responsive resizing of the chart container
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -83,6 +84,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
 
+    // Resolve margins with defaults
     const resolvedMargin = useMemo(() => ({
         top: chartMargin?.top ?? defaultMargin.top,
         right: chartMargin?.right ?? defaultMargin.right,
@@ -90,6 +92,10 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
+    /**
+     * Process raw dataset into structured scatter plot data.
+     * Extracts X, Y, and optional Category values.
+     */
     const processedData = useMemo(() => {
         if (!dataset) return { data: [], categories: [] };
 
@@ -118,6 +124,10 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
         return { data, categories };
     }, [dataset, xColumn, yColumn, categoryColumn]);
 
+    /**
+     * Calculate statistical metrics for the dataset.
+     * Includes slope, intercept, and correlation coefficients.
+     */
     const stats = useMemo(() => {
         if (!processedData.data.length) return { slope: 0, intercept: 0, r: 0, rSquared: 0 };
 
@@ -132,9 +142,11 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             sumY2 += d.y * d.y;
         });
 
+        // Linear regression formula
         const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
         const intercept = (sumY - slope * sumX) / n;
 
+        // Pearson correlation coefficient
         const numerator = n * sumXY - sumX * sumY;
         const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
         const r = denominator === 0 ? 0 : numerator / denominator;
@@ -145,22 +157,24 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
     const innerWidth = chartWidth - resolvedMargin.left - resolvedMargin.right;
     const innerHeight = height - resolvedMargin.top - resolvedMargin.bottom;
 
+    // X-axis scale (Linear)
     const xScale = useMemo(() => {
         const xValues = processedData.data.map(d => d.x);
         const xMin = minX ?? min(xValues) ?? 0;
         const xMax = maxX ?? max(xValues) ?? 100;
-        // Add some padding to the domain
+        // Add 5% padding to the domain for better visual spacing
         const xPadding = (xMax - xMin) * 0.05;
         return scaleLinear()
             .domain([xMin - xPadding, xMax + xPadding])
             .range([0, innerWidth]);
     }, [processedData.data, minX, maxX, innerWidth]);
 
+    // Y-axis scale (Linear)
     const yScale = useMemo(() => {
         const yValues = processedData.data.map(d => d.y);
         const yMin = minY ?? min(yValues) ?? 0;
         const yMax = maxY ?? max(yValues) ?? 100;
-        // Add some padding to the domain
+        // Add 5% padding to the domain for better visual spacing
         const yPadding = (yMax - yMin) * 0.05;
         return scaleLinear()
             .domain([yMin - yPadding, yMax + yPadding])
@@ -169,12 +183,13 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
+    // Map categories to colors
     const colorScale = useMemo(() => {
         return scaleOrdinal(resolvedColors.length > 0 ? resolvedColors : schemeTableau10)
             .domain(processedData.categories);
     }, [processedData.categories, resolvedColors]);
 
-    // Generate trendline points
+    // Generate start and end points for the trendline based on regression stats
     const trendlinePoints = useMemo(() => {
         if (!showTrendline || processedData.data.length < 2) return null;
         const xDomain = xScale.domain();
@@ -206,7 +221,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             <div style={{ position: 'relative', width: '100%', height: height }}>
                 <svg className="dl2-chart-svg" width={chartWidth} height={height}>
                     <g transform={`translate(${resolvedMargin.left},${resolvedMargin.top})`}>
-                        {/* Grid lines */}
+                        {/* Background Grid lines */}
                         <g className="grid-lines">
                             {yScale.ticks(5).map(tick => (
                                 <line
@@ -232,7 +247,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                             ))}
                         </g>
 
-                        {/* Axes */}
+                        {/* X-Axis Rendering */}
                         <g transform={`translate(0,${innerHeight})`}>
                             <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="var(--dl2-text-main)" />
                             {xScale.ticks(10).map(tick => (
@@ -255,6 +270,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                             )}
                         </g>
 
+                        {/* Y-Axis Rendering */}
                         <g>
                             <line y1={0} y2={innerHeight} stroke="var(--dl2-text-main)" />
                             {yScale.ticks(5).map(tick => (
@@ -278,7 +294,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                             )}
                         </g>
 
-                        {/* Trendline */}
+                        {/* Regression Trendline */}
                         {trendlinePoints && (
                             <line
                                 x1={xScale(trendlinePoints.x1)}
@@ -292,7 +308,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                             />
                         )}
 
-                        {/* Data Points */}
+                        {/* Individual Data Points */}
                         {processedData.data.map((d, i) => (
                             <circle
                                 key={i}
@@ -311,6 +327,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                             </circle>
                         ))}
 
+                        {/* Overlay layer for additional visual elements (markers, trends, etc.) */}
                         <ReportVisualElementsLayer
                             elements={otherElements}
                             innerWidth={innerWidth}
@@ -323,7 +340,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                     </g>
                 </svg>
 
-                {/* Tooltip */}
+                {/* Interactive Tooltip */}
                 {hoveredData && (
                     <div style={{
                         position: 'absolute',
@@ -343,7 +360,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                     </div>
                 )}
 
-                {/* Correlation Info */}
+                {/* Statistical Correlation Information Overlay */}
                 {showCorrelation && (
                     <div style={{
                         position: 'absolute',
@@ -365,6 +382,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                 )}
             </div>
 
+            {/* Legend for categories */}
             {showLegend && processedData.categories.length > 0 && categoryColumn !== undefined && (
                 <VisualLegend 
                     items={processedData.categories.map(cat => ({

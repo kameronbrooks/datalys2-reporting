@@ -20,11 +20,13 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
         return null;
     }
 
+    // Determine which columns to show based on available data in items
     const showValues = items.some(item => item.value !== undefined);
     const showPercentages = items.some(item => item.percentage !== undefined);
 
     return (
         <div className="dl2-visual-legend" style={{ marginTop: '10px' }}>
+            {/* Legend Header with Toggle functionality */}
             <div 
                 className="dl2-visual-legend-header" 
                 onClick={() => setIsCollapsed(!isCollapsed)}
@@ -55,6 +57,7 @@ export const VisualLegend: React.FC<VisualLegendProps> = ({ title, items }) => {
                             <tr key={item.key} style={{ borderBottom: '1px solid var(--dl2-border-table)' }}>
                                 <td style={{ padding: '4px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {/* Color swatch for the series */}
                                         <span
                                             className="dl2-visual-legend-swatch"
                                             style={{ 

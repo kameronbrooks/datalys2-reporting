@@ -7,27 +7,49 @@ import { Tooltip } from "./Tooltip";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the KPI component.
+ * Extends ReportVisual to include common visual properties.
+ */
 export interface KPIProps extends ReportVisual {
+    /** The column name or index to use for the primary value. Defaults to 0. */
     valueColumn?: string | number;
+    /** The column name or index to use for comparison. */
     comparisonColumn?: string | number;
+    /** The row index to use for comparison. If not provided, uses the same row as valueColumn. */
+    comparisonRowIndex?: number;
     
+    /** The row index to use for the primary value. Defaults to 0. */
     rowIndex?: number;
-    
+
+    /** Formatting style for the value. */
     format?: 'number' | 'currency' | 'percent' | 'date';
+    /** Currency symbol to use when format is 'currency'. Defaults to '$'. */
     currencySymbol?: string;
     
+    /** Defines whether a higher or lower value is considered 'good'. Defaults to 'higher'. */
     goodDirection?: 'higher' | 'lower';
+    /** The threshold value that triggers a breach status. */
     breachValue?: number;
+    /** The threshold value that triggers a warning status. */
     warningValue?: number;
     
+    /** Optional title for the KPI card. */
     title?: string;
+    /** Optional width for the KPI card. */
     width?: number;
+    /** Optional height for the KPI card. */
     height?: number;
 }
 
+/**
+ * KPI Component
+ * Displays a single key performance indicator with optional comparison and breach status.
+ */
 export const KPI: React.FC<KPIProps> = ({
     valueColumn = 0,
-    comparisonColumn = 1,
+    comparisonColumn,
+    comparisonRowIndex,
     rowIndex = 0,
     datasetId,
     title,
@@ -47,21 +69,50 @@ export const KPI: React.FC<KPIProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
 
+    // Process data to extract value, comparison, and change
     const data = useMemo(() => {
-        if (!dataset || !dataset.data[rowIndex]) return null;
+        if (!dataset || !Array.isArray(dataset.data) || dataset.data.length === 0) return null;
+
+        // Helper to handle negative indices (e.g., -1 for last row)
+        const resolveRowIndex = (index: number, length: number): number => {
+            if (index < 0) return length + index;
+            return index;
+        };
+
+        const resolvedRowIndex = resolveRowIndex(rowIndex, dataset.data.length);
+        if (resolvedRowIndex < 0 || resolvedRowIndex >= dataset.data.length) return null;
+
+        const resolvedComparisonRowIndex =
+            comparisonRowIndex === undefined
+                ? undefined
+                : resolveRowIndex(comparisonRowIndex, dataset.data.length);
+
+        if (
+            resolvedComparisonRowIndex !== undefined &&
+            (resolvedComparisonRowIndex < 0 || resolvedComparisonRowIndex >= dataset.data.length)
+        ) {
+            return null;
+        }
         
         const valIdx = findColumnIndex(valueColumn, dataset);
-        const comparisonIdx = comparisonColumn !== undefined ? findColumnIndex(comparisonColumn, dataset) : undefined;
+        const comparisonIdx = comparisonColumn !== undefined ? findColumnIndex(comparisonColumn, dataset) : valIdx;
         
-        const row = dataset.data[rowIndex];
+        const row = dataset.data[resolvedRowIndex];
+        const comparisonRow = (resolvedComparisonRowIndex !== undefined) ? dataset.data[resolvedComparisonRowIndex] : row;
+
+        if (!row || !comparisonRow) return null;
 
         const rawValue = valIdx !== undefined ? row[valIdx] : 0;
         const value = isDate(rawValue) ? rawValue.getTime() : Number(rawValue);
         const isDateValue = isDate(rawValue);
 
-        const rawComparison = comparisonIdx !== undefined ? row[comparisonIdx] : undefined;
-        const comparisonValue = isDate(rawComparison) ? rawComparison.getTime() : (rawComparison !== undefined ? Number(rawComparison) : undefined);
+        let comparisonValue = undefined;
+        if (comparisonRowIndex !== undefined ||  comparisonColumn !== undefined) {
+            const rawComparison = comparisonIdx !== undefined ? comparisonRow[comparisonIdx] : undefined;
+            comparisonValue = isDate(rawComparison) ? rawComparison.getTime() : (rawComparison !== undefined ? Number(rawComparison) : undefined);
+        }
         
+        // Calculate percentage change if comparison value exists
         let change: number | undefined = undefined;
         if (comparisonValue !== undefined && comparisonValue !== 0 && !isDateValue) {
             change = (value - comparisonValue) / Math.abs(comparisonValue);
@@ -73,8 +124,9 @@ export const KPI: React.FC<KPIProps> = ({
             comparisonValue: comparisonValue,
             isDateValue: isDateValue
         };
-    }, [dataset, valueColumn, comparisonColumn, rowIndex]);
+    }, [dataset, valueColumn, comparisonColumn, comparisonRowIndex, rowIndex]);
 
+    // Render empty state if no data is available
     if (!data) {
         return (
             <div className="dl2-kpi" style={{ padding: padding || 15, margin: margin || 10, border: border ? "1px solid var(--dl2-border-main)" : undefined }}>
@@ -85,7 +137,9 @@ export const KPI: React.FC<KPIProps> = ({
 
     const { value, change, comparisonValue, isDateValue } = data;
 
-    // Helper function to format values consistently
+    /**
+     * Helper function to format values consistently based on the 'format' prop.
+     */
     const formatValue = (val: number): string => {
         if (isDateValue || format === 'date') {
             return printDate(new Date(val));
@@ -99,10 +153,9 @@ export const KPI: React.FC<KPIProps> = ({
         }
     };
 
-    // Format Value
     const formattedValue = formatValue(value);
 
-    // Breach Logic
+    // Determine breach status and icon
     let valueColor = 'inherit';
     let breachIcon = null;
     let breachStatus = null;
@@ -115,7 +168,7 @@ export const KPI: React.FC<KPIProps> = ({
         breachIcon = <BreachIndicator status={breachStatus} />;
     }
 
-    // Build tooltip content
+    // Build tooltip content with detailed breakdown
     const tooltipContent = useMemo(() => {
         const lines: string[] = [];
         
@@ -174,7 +227,10 @@ export const KPI: React.FC<KPIProps> = ({
                 </div>
             </Tooltip>
             
-            <TrendIndicator change={change} goodDirection={goodDirection} textSuffix={textSuffix} />
+            {/* Display trend indicator if change is available */}
+            {change !== undefined && !Number.isNaN(change) && (
+                <TrendIndicator change={change} goodDirection={goodDirection} textSuffix={textSuffix} />
+            )}
             
             {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: 'var(--dl2-text-muted)', marginTop: 10, textAlign: 'center' }}>{description}</div>}
         </div>

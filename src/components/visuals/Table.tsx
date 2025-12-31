@@ -32,7 +32,10 @@ export const Table: React.FC<TableProps> = ({
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
-    // Helper to normalize data into array of objects
+    /**
+     * Normalizes the dataset into an array of objects (records).
+     * Handles both array-of-arrays and array-of-objects formats.
+     */
     const normalizedData = useMemo(() => {
         if (!dataset) return [];
         
@@ -41,7 +44,7 @@ export const Table: React.FC<TableProps> = ({
             return dataset.data;
         }
         
-        // If data is array of arrays (table format)
+        // If data is array of arrays (table format), map columns to keys
         if (dataset.data.length > 0 && Array.isArray(dataset.data[0])) {
             return dataset.data.map((row: any[]) => {
                 const obj: any = {};
@@ -55,7 +58,10 @@ export const Table: React.FC<TableProps> = ({
         return [];
     }, [dataset]);
 
-    // Determine columns to display
+    /**
+     * Determines which columns should be displayed in the table.
+     * Priority: Props.columns > Dataset.columns > Object keys.
+     */
     const displayColumns = useMemo(() => {
         if (columns && columns.length > 0) return columns;
         if (dataset && dataset.columns) return dataset.columns;
@@ -63,11 +69,13 @@ export const Table: React.FC<TableProps> = ({
         return [];
     }, [columns, dataset, normalizedData]);
 
-    // Filter, Sort, and Paginate
+    /**
+     * Applies filtering (search) and sorting to the normalized data.
+     */
     const processedData = useMemo(() => {
         let data = [...normalizedData];
 
-        // 1. Filter
+        // 1. Filter based on search term across all display columns
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             data = data.filter(row => 
@@ -79,7 +87,7 @@ export const Table: React.FC<TableProps> = ({
             );
         }
 
-        // 2. Sort
+        // 2. Sort based on the current sort configuration
         if (sortConfig) {
             data.sort((a, b) => {
                 const aVal = a[sortConfig.key];
@@ -94,9 +102,13 @@ export const Table: React.FC<TableProps> = ({
         return data;
     }, [normalizedData, searchTerm, sortConfig, displayColumns]);
 
+    // Pagination calculations
     const totalPages = Math.ceil(processedData.length / pageSize);
     const paginatedData = processedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+    /**
+     * Toggles sort direction or sets a new sort key.
+     */
     const handleSort = (key: string) => {
         let direction: 'asc' | 'desc' = 'asc';
         if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -123,6 +135,7 @@ export const Table: React.FC<TableProps> = ({
         }}>
             {title && <h3 style={{ margin: '0 0 15px 0' }}>{title}</h3>}
 
+            {/* Table Controls: Search and Record Count */}
             <div className="dl2-table-controls">
                 {showSearch && (
                     <input
@@ -141,6 +154,7 @@ export const Table: React.FC<TableProps> = ({
                 </div>
             </div>
 
+            {/* Main Table Rendering */}
             <div className="dl2-table-container">
                 <table className={`dl2-table ${tableStyle}`}>
                     <thead>
@@ -181,6 +195,7 @@ export const Table: React.FC<TableProps> = ({
                 </table>
             </div>
 
+            {/* Pagination Controls */}
             {totalPages > 1 && (
                 <div className="dl2-table-pagination" style={{ marginTop: 10, justifyContent: 'center' }}>
                     <button 

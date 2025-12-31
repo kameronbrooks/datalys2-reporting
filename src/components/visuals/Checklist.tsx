@@ -3,16 +3,31 @@ import { AppContext } from "../context/AppContext";
 import type { ReportVisual, Dataset } from "../../lib/types";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the Checklist component.
+ */
 export interface ChecklistProps extends ReportVisual {
+    /** Optional list of columns to display. If not provided, all columns except statusColumn are shown. */
     columns?: string[];
+    /** The column that indicates whether a task is complete (truthy value). */
     statusColumn: string;
+    /** Optional column containing a due date for status calculation. */
     warningColumn?: string;
-    warningThreshold?: number; // Days
+    /** Number of days before the due date to trigger a 'warning' status. Defaults to 3. */
+    warningThreshold?: number;
+    /** Optional title for the checklist. */
     title?: string;
+    /** Number of items per page. Defaults to 10. */
     pageSize?: number;
+    /** Whether to show the search input. Defaults to true. */
     showSearch?: boolean;
 }
 
+/**
+ * Checklist Component
+ * Displays a list of tasks with status indicators (complete, pending, warning, overdue).
+ * Supports searching, sorting, and pagination.
+ */
 export const Checklist: React.FC<ChecklistProps> = ({
     datasetId,
     columns,
@@ -36,13 +51,16 @@ export const Checklist: React.FC<ChecklistProps> = ({
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
+    // Normalize dataset data into an array of objects for easier access
     const normalizedData = useMemo(() => {
         if (!dataset) return [];
         
+        // Already objects
         if (dataset.data.length > 0 && typeof dataset.data[0] === 'object' && !Array.isArray(dataset.data[0])) {
             return dataset.data;
         }
         
+        // Convert array of arrays to array of objects using column names
         if (dataset.data.length > 0 && Array.isArray(dataset.data[0])) {
             return dataset.data.map((row: any[]) => {
                 const obj: any = {};
@@ -56,6 +74,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
         return [];
     }, [dataset]);
 
+    // Determine which columns to display in the table
     const displayColumns = useMemo(() => {
         if (columns && columns.length > 0) return columns;
         if (dataset && dataset.columns) return dataset.columns.filter(c => c !== statusColumn);
@@ -63,9 +82,11 @@ export const Checklist: React.FC<ChecklistProps> = ({
         return [];
     }, [columns, dataset, normalizedData, statusColumn]);
 
+    // Filter and sort the data based on user input
     const processedData = useMemo(() => {
         let data = [...normalizedData];
 
+        // Apply search filter
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             data = data.filter(row => 
@@ -77,6 +98,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
             );
         }
 
+        // Apply sorting
         if (sortConfig) {
             data.sort((a, b) => {
                 const aVal = a[sortConfig.key];
@@ -102,6 +124,9 @@ export const Checklist: React.FC<ChecklistProps> = ({
         setSortConfig({ key, direction });
     };
 
+    /**
+     * Calculates the status of a row based on the statusColumn and warningColumn.
+     */
     const getRowStatus = (row: any) => {
         const isComplete = !!row[statusColumn];
         if (isComplete) return 'complete';
@@ -213,6 +238,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
                 </table>
             </div>
 
+            {/* Pagination Controls */}
             {totalPages > 1 && (
                 <div className="dl2-table-pagination" style={{ marginTop: 10, justifyContent: 'center' }}>
                     <button 

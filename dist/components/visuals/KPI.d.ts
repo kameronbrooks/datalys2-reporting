@@ -3,6 +3,7 @@ import type { ReportVisual } from "../../lib/types";
 export interface KPIProps extends ReportVisual {
     valueColumn?: string | number;
     comparisonColumn?: string | number;
+    comparisonRowIndex?: number;
     rowIndex?: number;
     format?: 'number' | 'currency' | 'percent' | 'date';
     currencySymbol?: string;

@@ -6,21 +6,33 @@ import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer"
 import { resolveColors, getColor } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
+/**
+ * Props for the Histogram component.
+ */
 export interface HistogramProps extends ReportVisual {
+    /** Column to bin for the histogram. */
     column?: string | number;
+    /** Number of bins to generate. Defaults to 10. */
     bins?: number;
     title?: string;
     width?: number;
     height?: number;
     xAxisLabel?: string;
     yAxisLabel?: string;
+    /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
+    /** Color or color palette for the bars. */
     color?: ColorProperty;
+    /** Whether to show frequency labels above bars. */
     showLabels?: boolean;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
 
+/**
+ * Histogram Component
+ * Visualizes the distribution of a numerical dataset by grouping values into bins.
+ */
 export const Histogram: React.FC<HistogramProps> = ({
     column = 0,
     bins = 10,
@@ -46,6 +58,7 @@ export const Histogram: React.FC<HistogramProps> = ({
     const [hoveredBin, setHoveredBin] = useState<{ x0: number | undefined, x1: number | undefined, length: number } | null>(null);
     const [tooltipPos, setTooltipPos] = useState<{ x: number, y: number } | null>(null);
 
+    // Handle responsive resizing
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -63,6 +76,7 @@ export const Histogram: React.FC<HistogramProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const dataset = ctx.datasets[datasetId];
 
+    /** Helper to find column index by name or index. */
     const findColumnIndex = (col: string | number, dataset: Dataset): number | undefined => {
         if (!dataset) return undefined;
         if ((typeof col === "number") && (col >= 0) && (col < dataset.columns.length)) {
@@ -83,6 +97,7 @@ export const Histogram: React.FC<HistogramProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(color), [color]);
 
+    // Process dataset into bins using D3's bin generator
     const processedData = useMemo(() => {
         if (!dataset) return { binsData: [], xDomain: [0, 1], yMax: 0 };
 
@@ -91,6 +106,7 @@ export const Histogram: React.FC<HistogramProps> = ({
 
         const colName = dataset.columns[colIdx];
 
+        // Extract and normalize numerical data
         const data = dataset.data.map(row => {
             let val;
             if (dataset.format === 'records' || !Array.isArray(row)) {
@@ -108,6 +124,7 @@ export const Histogram: React.FC<HistogramProps> = ({
         const minValue = min(data) ?? 0;
         const maxValue = max(data) ?? 1;
         
+        // Configure D3 histogram generator
         const histogramGenerator = bin()
             .domain([minValue, maxValue])
             .thresholds(bins);
@@ -123,6 +140,7 @@ export const Histogram: React.FC<HistogramProps> = ({
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, height - resolvedMargin.top - resolvedMargin.bottom);
 
+    // Linear scales for X (value range) and Y (frequency)
     const xScale = useMemo(() => {
         return scaleLinear()
             .domain(xDomain)
@@ -165,7 +183,7 @@ export const Histogram: React.FC<HistogramProps> = ({
             <div className="relative" style={{ height: height }}>
                 <svg className="dl2-chart-svg" width="100%" height={height} viewBox={`0 0 ${chartWidth} ${height}`}>
                     <g transform={`translate(${resolvedMargin.left},${resolvedMargin.top})`}>
-                        {/* Grid lines */}
+                        {/* Horizontal Grid lines */}
                         {yScale.ticks(5).map(tickValue => (
                             <line
                                 key={tickValue}
@@ -178,7 +196,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                             />
                         ))}
 
-                        {/* Bars */}
+                        {/* Render Histogram Bars */}
                         {binsData.map((d, i) => {
                             const x0 = d.x0 ?? 0;
                             const x1 = d.x1 ?? 0;
@@ -229,7 +247,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                             );
                         })}
 
-                        {/* X Axis */}
+                        {/* X Axis rendering */}
                         <g transform={`translate(0,${innerHeight})`} color="var(--dl2-text-main)">
                             <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="currentColor" />
                             {xScale.ticks(bins).map(tickValue => (
@@ -254,7 +272,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                             )}
                         </g>
 
-                        {/* Y Axis */}
+                        {/* Y Axis rendering */}
                         <g color="var(--dl2-text-main)">
                             <line y1={0} y2={innerHeight} stroke="currentColor" />
                             {yScale.ticks(5).map(tickValue => (
@@ -280,7 +298,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                             )}
                         </g>
 
-                        {/* Labels */}
+                        {/* Optional frequency labels above bars */}
                         {showLabels && binsData.map((d, i) => {
                             const x0 = d.x0 ?? 0;
                             const x1 = d.x1 ?? 0;
@@ -303,7 +321,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                             );
                         })}
                         
-                        {/* Other Elements Layer */}
+                        {/* Layer for additional visual elements (markers, trends, etc.) */}
                         {otherElements && (
                             <ReportVisualElementsLayer
                                 elements={otherElements}
@@ -317,7 +335,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                 </svg>
             </div>
 
-            {/* Tooltip */}
+            {/* Floating Tooltip */}
             {hoveredBin && tooltipPos && (
                 <div
                     style={{
@@ -325,13 +343,15 @@ export const Histogram: React.FC<HistogramProps> = ({
                         left: tooltipPos.x,
                         top: tooltipPos.y,
                         transform: "translate(-50%, -100%)",
-                        backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        color: "white",
+                        backgroundColor: "var(--dl2-bg-main)",
+                        color: "var(--dl2-text-main)",
                         padding: "8px",
                         borderRadius: "4px",
+                        border: "1px solid var(--dl2-border-main)",
+                        boxShadow: "0 2px 4px var(--dl2-shadow)",
                         pointerEvents: "none",
                         fontSize: "12px",
-                        zIndex: 1000,
+                        zIndex: 10,
                         whiteSpace: "nowrap",
                         marginTop: "-10px"
                     }}

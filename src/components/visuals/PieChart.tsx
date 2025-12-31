@@ -75,6 +75,7 @@ export const PieChart: React.FC<PieChartProps> = ({
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [tooltipData, setTooltipData] = useState<{ x: number, y: number, label: string, value: number, percentage: number } | null>(null);
 
+    // Handle responsive resizing of the chart container
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -89,6 +90,9 @@ export const PieChart: React.FC<PieChartProps> = ({
         return () => resizeObserver.disconnect();
     }, []);
 
+    /**
+     * Helper to find the index of a column by name or index.
+     */
     const findColumnIndex = (column: string | number, dataset: Dataset): number | undefined => {
         if ((typeof column === "number") && (column >= 0) && (column < dataset.columns.length)) {
             return column;
@@ -99,6 +103,9 @@ export const PieChart: React.FC<PieChartProps> = ({
         return undefined;
     }
 
+    /**
+     * Transforms raw dataset rows into PieChartDatum objects.
+     */
     const generatePieChartDatum = (dataset: Dataset): PieChartDatum[] => {
         if (!dataset) return [];
         const catIdx = findColumnIndex(categoryColumn, dataset);
@@ -115,6 +122,7 @@ export const PieChart: React.FC<PieChartProps> = ({
     const ctx = useContext(AppContext) || { datasets: {} };
     const data = generatePieChartDatum(ctx.datasets[datasetId]) as PieChartDatum[];
 
+    // Resolve margins with defaults
     const resolvedMargin = useMemo(() => ({
         top: chartMargin?.top ?? defaultMargin.top,
         right: chartMargin?.right ?? defaultMargin.right,
@@ -122,18 +130,21 @@ export const PieChart: React.FC<PieChartProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
+    // Filter out invalid data points
     const sanitizedData = useMemo(
         () => data.filter((datum) => Number.isFinite(datum.value)),
         [data]
     );
 
+    // Generate D3 pie layout data
     const pieData = useMemo(
         () => pie<PieChartDatum>()
-            .sort(null)
+            .sort(null) // Maintain original data order
             .value((datum: any) => Math.max(0, datum.value))(sanitizedData),
         [sanitizedData]
     );
 
+    // Calculate total for percentage calculations
     const totalValue = useMemo(
         () => pieData.reduce((total: any, datum: PieArcDatum<PieChartDatum>) => total + datum.value, 0),
         [pieData]
@@ -141,12 +152,15 @@ export const PieChart: React.FC<PieChartProps> = ({
 
     const chartHeight = height;
 
+    // Calculate dimensions for the drawing area
     const innerWidth = Math.max(0, chartWidth - resolvedMargin.left - resolvedMargin.right);
     const innerHeight = Math.max(0, chartHeight - resolvedMargin.top - resolvedMargin.bottom);
 
+    // Determine radius based on available space
     const radius = Math.max(0, Math.min(innerWidth, innerHeight) / 2 * 0.75);
     const actualInnerRadius = Math.min(Math.max(0, innerRadius), radius);
 
+    // D3 Arc generator for standard slices
     const mainArc = useMemo(
         () => arc<PieArcDatum<PieChartDatum>>()
             .innerRadius(actualInnerRadius)
@@ -156,6 +170,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         [actualInnerRadius, radius, padAngle, cornerRadius]
     );
 
+    // D3 Arc generator for hovered slices (slightly larger)
     const hoverArc = useMemo(
         () => arc<PieArcDatum<PieChartDatum>>()
             .innerRadius(actualInnerRadius)
@@ -165,6 +180,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         [actualInnerRadius, radius, padAngle, cornerRadius]
     );
 
+    // D3 Arc generator for positioning labels outside the pie
     const labelArc = useMemo(
         () => arc<PieArcDatum<PieChartDatum>>()
             .innerRadius(radius * 1.1)
@@ -174,6 +190,7 @@ export const PieChart: React.FC<PieChartProps> = ({
 
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
+    // Map categories to colors
     const colorScale = useMemo(() => {
         if (resolvedColors && resolvedColors.length > 0) {
             return scaleOrdinal<string, string>()
@@ -198,6 +215,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         backgroundColor: "var(--dl2-bg-visual)"
     };
 
+    // Prepare items for the legend component
     const legendItems = useMemo(
         () => pieData.map((datum: PieArcDatum<PieChartDatum>, index: number) => {
             const label = datum.data.label;
@@ -239,6 +257,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                     aria-label={title ?? "Pie chart"}
                     style={{ display: "block", maxWidth: "100%" }}
                 >
+                    {/* Center the pie chart in the SVG container */}
                     <g transform={`translate(${resolvedMargin.left + innerWidth / 2}, ${resolvedMargin.top + innerHeight / 2})`}>
                         {pieData.map((datum: PieArcDatum<PieChartDatum>, index: number) => {
                             const isHovered = hoveredIndex === index;
@@ -248,13 +267,15 @@ export const PieChart: React.FC<PieChartProps> = ({
                             }
 
                             const fill = datum.data.color ?? colorScale(datum.data.label);
+                            // Only show labels for slices that take up at least 2% of the pie
                             const shouldShowLabel = totalValue > 0 ? datum.value / totalValue >= 0.02 : false;
 
-                            const posA = mainArc.centroid(datum);
-                            const posB = labelArc.centroid(datum);
+                            // Calculate label positioning
+                            const posA = mainArc.centroid(datum); // Start of leader line
+                            const posB = labelArc.centroid(datum); // Elbow of leader line
                             const midAngle = datum.startAngle + (datum.endAngle - datum.startAngle) / 2;
                             const isRight = midAngle < Math.PI;
-                            const posC = [radius * 1.2 * (isRight ? 1 : -1), posB[1]];
+                            const posC = [radius * 1.2 * (isRight ? 1 : -1), posB[1]]; // End of leader line
                             const textAnchor = isRight ? "start" : "end";
 
                             return (
@@ -300,6 +321,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                                     />
                                     {shouldShowLabel && (
                                         <>
+                                            {/* Leader line from slice to label */}
                                             <polyline
                                                 points={`${posA},${posB},${posC}`}
                                                 fill="none"
@@ -324,6 +346,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                         })}
                     </g>
                 </svg>
+                {/* Custom Tooltip */}
                 {tooltipData && (
                     <div style={{
                         position: "absolute",
@@ -347,6 +370,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                     </div>
                 )}
             </div>
+            {/* Optional Legend */}
             {showLegend && legendItems.length > 0 && (
                 <VisualLegend
                     title={legendTitle}
