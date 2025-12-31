@@ -18,7 +18,9 @@ export interface KPIProps extends ReportVisual {
     comparisonColumn?: string | number;
     /** The row index to use for comparison. If not provided, uses the same row as valueColumn. */
     comparisonRowIndex?: number;
-    
+    /** The comparison text to show alongside the comparison value. Ex. ("Last Month", "Yesterday", etc.) */
+    comparisonText?: string;
+
     /** The row index to use for the primary value. Defaults to 0. */
     rowIndex?: number;
 
@@ -50,6 +52,7 @@ export const KPI: React.FC<KPIProps> = ({
     valueColumn = 0,
     comparisonColumn,
     comparisonRowIndex,
+    comparisonText,
     rowIndex = 0,
     datasetId,
     title,
@@ -161,7 +164,8 @@ export const KPI: React.FC<KPIProps> = ({
     let breachStatus = null;
 
     const changeAdjective = (change !== undefined) ? (change > 0 ? 'above' : (change < 0 ? 'below' : 'from')) : 'no data';
-    const textSuffix = (comparisonColumn !== undefined) ? `${changeAdjective} ${comparisonColumn}` : undefined;
+    const comparisonDisplay = comparisonText && comparisonColumn;
+    const textSuffix = comparisonDisplay ? `${changeAdjective} ${comparisonText}` : undefined;
 
     if (breachValue !== undefined) {
         breachStatus = getBreachStatus(value, breachValue, warningValue, goodDirection);

@@ -25,6 +25,7 @@ You can also use standard HTML meta tags to configure the report header informat
     <meta name="description" content="A brief description of this report">
     <meta name="author" content="Report Author Name">
     <meta name="last-updated" content="2024-01-01">
+    <meta name="dl-version" content="0.2.2">
 
     <!-- Include the library styles -->
     <link rel="stylesheet" href="path/to/dl2-style.css">
@@ -256,6 +257,7 @@ Displays a Key Performance Indicator with optional comparison and breach status.
 | `valueColumn` | `string \| number` | Column for the main value. |
 | `comparisonColumn` | `string \| number` | Column for the comparison value (e.g., yesterday). |
 | `comparisonRowIndex` | `number` | Index of the row in the dataset to use for comparison. Supports negative indices (e.g., -1 for last row). If not provided, uses the same row as `rowIndex`. |
+| `comparisonText` | `string` | The comparison text to show alongside the comparison value. Ex. ("Last Month", "Yesterday", etc.) |
 | `rowIndex` | `number` | Index of the row in the dataset to display (default 0). Supports negative indices (e.g., -1 for last row). |
 | `format` | `'number' \| 'currency' \| 'percent' \| 'date'` | Formatting style. |
 | `currencySymbol` | `string` | Symbol for currency (default '$'). |
