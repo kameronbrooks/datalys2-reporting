@@ -284,7 +284,9 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
         flexDirection: "column",
         flex: flex || "1",
         width: '100%',
-        position: 'relative'
+        minWidth: 0,
+        position: 'relative',
+        overflow: 'hidden'
     };
 
     if (!dataset || processedData.length === 0 || !xScale || !yScale) {
@@ -306,7 +308,13 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
             {title && <h3 className="dl2-chart-title">{title}</h3>}
             {description && <p className="dl2-chart-description">{description}</p>}
             
-            <svg className="dl2-chart-svg" width={chartWidth} height={height}>
+            <svg 
+                className="dl2-chart-svg" 
+                width="100%" 
+                height={height} 
+                viewBox={`0 0 ${chartWidth} ${height}`}
+                style={{ display: "block", maxWidth: "100%" }}
+            >
                 <g transform={`translate(${resolvedMargin.left},${resolvedMargin.top})`}>
                     {/* Render Axes */}
                     {direction === 'vertical' ? (

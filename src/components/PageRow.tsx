@@ -75,8 +75,7 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
             }}
         >
             {layout.title && (
-                <h3 style={{
-                    width: '100%', 
+                <h3 className='dl2-row-title' style={{
                     gridColumn: layout.direction === 'grid' ? `span ${layout.columns || 3}` : undefined
                 }}>
                     {layout.title}

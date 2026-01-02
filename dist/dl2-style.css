@@ -205,6 +205,13 @@ body {
     box-shadow: 0 2px 4px var(--dl2-shadow);
 }
 
+.dl2-row-title {
+    border-bottom: 1px solid var(--dl2-border-main);
+    padding-bottom: 5px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
 .dl2-element-wrapper:hover .dl2-modal-icon-trigger {
     opacity: 1;
 }
@@ -214,7 +221,6 @@ body {
     border-color: var(--dl2-primary);
     color: var(--dl2-primary);
 }
-
 
 .datalys2-report {
     background: var(--dl2-bg-report);
