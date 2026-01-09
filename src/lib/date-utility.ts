@@ -38,7 +38,6 @@ export function fromUnixTimestampMs(timestampMs: number): Date {
     return new Date(timestampMs);
 }
 
-
 /**
  * Checks if a value is a Date object
  * @param value The value to check

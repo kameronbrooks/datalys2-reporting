@@ -98,6 +98,10 @@ export const KPI: React.FC<KPIProps> = ({
         }
         
         const valIdx = findColumnIndex(valueColumn, dataset);
+        
+        // If valueColumn is not found, return null to show error state
+        if (valIdx === undefined) return null;
+        
         const comparisonIdx = comparisonColumn !== undefined ? findColumnIndex(comparisonColumn, dataset) : valIdx;
         
         const row = dataset.data[resolvedRowIndex];
@@ -105,9 +109,12 @@ export const KPI: React.FC<KPIProps> = ({
 
         if (!row || !comparisonRow) return null;
 
-        const rawValue = valIdx !== undefined ? row[valIdx] : 0;
+        const rawValue = row[valIdx];
         const value = isDate(rawValue) ? rawValue.getTime() : Number(rawValue);
         const isDateValue = isDate(rawValue);
+        
+        // Check if the value is NaN (invalid conversion)
+        if (!isDateValue && isNaN(value)) return null;
 
         let comparisonValue = undefined;
         if (comparisonRowIndex !== undefined ||  comparisonColumn !== undefined) {
@@ -131,9 +138,26 @@ export const KPI: React.FC<KPIProps> = ({
 
     // Render empty state if no data is available
     if (!data) {
+        const emptyContainerStyle: React.CSSProperties = {
+            padding: padding || 15,
+            margin: margin || 10,
+            border: border ? "1px solid var(--dl2-border-main)" : undefined,
+            boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "var(--dl2-bg-visual)",
+            minWidth: width || 150,
+            minHeight: height || 100,
+            flex: "1"
+        };
+        
         return (
-            <div className="dl2-kpi" style={{ padding: padding || 15, margin: margin || 10, border: border ? "1px solid var(--dl2-border-main)" : undefined }}>
-                <div className="dl2-kpi-empty">No data</div>
+            <div className="dl2-kpi" style={emptyContainerStyle}>
+                {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: 'var(--dl2-text-main)', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
+                <div className="dl2-kpi-empty" style={{ fontSize: '1em', color: 'var(--dl2-text-muted)', fontStyle: 'italic', textAlign: 'center' }}>(no value found)</div>
+                {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: 'var(--dl2-text-muted)', marginTop: 10, textAlign: 'center' }}>{description}</div>}
             </div>
         );
     }
@@ -164,8 +188,7 @@ export const KPI: React.FC<KPIProps> = ({
     let breachStatus = null;
 
     const changeAdjective = (change !== undefined) ? (change > 0 ? 'above' : (change < 0 ? 'below' : 'from')) : 'no data';
-    const comparisonDisplay = comparisonText && comparisonColumn;
-    const textSuffix = comparisonDisplay ? `${changeAdjective} ${comparisonText}` : undefined;
+    const textSuffix = comparisonText ? `${changeAdjective} ${comparisonText}` : undefined;
 
     if (breachValue !== undefined) {
         breachStatus = getBreachStatus(value, breachValue, warningValue, goodDirection);
@@ -189,10 +212,6 @@ export const KPI: React.FC<KPIProps> = ({
         
         if (breachValue !== undefined) {
             lines.push(`Breach Threshold: ${formatValue(breachValue)}`);
-        }
-        
-        if (warningValue !== undefined) {
-            lines.push(`Warning Threshold: ${formatValue(warningValue)}`);
         }
         
         if (breachStatus) {
