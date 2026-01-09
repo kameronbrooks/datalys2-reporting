@@ -155,9 +155,9 @@ export const KPI: React.FC<KPIProps> = ({
         
         return (
             <div className="dl2-kpi" style={emptyContainerStyle}>
-                {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: 'var(--dl2-text-main)', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
-                <div className="dl2-kpi-empty" style={{ fontSize: '1em', color: 'var(--dl2-text-muted)', fontStyle: 'italic', textAlign: 'center' }}>(no value found)</div>
-                {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: 'var(--dl2-text-muted)', marginTop: 10, textAlign: 'center' }}>{description}</div>}
+                {title && <div className="dl2-kpi-title">{title}</div>}
+                <div className="dl2-kpi-empty">(no value found)</div>
+                {description && <div className="dl2-kpi-desc">{description}</div>}
             </div>
         );
     }
@@ -224,10 +224,19 @@ export const KPI: React.FC<KPIProps> = ({
         return lines.join('\n');
     }, [value, comparisonValue, change, breachValue, warningValue, breachStatus, formattedValue, format, currencySymbol]);
 
+    // Determine border color based on breach status
+    let borderColor = border ? "var(--dl2-border-main)" : undefined;
+    let borderWidth = border ? "1px" : undefined;
+    
+    if (breachStatus && breachStatus !== 'ok') {
+        borderColor = getBreachColor(breachStatus);
+        borderWidth = "3px"; // Make warning/breach borders thicker for visibility
+    }
+
     const containerStyle: React.CSSProperties = {
         padding: padding || 15,
         margin: margin || 10,
-        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        border: borderWidth && borderColor ? `${borderWidth} solid ${borderColor}` : undefined,
         boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         display: "flex",
         flexDirection: "column",
@@ -241,10 +250,10 @@ export const KPI: React.FC<KPIProps> = ({
 
     return (
         <div className="dl2-kpi" style={containerStyle}>
-            {title && <div className="dl2-kpi-title" style={{ fontSize: '1.1em', fontWeight: 700, color: 'var(--dl2-text-main)', marginBottom: 5, textAlign: 'center' }}>{title}</div>}
+            {title && <div className="dl2-kpi-title">{title}</div>}
             
             <Tooltip content={tooltipContent}>
-                <div className="dl2-kpi-value" style={{ fontSize: '2em', fontWeight: 'bold', color: valueColor, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'help' }}>
+                <div className="dl2-kpi-value" style={{ color: valueColor }}>
                     {formattedValue}
                     {breachIcon}
                 </div>
@@ -255,7 +264,7 @@ export const KPI: React.FC<KPIProps> = ({
                 <TrendIndicator change={change} goodDirection={goodDirection} textSuffix={textSuffix} />
             )}
             
-            {description && <div className="dl2-kpi-desc" style={{ fontSize: '0.8em', color: 'var(--dl2-text-muted)', marginTop: 10, textAlign: 'center' }}>{description}</div>}
+            {description && <div className="dl2-kpi-desc">{description}</div>}
         </div>
     );
 };

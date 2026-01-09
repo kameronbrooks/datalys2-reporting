@@ -524,3 +524,63 @@ body {
     background-color: var(--dl2-bg-visual);
 }
 
+/* KPI Styles */
+.dl2-kpi-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--dl2-text-main);
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.dl2-kpi-value {
+    font-size: 2em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+}
+
+.dl2-kpi-desc {
+    font-size: 0.8em;
+    color: var(--dl2-text-muted);
+    margin-top: 10px;
+    text-align: center;
+}
+
+.dl2-kpi-empty {
+    font-size: 1em;
+    color: var(--dl2-text-muted);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Mobile responsive styles for KPI */
+@media (max-width: 768px) {
+    .dl2-kpi-title {
+        font-size: 0.9em;
+    }
+    
+    .dl2-kpi-value {
+        font-size: 1.5em;
+    }
+    
+    .dl2-kpi-desc {
+        font-size: 0.7em;
+    }
+}
+
+@media (max-width: 480px) {
+    .dl2-kpi-title {
+        font-size: 0.8em;
+    }
+    
+    .dl2-kpi-value {
+        font-size: 1.2em;
+    }
+    
+    .dl2-kpi-desc {
+        font-size: 0.65em;
+    }
+}
