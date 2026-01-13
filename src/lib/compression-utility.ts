@@ -12,7 +12,6 @@ export async function decompressGzipB64ToObject<T = any>(base64: string): Promis
     for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }
-
     // Decompress using DecompressionStream
     const stream = new ReadableStream({
         start(controller) {

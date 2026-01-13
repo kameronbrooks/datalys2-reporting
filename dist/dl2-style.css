@@ -540,6 +540,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: help;
+    transition: font-size 0.2s;
 }
 
 .dl2-kpi-desc {
@@ -563,7 +564,7 @@ body {
     }
     
     .dl2-kpi-value {
-        font-size: 1.5em;
+        font-size: 1.2em;
     }
     
     .dl2-kpi-desc {
@@ -577,7 +578,7 @@ body {
     }
     
     .dl2-kpi-value {
-        font-size: 1.2em;
+        font-size: 1em;
     }
     
     .dl2-kpi-desc {

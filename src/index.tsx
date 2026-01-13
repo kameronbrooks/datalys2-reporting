@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AppContext } from './components/context/AppContext';
 import { Headbar } from './components/Headbar';
@@ -6,36 +6,22 @@ import { TabGroup } from './components/TabGroup';
 import { Modal } from './components/Modal';
 import { ApplicationData, Dataset, ReportModal } from './lib/types';
 import { decompressDatasets } from './lib/dataset-utility';
+import { decompressGzipB64ToObject } from './lib/compression-utility';
 
 function App() {
     const [datasets, setDatasets] = useState<Record<string, Dataset>>({});
     const [isLoaded, setIsLoaded] = useState(false);
     const [activeModal, setActiveModal] = useState<ReportModal | null>(null);
-
-    // Get data from the script element only once
-    const data = useMemo(() => {
-        const dataElement = document.getElementById('report-data');
-        if (!dataElement) return { pages: [], datasets: {} } as ApplicationData;
-        
-        const parsedData: ApplicationData = JSON.parse(dataElement.textContent || '{}');
-        
-        // Check for GC meta tag
-        const shouldGC = document.querySelector('meta[name="gc-compressed-data"]')?.getAttribute('content') === 'true';
-        if (shouldGC) {
-            dataElement.textContent = '';
-        }
-        
-        return parsedData;
-    }, []);
+    const [appData, setAppData] = useState<ApplicationData>({ pages: [], datasets: {} });
 
     const openModal = (modalOrId: ReportModal | string) => {
         if (typeof modalOrId === 'string') {
-            const found = (data.modals || []).find(m => m.id === modalOrId);
+            const found = (appData.modals || []).find(m => m.id === modalOrId);
             if (found) setActiveModal(found);
         } else {
             // If the object passed doesn't have rows, try to find it in global modals by ID
             if (!modalOrId.rows && modalOrId.id) {
-                const found = (data.modals || []).find(m => m.id === modalOrId.id);
+                const found = (appData.modals || []).find(m => m.id === modalOrId.id);
                 if (found) {
                     setActiveModal(found);
                     return;
@@ -53,15 +39,38 @@ function App() {
 
     useEffect(() => {
         const loadData = async () => {
+            const dataElement = document.getElementById('report-data');
+            if (!dataElement) {
+                setIsLoaded(true);
+                return;
+            }
+
+            // Parse data (with decompression if needed)
+            let parsedData: ApplicationData;
+            if (dataElement.getAttribute('type') === 'text/b64-gzip') {
+                parsedData = await decompressGzipB64ToObject<ApplicationData>(dataElement.textContent || '');
+            } else {
+                parsedData = JSON.parse(dataElement.textContent || '{}');
+            }
+
+            // Clear data element if GC is enabled
             const shouldGC = document.querySelector('meta[name="gc-compressed-data"]')?.getAttribute('content') === 'true';
-            if (data.datasets) {
-                const decompressed = await decompressDatasets(data.datasets, shouldGC);
+            if (shouldGC) {
+                dataElement.textContent = '';
+            }
+
+            setAppData(parsedData);
+
+            // Decompress datasets if present
+            if (parsedData.datasets) {
+                const decompressed = await decompressDatasets(parsedData.datasets, shouldGC);
                 setDatasets(decompressed);
             }
+
             setIsLoaded(true);
         };
         loadData();
-    }, [data]);
+    }, []);
 
     if (!isLoaded) {
         return <div>Loading report data...</div>;
@@ -70,7 +79,7 @@ function App() {
     return (
         <AppContext.Provider value={{ 
             datasets: datasets, 
-            modals: data.modals || [],
+            modals: appData.modals || [],
             openModal,
             closeModal
         }}>
@@ -82,7 +91,7 @@ function App() {
                     lastUpdated={documentLastUpdated}
                 />
                 <div>
-                    <TabGroup pages={data.pages || []} />
+                    <TabGroup pages={appData.pages || []} />
                 </div>
                 {activeModal && <Modal modal={activeModal} />}
             </div>
