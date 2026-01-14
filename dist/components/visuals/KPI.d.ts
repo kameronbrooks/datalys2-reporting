@@ -16,7 +16,9 @@ export interface KPIProps extends ReportVisual {
     /** The row index to use for the primary value. Defaults to 0. */
     rowIndex?: number;
     /** Formatting style for the value. */
-    format?: 'number' | 'currency' | 'percent' | 'date';
+    format?: 'number' | 'currency' | 'percent' | 'date' | 'hms';
+    /** Rounding precision for the value. */
+    roundingPrecision?: number;
     /** Currency symbol to use when format is 'currency'. Defaults to '$'. */
     currencySymbol?: string;
     /** Defines whether a higher or lower value is considered 'good'. Defaults to 'higher'. */

@@ -36,7 +36,7 @@ function App() {
     const documentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
     const documentAuthor = document.querySelector('meta[name="author"]')?.getAttribute('content') || '';
     const documentLastUpdated = document.querySelector('meta[name="last-updated"]')?.getAttribute('content') || '';
-
+    
     useEffect(() => {
         const loadData = async () => {
             const dataElement = document.getElementById('report-data');

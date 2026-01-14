@@ -20,22 +20,20 @@ export interface KPIProps extends ReportVisual {
     comparisonRowIndex?: number;
     /** The comparison text to show alongside the comparison value. Ex. ("Last Month", "Yesterday", etc.) */
     comparisonText?: string;
-
     /** The row index to use for the primary value. Defaults to 0. */
     rowIndex?: number;
-
     /** Formatting style for the value. */
-    format?: 'number' | 'currency' | 'percent' | 'date';
+    format?: 'number' | 'currency' | 'percent' | 'date' | 'hms';
+    /** Rounding precision for the value. */
+    roundingPrecision?: number;
     /** Currency symbol to use when format is 'currency'. Defaults to '$'. */
     currencySymbol?: string;
-    
     /** Defines whether a higher or lower value is considered 'good'. Defaults to 'higher'. */
     goodDirection?: 'higher' | 'lower';
     /** The threshold value that triggers a breach status. */
     breachValue?: number;
     /** The threshold value that triggers a warning status. */
     warningValue?: number;
-    
     /** Optional title for the KPI card. */
     title?: string;
     /** Optional width for the KPI card. */
@@ -64,6 +62,7 @@ export const KPI: React.FC<KPIProps> = ({
     width,
     height,
     format = 'number',
+    roundingPrecision = 4,
     currencySymbol = '$',
     goodDirection = 'higher',
     breachValue,
@@ -168,16 +167,29 @@ export const KPI: React.FC<KPIProps> = ({
      * Helper function to format values consistently based on the 'format' prop.
      */
     const formatValue = (val: number): string => {
+        // Format value based on the specified format
+        // Format dates
         if (isDateValue || format === 'date') {
             return printDate(new Date(val));
         }
+        // Format time in hours, minutes, and seconds
+        if (format === 'hms') {
+            const hours = Math.floor(val / 3600);
+            const minutes = Math.floor((val % 3600) / 60);
+            const seconds = Math.floor(val % 60);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        // Format currency
         if (format === 'currency') {
             return `${currencySymbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-        } else if (format === 'percent') {
-            return `${(val * 100).toFixed(1)}%`;
-        } else {
-            return val.toLocaleString();
         }
+        // Format percentage
+        if (format === 'percent') {
+            return `${(val * 100).toFixed(roundingPrecision)}%`;
+        }
+        // Format general numbers
+        const roundedValue = Number(val.toFixed(roundingPrecision));
+        return roundedValue.toLocaleString();
     };
 
     const formattedValue = formatValue(value);
