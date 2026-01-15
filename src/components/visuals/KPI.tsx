@@ -62,7 +62,7 @@ export const KPI: React.FC<KPIProps> = ({
     width,
     height,
     format = 'number',
-    roundingPrecision = 4,
+    roundingPrecision = 2,
     currencySymbol = '$',
     goodDirection = 'higher',
     breachValue,
