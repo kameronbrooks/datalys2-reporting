@@ -100,11 +100,41 @@
             "rows" : [
                 {
                     "type": "layout",
+                    "title": "Card Content Type Tests",
+                    "direction": "grid",
+                    "children": [
+                        {
+                            "type": "card",
+                            "title": "Plain Text Card (default)",
+                            "text": "This is a plain text card with no special formatting. Just regular text content.",
+                            "border": true,
+                            "shadow": true
+                        },
+                        {
+                            "type": "card",
+                            "title": "HTML Card",
+                            "text": "<p>This card contains <strong>HTML content</strong>.</p><p>You can use <em>italic</em>, <strong>bold</strong>, and even <a href='#'>links</a>!</p><ul><li>List item 1</li><li>List item 2</li></ul>",
+                            "contentType": "html",
+                            "border": true,
+                            "shadow": true
+                        },
+                        {
+                            "type": "card",
+                            "title": "Markdown Card",
+                            "text": "# Heading 1\n## Heading 2\n### Heading 3\n\nThis is **bold** and this is *italic*.\n\nYou can also create [links](https://example.com)!\n\n**Features:**\n- Easy to write\n- Clean syntax\n- Renders as HTML",
+                            "contentType": "md",
+                            "border": true,
+                            "shadow": true
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
                     "children": [
                         {
                             "type": "card",
                             "title": "Welcome to the Report {{printRandomNumber1()}}",
-                            "content": "This report provides insights into the top 10 things. Explore the visualizations below to understand the data better.",
+                            "text": "This report provides insights into the top 10 things. Explore the visualizations below to understand the data better.",
                             "border": true,
                             "shadow": true
                         }

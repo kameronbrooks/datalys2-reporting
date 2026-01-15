@@ -2,6 +2,10 @@ import React from "react";
 import { ReportVisual } from "../../lib/types";
 import { type TemplateValue } from "../../lib/template-utility";
 /**
+ * Content type for the card
+ */
+export type CardContentType = "text" | "html" | "md";
+/**
  * Props for the Card component.
  * Uses TemplateValue for text and title to allow dynamic data injection.
  */
@@ -10,6 +14,8 @@ export interface CardProps extends ReportVisual {
     text: TemplateValue;
     /** Optional title for the card. Can include template placeholders. */
     title?: TemplateValue;
+    /** Content type for rendering (text, html, or markdown). Defaults to "text". */
+    contentType?: CardContentType;
 }
 /**
  * Card Component
