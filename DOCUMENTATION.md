@@ -63,6 +63,18 @@ The application reads the following tags from the `<head>` to populate the repor
 
 The core of the report configuration lives inside the `<script id="report-data" type="application/json">` tag. This JSON object must adhere to the `ApplicationData` structure.
 
+**Alternative: Compressed report-data**
+
+For reports with large configuration objects, you can compress the `report-data` itself using gzip and base64 encoding. Simply change the script type to `text/b64-gzip` and provide the compressed string:
+
+```html
+<script id="report-data" type="text/b64-gzip">
+H4sIAAAAAAAAA6tWKkktLlGyUlAqS8wpTtVRKi1OLUpV0lFQSixOVbICMqAMqFpbAJ2MupsmAAAA
+</script>
+```
+
+The library will automatically detect the compressed format and decompress it before parsing the configuration.
+
 ### Root Object
 
 | Property | Type | Description |
@@ -259,7 +271,8 @@ Displays a Key Performance Indicator with optional comparison and breach status.
 | `comparisonRowIndex` | `number` | Index of the row in the dataset to use for comparison. Supports negative indices (e.g., -1 for last row). If not provided, uses the same row as `rowIndex`. |
 | `comparisonText` | `string` | The comparison text to show alongside the comparison value. Ex. ("Last Month", "Yesterday", etc.) |
 | `rowIndex` | `number` | Index of the row in the dataset to display (default 0). Supports negative indices (e.g., -1 for last row). |
-| `format` | `'number' \| 'currency' \| 'percent' \| 'date'` | Formatting style. |
+| `format` | `'number' \| 'currency' \| 'percent' \| 'date' \| 'hms'` | Formatting style. |
+| `roundingPrecision` | `number` | The rounding precision for the output |
 | `currencySymbol` | `string` | Symbol for currency (default '$'). |
 | `goodDirection` | `'higher' \| 'lower'` | Which direction is considered "good". |
 | `breachValue` | `number` | Value that triggers a breach indicator. |
