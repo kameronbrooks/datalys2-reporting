@@ -41,20 +41,23 @@ export declare function isDate(value: any): value is Date;
  * ss - 2-digit second (00-59)
  * @param date The Date object to format
  * @param format The format string
+ * @param useUTC If true, formats in UTC time; otherwise uses local time (default: false)
  * @returns The formatted date string
  */
-export declare function formatDate(date: Date, format: string): string;
+export declare function formatDate(date: Date, format: string, useUTC?: boolean): string;
 /**
  * A wrapper to print a date as a datetime string in the specified format.
  * @param date
  * @param format
+ * @param useUTC If true, formats in UTC time; otherwise uses local time (default: false)
  * @returns
  */
-export declare function printDatetime(date: Date, format?: string): string;
+export declare function printDatetime(date: Date, format?: string, useUTC?: boolean): string;
 /**
  * A wrapper to print a date as a short date string in the specified format.
  * @param date
  * @param format
+ * @param useUTC If true, formats in UTC time; otherwise uses local time (default: false)
  * @returns
  */
-export declare function printDate(date: Date, format?: string): string;
+export declare function printDate(date: Date, format?: string, useUTC?: boolean): string;

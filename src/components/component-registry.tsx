@@ -11,6 +11,7 @@ import { Heatmap } from "./visuals/Heatmap";
 import { Histogram } from "./visuals/Histogram";
 import { LineChart } from "./visuals/LineChart";
 import { BoxPlot } from "./visuals/BoxPlot";
+import { Gauge } from "./visuals/Gauge";
 
 
 const componentRegistry: { [key: string]: React.FC<any> } = {
@@ -26,6 +27,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'heatmap': Heatmap,
     'histogram': Histogram,
     'boxplot': BoxPlot,
+    'gauge': Gauge,
     // Add other components here as needed
 };
 

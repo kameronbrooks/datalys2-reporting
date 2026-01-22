@@ -221,6 +221,27 @@
                             "goodDirection": "higher",
                             "border": true,
                             "shadow": true
+                        },
+                        {
+                            "id": "gauge-csat",
+                            "elementType": "visual",
+                            "type": "gauge",
+                            "datasetId": "gaugeData",
+                            "rowIndex": 0,
+                            "valueColumn": "Value",
+                            "title": "CSAT Score",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "unit": "points",
+                            "showMinMax": true,
+                            "ranges": [
+                                { "from": 0, "to": 60, "color": "#e74c3c", "label": "Low" },
+                                { "from": 60, "to": 80, "color": "#f39c12", "label": "Fair" },
+                                { "from": 80, "to": 100, "color": "#27ae60", "label": "Good" }
+                            ],
+                            "border": true,
+                            "shadow": true,
+                            "height": 220
                         }
                     ]
                 },
@@ -536,6 +557,14 @@
                 ["Total Revenue", 150000, 142500],
                 ["Active Users", 1200, 1200],
                 ["Bounce Rate", 0.45, 0.50]
+            ]
+        },
+        "gaugeData": {
+            "format": "table",
+            "dtypes": ["string", "number"],
+            "columns": ["Metric", "Value"],
+            "data": [
+                ["CSAT", 82]
             ]
         },
         "adSpendVsSales": {

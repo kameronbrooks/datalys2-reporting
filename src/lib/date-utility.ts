@@ -57,9 +57,10 @@ export function isDate(value: any): value is Date {
  * ss - 2-digit second (00-59)
  * @param date The Date object to format
  * @param format The format string
+ * @param useUTC If true, formats in UTC time; otherwise uses local time (default: false)
  * @returns The formatted date string
  */
-export function formatDate(date: Date, format: string): string {
+export function formatDate(date: Date, format: string, useUTC: boolean = false): string {
     const pad = (num: number, size: number) => {
         let s = num.toString();
         while (s.length < size) s = "0" + s;
@@ -68,12 +69,12 @@ export function formatDate(date: Date, format: string): string {
 
     return format.replace(/YYYY|MM|DD|hh|mm|ss/g, (match) => {
         switch (match) {
-            case 'YYYY': return date.getFullYear().toString();
-            case 'MM': return pad(date.getMonth() + 1, 2);
-            case 'DD': return pad(date.getDate(), 2);
-            case 'hh': return pad(date.getHours(), 2);
-            case 'mm': return pad(date.getMinutes(), 2);
-            case 'ss': return pad(date.getSeconds(), 2);
+            case 'YYYY': return useUTC ? date.getUTCFullYear().toString() : date.getFullYear().toString();
+            case 'MM': return pad(useUTC ? date.getUTCMonth() + 1 : date.getMonth() + 1, 2);
+            case 'DD': return pad(useUTC ? date.getUTCDate() : date.getDate(), 2);
+            case 'hh': return pad(useUTC ? date.getUTCHours() : date.getHours(), 2);
+            case 'mm': return pad(useUTC ? date.getUTCMinutes() : date.getMinutes(), 2);
+            case 'ss': return pad(useUTC ? date.getUTCSeconds() : date.getSeconds(), 2);
             default: return match;
         }
     });
@@ -83,19 +84,21 @@ export function formatDate(date: Date, format: string): string {
  * A wrapper to print a date as a datetime string in the specified format.
  * @param date 
  * @param format 
+ * @param useUTC If true, formats in UTC time; otherwise uses local time (default: false)
  * @returns 
  */
-export function printDatetime(date: Date, format: string = 'YYYY-MM-DD hh:mm:ss'): string {
-    return formatDate(date, format);
+export function printDatetime(date: Date, format: string = 'YYYY-MM-DD hh:mm:ss', useUTC: boolean = false): string {
+    return formatDate(date, format, useUTC);
 }
 
 /**
  * A wrapper to print a date as a short date string in the specified format.
  * @param date 
  * @param format 
+ * @param useUTC If true, formats in UTC time; otherwise uses local time (default: false)
  * @returns 
  */
-export function printDate(date: Date, format: string = 'YYYY-MM-DD'): string {
-    return formatDate(date, format);
+export function printDate(date: Date, format: string = 'YYYY-MM-DD', useUTC: boolean = false): string {
+    return formatDate(date, format, useUTC);
 }
 
