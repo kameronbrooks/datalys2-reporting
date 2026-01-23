@@ -101,7 +101,10 @@ export const Gauge: React.FC<GaugeProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
     const [isHovered, setIsHovered] = useState(false);
+    const [hoveredRangeIndex, setHoveredRangeIndex] = useState<number | null>(null);
     const [tooltipData, setTooltipData] = useState<{ x: number; y: number; value: number; percent: number } | null>(null);
+    const [animatedValue, setAnimatedValue] = useState(minValue);
+    const [hasAnimated, setHasAnimated] = useState(false);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -179,6 +182,33 @@ export const Gauge: React.FC<GaugeProps> = ({
         return rounded.toLocaleString();
     }, [value, format, roundingPrecision, currencySymbol]);
 
+    // Animate the needle from minValue to actual value on mount
+    useEffect(() => {
+        if (value === null || hasAnimated) return;
+
+        const duration = 800; // ms
+        const startTime = performance.now();
+        const startVal = minValue;
+        const endVal = value;
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out cubic for smooth deceleration
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = startVal + (endVal - startVal) * eased;
+            setAnimatedValue(current);
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                setHasAnimated(true);
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }, [value, minValue, hasAnimated]);
+
     if (!dataset || value === null) {
         return (
             <div
@@ -228,8 +258,15 @@ export const Gauge: React.FC<GaugeProps> = ({
             .outerRadius(radius);
     }, [innerRadius, radius]);
 
+    const hoverArcGenerator = useMemo(() => {
+        return arc<any>()
+            .innerRadius(innerRadius - 2)
+            .outerRadius(radius + 4);
+    }, [innerRadius, radius]);
+
     const clampedValue = Math.min(Math.max(value, minValue), maxValue);
-    const valueAngle = angleScale(clampedValue);
+    const displayValue = hasAnimated ? clampedValue : animatedValue;
+    const valueAngle = angleScale(displayValue);
     const baseArcPath = arcGenerator({ startAngle, endAngle });
     const valueArcPath = arcGenerator({ startAngle, endAngle: valueAngle });
 
@@ -242,7 +279,7 @@ export const Gauge: React.FC<GaugeProps> = ({
                 to: Math.min(maxValue, range.to)
             }))
             .filter((range) => range.to > range.from)
-            .sort((a, b) => a.from - b.from);
+            .sort((a, b) => b.from - a.from);           // I sort in descending order to handle overlapping ranges correctly
     }, [ranges, minValue, maxValue]);
 
     const activeRange = useMemo(() => {
@@ -266,14 +303,25 @@ export const Gauge: React.FC<GaugeProps> = ({
     };
 
     // Position min/max labels just past the arc ends
-    const labelRadius = radius + 16;
+    const labelRadius = radius - thickness / 2;
     const startLabelX = Math.sin(startAngle) * labelRadius;
-    const startLabelY = -Math.cos(startAngle) * labelRadius;
+    const startLabelY = -Math.cos(startAngle) * labelRadius + 10;
     const endLabelX = Math.sin(endAngle) * labelRadius;
-    const endLabelY = -Math.cos(endAngle) * labelRadius;
+    const endLabelY = -Math.cos(endAngle) * labelRadius + 10;
 
     const resolvedValueColor = valueColor || activeRange?.color || getColor(resolvedColors, 0, "#4c9aff");
     const percentOfRange = maxValue > minValue ? (clampedValue - minValue) / (maxValue - minValue) : 0;
+
+    const centerValueLabelX = 0;
+    const centerValueLabelY = -radius * 0.5;
+
+    // Determine if needle is in the "danger zone" where it might interfere with text
+    // This is roughly between 10 o'clock and 2 o'clock (-60° to +60° in D3 arc coords)
+    const needleInTextZone = valueAngle > -Math.PI / 3 && valueAngle < Math.PI / 3;
+
+    // Calculate background dimensions for value text area
+    const textBgWidth = Math.max(80, formattedValue.length * 14 + 20);
+    const textBgHeight = unit ? (activeRange?.label ? 70 : 50) : (activeRange?.label ? 50 : 30);
 
     const handleMouseMove = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
         const svg = event.currentTarget;
@@ -329,7 +377,9 @@ export const Gauge: React.FC<GaugeProps> = ({
 
                         {/* Range bands */}
                         {normalizedRanges.map((range, index) => {
-                            const rangePath = arcGenerator({
+                            const isRangeHovered = hoveredRangeIndex === index;
+                            const generator = isRangeHovered ? hoverArcGenerator : arcGenerator;
+                            const rangePath = generator({
                                 startAngle: angleScale(range.from),
                                 endAngle: angleScale(range.to)
                             });
@@ -342,7 +392,14 @@ export const Gauge: React.FC<GaugeProps> = ({
                                     key={`${range.from}-${range.to}-${index}`}
                                     d={rangePath}
                                     fill={fill}
-                                    opacity={0.9}
+                                    opacity={isRangeHovered ? 1 : 0.85}
+                                    style={{
+                                        cursor: "pointer",
+                                        transition: "all 0.15s ease-out",
+                                        filter: isRangeHovered ? "brightness(1.1)" : "none"
+                                    }}
+                                    onMouseEnter={() => setHoveredRangeIndex(index)}
+                                    onMouseLeave={() => setHoveredRangeIndex(null)}
                                 />
                             );
                         })}
@@ -370,10 +427,22 @@ export const Gauge: React.FC<GaugeProps> = ({
                         )}
 
                         {/* Value text - positioned below the center */}
+                        {showValue && needleInTextZone && (
+                            <rect
+                                x={centerValueLabelX - textBgWidth / 2}
+                                y={centerValueLabelY - 18}
+                                width={textBgWidth}
+                                height={textBgHeight}
+                                rx={6}
+                                ry={6}
+                                fill="var(--dl2-bg-visual)"
+                                opacity={0.85}
+                            />
+                        )}
                         {showValue && (
                             <text
-                                x={0}
-                                y={radius * 0.35}
+                                x={centerValueLabelX}
+                                y={centerValueLabelY}
                                 textAnchor="middle"
                                 fontSize={22}
                                 fontWeight={700}
@@ -385,12 +454,12 @@ export const Gauge: React.FC<GaugeProps> = ({
                         )}
                         {showValue && unit && (
                             <text
-                                x={0}
-                                y={radius * 0.35 + 18}
+                                x={centerValueLabelX}
+                                y={centerValueLabelY + 18}
                                 textAnchor="middle"
-                                fontSize={13}
+                                fontSize={16}
                                 fontWeight={500}
-                                fill="var(--dl2-text-muted)"
+                                fill={resolvedValueColor}
                                 className="dl2-gauge-unit"
                             >
                                 {unit}
@@ -398,12 +467,12 @@ export const Gauge: React.FC<GaugeProps> = ({
                         )}
                         {showValue && activeRange?.label && (
                             <text
-                                x={0}
-                                y={radius * 0.35 + (unit ? 36 : 18)}
+                                x={centerValueLabelX}
+                                y={centerValueLabelY + (unit ? 36 : 18)}
                                 textAnchor="middle"
-                                fontSize={13}
+                                fontSize={16}
                                 fontWeight={600}
-                                fill={activeRange.color || resolvedValueColor}
+                                fill={resolvedValueColor}
                                 className="dl2-gauge-status"
                             >
                                 {activeRange.label}
@@ -416,9 +485,9 @@ export const Gauge: React.FC<GaugeProps> = ({
                                 <text
                                     x={startLabelX}
                                     y={startLabelY}
-                                    textAnchor="end"
+                                    textAnchor="middle"
                                     dominantBaseline="hanging"
-                                    fontSize={14}
+                                    fontSize={16}
                                     fontWeight={600}
                                     style={{ fill: "var(--dl2-text-main)" }}
                                     className="dl2-gauge-minmax"
@@ -428,9 +497,9 @@ export const Gauge: React.FC<GaugeProps> = ({
                                 <text
                                     x={endLabelX}
                                     y={endLabelY}
-                                    textAnchor="start"
+                                    textAnchor="middle"
                                     dominantBaseline="hanging"
-                                    fontSize={14}
+                                    fontSize={16}
                                     fontWeight={600}
                                     style={{ fill: "var(--dl2-text-main)" }}
                                     className="dl2-gauge-minmax"
@@ -451,7 +520,7 @@ export const Gauge: React.FC<GaugeProps> = ({
                             backgroundColor: "var(--dl2-bg-main)",
                             color: "var(--dl2-text-main)",
                             border: "1px solid var(--dl2-border-main)",
-                            padding: "8px",
+                            padding: "10px 12px",
                             borderRadius: "6px",
                             pointerEvents: "none",
                             fontSize: "12px",
@@ -460,8 +529,28 @@ export const Gauge: React.FC<GaugeProps> = ({
                             boxShadow: "0 2px 6px var(--dl2-shadow)"
                         }}
                     >
-                        <div style={{ fontWeight: 600 }}>Value: {formattedValue}</div>
-                        <div>Range: {(tooltipData.percent * 100).toFixed(1)}%</div>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Value: {formattedValue}</div>
+                        <div style={{ marginBottom: 4 }}>Position: {(tooltipData.percent * 100).toFixed(1)}%</div>
+                        {activeRange && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                <span
+                                    style={{
+                                        display: "inline-block",
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 2,
+                                        backgroundColor: activeRange.color || resolvedValueColor
+                                    }}
+                                />
+                                <span style={{ fontWeight: 600, color: activeRange.color || resolvedValueColor }}>
+                                    {activeRange.label || "Current Range"}
+                                </span>
+                                <span style={{ color: "var(--dl2-text-muted)" }}>({activeRange.from} – {activeRange.to})</span>
+                            </div>
+                        )}
+                        <div style={{ color: "var(--dl2-text-muted)", fontSize: 11 }}>
+                            Scale: {minValue} – {maxValue}
+                        </div>
                     </div>
                 )}
             </div>

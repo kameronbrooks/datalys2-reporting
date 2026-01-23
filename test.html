@@ -104,6 +104,68 @@
                     "direction": "grid",
                     "children": [
                         {
+                            "id": "gauge-csat0",
+                            "elementType": "visual",
+                            "type": "gauge",
+                            "datasetId": "gaugeData",
+                            "rowIndex": 0,
+                            "valueColumn": "Value",
+                            "title": "CSAT Score",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "showMinMax": true,
+                            "ranges": [
+                                { "from": 0, "to": 60, "color": "#e74c3c", "label": "Low" },
+                                { "from": 60, "to": 80, "color": "#f39c12", "label": "Fair" },
+                                { "from": 80, "to": 100, "color": "#27ae60", "label": "Good" }
+                            ],
+                            "border": true,
+                            "shadow": true,
+                            "height": 220
+                        },
+                        {
+                            "id": "gauge-csat1",
+                            "elementType": "visual",
+                            "type": "gauge",
+                            "datasetId": "gaugeData",
+                            "rowIndex": 1,
+                            "valueColumn": "Value",
+                            "title": "CSAT Score",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "showMinMax": true,
+                            "ranges": [
+                                { "from": 0, "to": 60, "color": "#e74c3c", "label": "Low" },
+                                { "from": 60, "to": 80, "color": "#f39c12", "label": "Fair" },
+                                { "from": 80, "to": 100, "color": "#27ae60", "label": "Good" }
+                            ],
+                            "border": true,
+                            "shadow": true,
+                            "height": 220
+                        },
+                        {
+                            "id": "gauge-csat2",
+                            "elementType": "visual",
+                            "type": "gauge",
+                            "datasetId": "gaugeData",
+                            "rowIndex": 1,
+                            "valueColumn": "Value",
+                            "title": "CSAT Score",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "showMinMax": true,
+                            "border": true,
+                            "shadow": true,
+                            "height": 220
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "title": "Card Content Type Tests",
+                    "direction": "grid",
+                    "children": [
+                        {
                             "type": "card",
                             "title": "Plain Text Card (default)",
                             "text": "This is a plain text card with no special formatting. Just regular text content.",
@@ -564,7 +626,8 @@
             "dtypes": ["string", "number"],
             "columns": ["Metric", "Value"],
             "data": [
-                ["CSAT", 82]
+                ["CSAT", 50],
+                ["CSAT", 80]
             ]
         },
         "adSpendVsSales": {

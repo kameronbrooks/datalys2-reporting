@@ -1,6 +1,5 @@
 
 
-
 :root {
     --dl2-bg-main: #ffffff;
     --dl2-bg-report: #f8f9fa;
@@ -44,6 +43,10 @@
 
     --dl2-default-border-radius: 0px;
     --dl2-modal-border-radius: 0px;
+
+    --dl2-link-color: #007bff;
+
+    --dl2-font-family: Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -87,6 +90,8 @@
         --dl2-success: #48bb78;
         --dl2-warning: #ed8936;
         --dl2-error: #f56565;
+
+        --dl2-link-color: #52e2f5;
     }
 }
 
@@ -95,6 +100,19 @@ body {
     color: var(--dl2-text-main);
     margin: 0;
     padding: 0;
+
+    font-family: var(--dl2-font-family);
+    font-optical-sizing: auto;
+}
+
+a {
+    color: var(--dl2-link-color);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 .datalys2-dashboard {
@@ -345,7 +363,8 @@ body {
 @media (min-width: 1200px) {
     
     body {
-        font-family: Arial, sans-serif;
+        font-family: var(--dl2-font-family);
+        font-optical-sizing: auto;
         max-width: 85%;
         margin: 0 auto;
     }
@@ -355,7 +374,8 @@ body {
 @media (max-width: 1199px) {
     
     body {
-        font-family: Arial, sans-serif;
+        font-family: var(--dl2-font-family);
+        font-optical-sizing: auto;
         max-width: 100%;
         margin: 0 auto;
     }
