@@ -1,6 +1,6 @@
 {
   "name": "datalys2-reports",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A react based framework for showing dashboards and reports",
   "main": "dist/datalys2-reports.min.js",
   "types": "dist/index.d.ts",

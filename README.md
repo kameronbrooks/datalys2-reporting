@@ -49,7 +49,11 @@ You can use the library directly from a CDN without installing anything.
 
 For detailed documentation on the configuration schema and available components, please refer to [DOCUMENTATION.md](./DOCUMENTATION.md).
 
+---
+
 ## Development
+
+This section is only if you are building the package yourself!
 
 ### Prerequisites
 

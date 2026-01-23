@@ -106,6 +106,7 @@ export const Gauge: React.FC<GaugeProps> = ({
     const [animatedValue, setAnimatedValue] = useState(minValue);
     const [hasAnimated, setHasAnimated] = useState(false);
 
+    // Handle responsive resizing of the chart container
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -209,22 +210,28 @@ export const Gauge: React.FC<GaugeProps> = ({
         requestAnimationFrame(animate);
     }, [value, minValue, hasAnimated]);
 
+    const containerStyle: React.CSSProperties = {
+        padding: padding || 10,
+        margin: margin || 10,
+        border: border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
+        minHeight: "200px",
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
+        flex: flex || 1,
+        backgroundColor: "var(--dl2-bg-visual)"
+    };
+
     if (!dataset || value === null) {
         return (
             <div
+                ref={containerRef}
                 className="dl2-gauge dl2-visual-container"
                 style={{
-                    padding: padding || 10,
-                    margin: margin || 10,
-                    border: border ? "1px solid var(--dl2-border-main)" : undefined,
-                    boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
-                    minHeight: height,
-                    display: "flex",
-                    flexDirection: "column",
+                    ...containerStyle,
                     justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "var(--dl2-bg-visual)",
-                    flex: flex || 1
+                    alignItems: "center"
                 }}
             >
                 {title && <h3 className="dl2-chart-title">{title}</h3>}
@@ -344,28 +351,19 @@ export const Gauge: React.FC<GaugeProps> = ({
         <div
             ref={containerRef}
             className="dl2-gauge dl2-visual-container"
-            style={{
-                padding: padding || 10,
-                margin: margin || 10,
-                border: border ? "1px solid var(--dl2-border-main)" : undefined,
-                boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
-                backgroundColor: "var(--dl2-bg-visual)",
-                flex: flex || 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "stretch"
-            }}
+            style={containerStyle}
         >
             {title && <h3 className="dl2-chart-title" style={{ textAlign: "center", marginBottom: 4 }}>{title}</h3>}
             {description && <p className="dl2-chart-description" style={{ textAlign: "center", marginTop: 0 }}>{description}</p>}
 
-            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+            <div style={{ flex: 1, width: "100%", minHeight: 0, position: "relative" }}>
                 <svg
+                    className="dl2-chart-svg"
                     width={chartWidth}
                     height={height}
                     role="img"
                     aria-label={title ?? "Gauge"}
-                    style={{ display: "block" }}
+                    style={{ display: "block", maxWidth: "100%" }}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
                 >
