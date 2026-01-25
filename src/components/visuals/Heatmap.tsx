@@ -464,9 +464,9 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                     <div
                         style={{
                             position: "absolute",
-                            left: hoveredData.x,
-                            top: hoveredData.y,
-                            transform: "translate(-50%, -110%)",
+                            left: hoveredData.x + 15,
+                            top: hoveredData.y - 10,
+                            transform: "translateY(-100%)",
                             backgroundColor: "var(--dl2-bg-main)",
                             color: "var(--dl2-text-main)",
                             border: "1px solid var(--dl2-border-main)",
@@ -475,7 +475,6 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                             pointerEvents: "none",
                             fontSize: "12px",
                             zIndex: 10,
-                            marginTop: "-10px",
                             whiteSpace: "nowrap",
                             boxShadow: "0 2px 4px var(--dl2-shadow)"
                         }}

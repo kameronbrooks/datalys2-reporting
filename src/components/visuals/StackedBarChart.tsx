@@ -396,9 +396,9 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                 {hoveredData && (
                     <div style={{
                         position: "absolute",
-                        left: hoveredData.x,
-                        top: hoveredData.y,
-                        transform: "translate(-50%, -100%)",
+                        left: hoveredData.x + 15,
+                        top: hoveredData.y - 10,
+                        transform: "translateY(-100%)",
                         backgroundColor: "rgba(0, 0, 0, 0.8)",
                         color: "white",
                         padding: "8px",
@@ -406,7 +406,6 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                         pointerEvents: "none",
                         fontSize: "12px",
                         zIndex: 10,
-                        marginTop: "-10px",
                         whiteSpace: "nowrap"
                     }}>
                         <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>

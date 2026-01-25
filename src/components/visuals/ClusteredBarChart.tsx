@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { scaleBand, scaleLinear, scaleOrdinal, max, schemeTableau10 } from "d3";
-import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty, ThresholdConfig } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
@@ -37,6 +37,11 @@ export interface ClusteredBarChartProps extends ReportVisual {
     legendTitle?: string;
     /** Whether to show value labels inside the bars. Defaults to false. */
     showLabels?: boolean;
+    /** 
+     * Optional threshold configuration for pass/fail coloring.
+     * When provided, bars will be colored based on whether values pass or fail the threshold.
+     */
+    threshold?: ThresholdConfig;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
@@ -67,7 +72,8 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     colors,
     showLegend = true,
     legendTitle,
-    showLabels = false
+    showLabels = false,
+    threshold
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
@@ -132,6 +138,37 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
     }, [dataset, xColumn, yColumns]);
 
     const { data, keys } = processedData;
+
+    // Threshold configuration with defaults
+    const thresholdConfig = useMemo(() => {
+        if (!threshold) return null;
+        return {
+            value: threshold.value,
+            passColor: threshold.passColor || '#22c55e', // green-500
+            failColor: threshold.failColor || '#ef4444', // red-500
+            mode: threshold.mode || 'above',
+            showLine: threshold.showLine !== false,
+            lineStyle: threshold.lineStyle || 'dashed',
+            applyTo: threshold.applyTo || 'both'
+        };
+    }, [threshold]);
+
+    /** Determine if a value passes the threshold check */
+    const passesThreshold = (value: number): boolean => {
+        if (!thresholdConfig) return true;
+        switch (thresholdConfig.mode) {
+            case 'above': return value >= thresholdConfig.value;
+            case 'below': return value <= thresholdConfig.value;
+            case 'equals': return value === thresholdConfig.value;
+            default: return value >= thresholdConfig.value;
+        }
+    };
+
+    /** Get color for a specific value based on threshold */
+    const getThresholdColor = (value: number): string | null => {
+        if (!thresholdConfig) return null;
+        return passesThreshold(value) ? thresholdConfig.passColor : thresholdConfig.failColor;
+    };
 
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
@@ -246,6 +283,23 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                             ))}
                         </g>
 
+                        {/* Threshold reference line */}
+                        {thresholdConfig && thresholdConfig.showLine && (
+                            <line
+                                x1={0}
+                                x2={innerWidth}
+                                y1={yScale(thresholdConfig.value)}
+                                y2={yScale(thresholdConfig.value)}
+                                stroke="var(--dl2-text-muted)"
+                                strokeWidth={1.5}
+                                strokeDasharray={
+                                    thresholdConfig.lineStyle === 'dashed' ? '8 4' :
+                                    thresholdConfig.lineStyle === 'dotted' ? '2 2' : 'none'
+                                }
+                                opacity={0.7}
+                            />
+                        )}
+
                         {/* Render Bar Groups */}
                         {data.map((d, i) => {
                             const groupX = x0Scale(d.x);
@@ -260,6 +314,10 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                         const barY = yScale(value);
                                         const barHeight = innerHeight - barY;
                                         const isHovered = hoveredData?.label === d.x && hoveredData?.series === key;
+                                        
+                                        // Determine bar color: use threshold color if configured, otherwise use series color
+                                        const baseColor = colorScale(key);
+                                        const barColor = thresholdConfig ? (getThresholdColor(value) || baseColor) : baseColor;
 
                                         if (barX === undefined) return null;
 
@@ -270,7 +328,7 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                                                     y={barY}
                                                     width={barWidth}
                                                     height={barHeight}
-                                                    fill={colorScale(key)}
+                                                    fill={barColor}
                                                     fillOpacity={isHovered ? 0.8 : 1}
                                                     stroke={isHovered ? "var(--dl2-text-main)" : "none"}
                                                     strokeWidth={1}
@@ -413,9 +471,9 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                 {hoveredData && (
                     <div style={{
                         position: "absolute",
-                        left: hoveredData.x,
-                        top: hoveredData.y,
-                        transform: "translate(-50%, -100%)",
+                        left: hoveredData.x + 15,
+                        top: hoveredData.y - 10,
+                        transform: "translateY(-100%)",
                         backgroundColor: "rgba(0, 0, 0, 0.8)",
                         color: "white",
                         padding: "8px",
@@ -423,7 +481,6 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
                         pointerEvents: "none",
                         fontSize: "12px",
                         zIndex: 10,
-                        marginTop: "-10px",
                         whiteSpace: "nowrap"
                     }}>
                         <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>

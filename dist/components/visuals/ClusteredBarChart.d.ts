@@ -1,5 +1,5 @@
 import React from "react";
-import type { ReportVisual, ReportVisualElement, ColorProperty } from "../../lib/types";
+import type { ReportVisual, ReportVisualElement, ColorProperty, ThresholdConfig } from "../../lib/types";
 /**
  * Props for the ClusteredBarChart component.
  */
@@ -29,6 +29,11 @@ export interface ClusteredBarChartProps extends ReportVisual {
     legendTitle?: string;
     /** Whether to show value labels inside the bars. Defaults to false. */
     showLabels?: boolean;
+    /**
+     * Optional threshold configuration for pass/fail coloring.
+     * When provided, bars will be colored based on whether values pass or fail the threshold.
+     */
+    threshold?: ThresholdConfig;
 }
 /**
  * ClusteredBarChart Component

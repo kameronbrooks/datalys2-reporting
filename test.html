@@ -342,23 +342,20 @@
                             "showLabels": true,
                             "datasetId": "quarterlySales",
                             "title": "Quarterly Sales by Category",
-                            "description": "Sales breakdown by quarter and category.",
+                            "description": "Sales breakdown by quarter and category. Values at or above 4000 shown in green.",
                             "xColumn": "Quarter",
                             "yColumns": ["Electronics", "Clothing", "Home"],
                             "border": true,
                             "shadow": true,
                             "height": 200,
-                            "otherElements": [
-                                {
-                                    "visualElementType": "xAxis",
-                                    "value": 4500,
-                                    "color": "green",
-                                    "lineStyle": "dashed",
-                                    "lineWidth": 2,
-                                    "label": "Target"
-                                }
-                            ]
-
+                            "threshold": {
+                                "value": 4000,
+                                "passColor": "#22c55e",
+                                "failColor": "#ef4444",
+                                "mode": "above",
+                                "showLine": true,
+                                "lineStyle": "dashed"
+                            }
                         }
                     ]
                 },
@@ -553,6 +550,24 @@
                                 "showLine": true,
                                 "applyTo": "both"
                             }
+                        },
+                        {
+                            "id": "sales-area-chart-multi",
+                            "elementType": "visual",
+                            "type": "area",
+                            "datasetId": "quarterlySales",
+                            "title": "Multi-Series Area Chart",
+                            "description": "Area chart showing all product categories.",
+                            "xColumn": "Quarter",
+                            "yColumns": ["Electronics", "Clothing", "Home"],
+                            "border": true,
+                            "shadow": true,
+                            "height": 300,
+                            "smooth": true,
+                            "fillOpacity": 0.3,
+                            "showLine": true,
+                            "showMarkers": true,
+                            "showLegend": true
                         }
                     ]
                 },

@@ -340,9 +340,9 @@ export const Histogram: React.FC<HistogramProps> = ({
                 <div
                     style={{
                         position: "absolute",
-                        left: tooltipPos.x,
-                        top: tooltipPos.y,
-                        transform: "translate(-50%, -100%)",
+                        left: tooltipPos.x + 15,
+                        top: tooltipPos.y - 10,
+                        transform: "translateY(-100%)",
                         backgroundColor: "var(--dl2-bg-main)",
                         color: "var(--dl2-text-main)",
                         padding: "8px",
@@ -352,8 +352,7 @@ export const Histogram: React.FC<HistogramProps> = ({
                         pointerEvents: "none",
                         fontSize: "12px",
                         zIndex: 10,
-                        whiteSpace: "nowrap",
-                        marginTop: "-10px"
+                        whiteSpace: "nowrap"
                     }}
                 >
                     <div style={{ fontWeight: "bold" }}>Range: {hoveredBin.x0} - {hoveredBin.x1}</div>

@@ -512,9 +512,9 @@ export const Gauge: React.FC<GaugeProps> = ({
                     <div
                         style={{
                             position: "absolute",
-                            left: tooltipData.x,
-                            top: tooltipData.y,
-                            transform: "translate(-50%, -110%)",
+                            left: tooltipData.x + 15,
+                            top: tooltipData.y - 10,
+                            transform: "translateY(-100%)",
                             backgroundColor: "var(--dl2-bg-main)",
                             color: "var(--dl2-text-main)",
                             border: "1px solid var(--dl2-border-main)",
