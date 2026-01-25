@@ -1,9 +1,9 @@
 import React from "react";
 import type { ReportVisual, ReportVisualElement, ColorProperty, ThresholdConfig } from "../../lib/types";
 /**
- * Props for the LineChart component.
+ * Props for the AreaChart component.
  */
-export interface LineChartProps extends ReportVisual {
+export interface AreaChartProps extends ReportVisual {
     /** Additional visual elements like markers or trend lines. */
     otherElements?: ReportVisualElement[];
     /** Column for the X-axis (categories or time). */
@@ -21,24 +21,34 @@ export interface LineChartProps extends ReportVisual {
     yAxisLabel?: string;
     /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    /** Color or color palette for the lines. */
+    /** Color or color palette for the areas. */
     colors?: ColorProperty;
     /** Whether to show the legend. Defaults to true. */
     showLegend?: boolean;
     legendTitle?: string;
     /** Whether to show value labels above points. Defaults to false. */
     showLabels?: boolean;
-    /** Whether to use monotone cubic interpolation for smooth lines. Defaults to false. */
+    /** Whether to use monotone cubic interpolation for smooth curves. Defaults to false. */
     smooth?: boolean;
     /**
      * Optional threshold configuration for pass/fail coloring.
-     * When provided, lines and markers will be colored based on whether values pass or fail the threshold.
-     * Lines will seamlessly blend colors at threshold crossing points.
+     * When provided, lines, areas, and markers will be colored based on whether values pass or fail the threshold.
+     * Colors will seamlessly blend at threshold crossing points.
      */
     threshold?: ThresholdConfig;
+    /**
+     * Opacity of the area fill (0-1). Defaults to 0.3.
+     * Set to 0 to hide the fill and show only the line.
+     */
+    fillOpacity?: number;
+    /** Whether to show the line stroke on top of the area. Defaults to true. */
+    showLine?: boolean;
+    /** Whether to show interactive markers/points. Defaults to true. */
+    showMarkers?: boolean;
 }
 /**
- * LineChart Component
- * Renders a multi-series line chart with optional smoothing and interactive points.
+ * AreaChart Component
+ * Renders a multi-series area chart with filled regions below the lines.
+ * Supports threshold-based coloring with smooth gradient transitions.
  */
-export declare const LineChart: React.FC<LineChartProps>;
+export declare const AreaChart: React.FC<AreaChartProps>;

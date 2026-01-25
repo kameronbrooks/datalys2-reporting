@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import { scalePoint, scaleLinear, scaleOrdinal, max, schemeTableau10, line, curveLinear, curveMonotoneX } from "d3";
+import { scalePoint, scaleLinear, scaleOrdinal, max, schemeTableau10, line, area, curveLinear, curveMonotoneX } from "d3";
 import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty, ThresholdConfig } from "../../lib/types";
 import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
@@ -8,9 +8,9 @@ import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
 /**
- * Props for the LineChart component.
+ * Props for the AreaChart component.
  */
-export interface LineChartProps extends ReportVisual {
+export interface AreaChartProps extends ReportVisual {
     /** Additional visual elements like markers or trend lines. */
     otherElements?: ReportVisualElement[];
     /** Column for the X-axis (categories or time). */
@@ -28,30 +28,40 @@ export interface LineChartProps extends ReportVisual {
     yAxisLabel?: string;
     /** Custom margins for the chart area. */
     chartMargin?: Partial<Record<"top" | "right" | "bottom" | "left", number>>;
-    /** Color or color palette for the lines. */
+    /** Color or color palette for the areas. */
     colors?: ColorProperty;
     /** Whether to show the legend. Defaults to true. */
     showLegend?: boolean;
     legendTitle?: string;
     /** Whether to show value labels above points. Defaults to false. */
     showLabels?: boolean;
-    /** Whether to use monotone cubic interpolation for smooth lines. Defaults to false. */
+    /** Whether to use monotone cubic interpolation for smooth curves. Defaults to false. */
     smooth?: boolean;
     /** 
      * Optional threshold configuration for pass/fail coloring.
-     * When provided, lines and markers will be colored based on whether values pass or fail the threshold.
-     * Lines will seamlessly blend colors at threshold crossing points.
+     * When provided, lines, areas, and markers will be colored based on whether values pass or fail the threshold.
+     * Colors will seamlessly blend at threshold crossing points.
      */
     threshold?: ThresholdConfig;
+    /** 
+     * Opacity of the area fill (0-1). Defaults to 0.3.
+     * Set to 0 to hide the fill and show only the line.
+     */
+    fillOpacity?: number;
+    /** Whether to show the line stroke on top of the area. Defaults to true. */
+    showLine?: boolean;
+    /** Whether to show interactive markers/points. Defaults to true. */
+    showMarkers?: boolean;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
 
 /**
- * LineChart Component
- * Renders a multi-series line chart with optional smoothing and interactive points.
+ * AreaChart Component
+ * Renders a multi-series area chart with filled regions below the lines.
+ * Supports threshold-based coloring with smooth gradient transitions.
  */
-export const LineChart: React.FC<LineChartProps> = ({
+export const AreaChart: React.FC<AreaChartProps> = ({
     xColumn = 0,
     yColumns = [1],
     datasetId,
@@ -75,7 +85,10 @@ export const LineChart: React.FC<LineChartProps> = ({
     legendTitle,
     showLabels = false,
     smooth = false,
-    threshold
+    threshold,
+    fillOpacity = 0.3,
+    showLine = true,
+    showMarkers = true
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
@@ -118,7 +131,7 @@ export const LineChart: React.FC<LineChartProps> = ({
         left: chartMargin?.left ?? defaultMargin.left
     }), [chartMargin]);
 
-    // Process dataset into a format suitable for multi-series line rendering
+    // Process dataset into a format suitable for multi-series rendering
     const processedData = useMemo(() => {
         if (!dataset) return { data: [], keys: [] };
 
@@ -221,7 +234,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
         keys.forEach((key) => {
             const seriesData = data.map(d => ({ x: d.x, value: d[key] }));
-            const gradientId = `threshold-gradient-${key.replace(/\s+/g, '-')}`;
+            const gradientId = `area-threshold-gradient-${key.replace(/\s+/g, '-')}`;
             const stops: Array<{ offset: string; color: string }> = [];
 
             for (let i = 0; i < seriesData.length; i++) {
@@ -312,9 +325,21 @@ export const LineChart: React.FC<LineChartProps> = ({
             .curve(smooth ? curveMonotoneX : curveLinear);
     }, [xScale, yScale, smooth]);
 
+    // D3 Area generator with optional smoothing
+    const areaGenerator = useMemo(() => {
+        return area<any>()
+            .x(d => xScale(d.x) ?? 0)
+            .y0(innerHeight)
+            .y1(d => yScale(d.value))
+            .curve(smooth ? curveMonotoneX : curveLinear);
+    }, [xScale, yScale, innerHeight, smooth]);
+
+    // Clamp fill opacity between 0 and 1
+    const clampedFillOpacity = Math.max(0, Math.min(1, fillOpacity));
+
     if (!dataset || data.length === 0) {
         return (
-            <div className="dl2-line-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
+            <div className="dl2-area-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
                 {title && <h3 className="dl2-chart-title">{title}</h3>}
                 {description && <p className="dl2-chart-description">{description}</p>}
                 <div className="dl2-chart-empty">No data available.</div>
@@ -323,7 +348,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     }
 
     return (
-        <div className="dl2-line-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
+        <div className="dl2-area-chart dl2-visual-container" style={containerStyle} ref={containerRef}>
             {title && <h3 className="dl2-chart-title">{title}</h3>}
             {description && <p className="dl2-chart-description">{description}</p>}
 
@@ -333,7 +358,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                     width={chartWidth}
                     height={height}
                     role="img"
-                    aria-label={title ?? "Line Chart"}
+                    aria-label={title ?? "Area Chart"}
                     style={{ display: "block", maxWidth: "100%" }}
                 >
                     {/* Gradient definitions for threshold-based coloring */}
@@ -390,30 +415,47 @@ export const LineChart: React.FC<LineChartProps> = ({
                             />
                         )}
 
-                        {/* Render Lines and Points for each series */}
+                        {/* Render Areas, Lines, and Points for each series */}
                         {keys.map((key) => {
                             const seriesData = data.map(d => ({ x: d.x, value: d[key] }));
-                            const pathD = lineGenerator(seriesData);
+                            const areaPath = areaGenerator(seriesData);
+                            const linePath = lineGenerator(seriesData);
                             const baseColor = colorScale(key);
                             const gradient = thresholdGradients[key];
+                            
                             // Use gradient if threshold is configured and applyTo includes lines
                             const applyToLines = thresholdConfig && (thresholdConfig.applyTo === 'both' || thresholdConfig.applyTo === 'lines');
+                            const fillColor = applyToLines && gradient 
+                                ? `url(#${gradient.id})` 
+                                : baseColor;
                             const strokeColor = applyToLines && gradient 
                                 ? `url(#${gradient.id})` 
                                 : baseColor;
 
                             return (
                                 <g key={key}>
-                                    {/* Series Line */}
-                                    <path
-                                        d={pathD || ""}
-                                        fill="none"
-                                        stroke={strokeColor}
-                                        strokeWidth={2}
-                                    />
+                                    {/* Area Fill */}
+                                    {clampedFillOpacity > 0 && (
+                                        <path
+                                            d={areaPath || ""}
+                                            fill={fillColor}
+                                            fillOpacity={clampedFillOpacity}
+                                            stroke="none"
+                                        />
+                                    )}
+                                    
+                                    {/* Line Stroke */}
+                                    {showLine && (
+                                        <path
+                                            d={linePath || ""}
+                                            fill="none"
+                                            stroke={strokeColor}
+                                            strokeWidth={2}
+                                        />
+                                    )}
                                     
                                     {/* Interactive Points */}
-                                    {seriesData.map((d, i) => {
+                                    {showMarkers && seriesData.map((d, i) => {
                                         const cx = xScale(d.x);
                                         const cy = yScale(d.value);
                                         // Use threshold color for marker if configured and applyTo includes markers

@@ -519,9 +519,39 @@
                                 "passColor": "#22c55e",
                                 "failColor": "#ef4444",
                                 "mode": "above",
+                                "blendWidth": 8,
+                                "applyTo": "markers"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "children": [
+                        {
+                            "id": "sales-area-chart",
+                            "elementType": "visual",
+                            "type": "area",
+                            "datasetId": "quarterlySales",
+                            "title": "Quarterly Sales Area Chart",
+                            "description": "Area chart with threshold coloring. Values above 4000 shown in green.",
+                            "xColumn": "Quarter",
+                            "yColumns": ["Electronics"],
+                            "border": true,
+                            "shadow": true,
+                            "height": 300,
+                            "smooth": true,
+                            "fillOpacity": 0.4,
+                            "showLine": true,
+                            "showMarkers": true,
+                            "threshold": {
+                                "value": 5500,
+                                "passColor": "#22c55e",
+                                "failColor": "#ef4444",
+                                "mode": "above",
+                                "blendWidth": 8,
                                 "showLine": true,
-                                "lineStyle": "dashed",
-                                "blendWidth": 8
+                                "applyTo": "both"
                             }
                         }
                     ]

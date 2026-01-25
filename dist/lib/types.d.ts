@@ -136,6 +136,42 @@ export interface LabelVisualElement extends ReportVisualElement {
     fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter';
 }
 /**
+ * Threshold configuration for pass/fail coloring in charts.
+ * Used by LineChart and AreaChart to color elements based on threshold values.
+ */
+export interface ThresholdConfig {
+    /** The threshold value to compare against. */
+    value: number;
+    /** Color for values that pass the threshold check. Defaults to green. */
+    passColor?: string;
+    /** Color for values that fail the threshold check. Defaults to red. */
+    failColor?: string;
+    /**
+     * How to determine pass/fail:
+     * - 'above': values >= threshold pass (default)
+     * - 'below': values <= threshold pass
+     * - 'equals': values === threshold pass
+     */
+    mode?: 'above' | 'below' | 'equals';
+    /** Whether to show the threshold line on the chart. Defaults to true. */
+    showLine?: boolean;
+    /** Style for the threshold line. Defaults to 'dashed'. */
+    lineStyle?: 'solid' | 'dashed' | 'dotted';
+    /**
+     * Width of the color blend transition zone as a percentage of the chart width (0-50).
+     * Higher values create a more gradual color transition. Defaults to 5.
+     * Set to 0 for a hard edge at the threshold crossing.
+     */
+    blendWidth?: number;
+    /**
+     * Which elements to apply threshold coloring to:
+     * - 'both': Apply to both lines/areas and markers (default)
+     * - 'markers': Only apply to markers, lines/areas keep their original colors
+     * - 'lines': Only apply to lines/areas, markers keep their original colors
+     */
+    applyTo?: 'both' | 'markers' | 'lines';
+}
+/**
  * Interface for report layout elements
  * Extends LayoutElement with layout-specific properties
  * Properties:

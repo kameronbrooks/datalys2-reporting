@@ -10,6 +10,7 @@ import { Checklist } from "./visuals/Checklist";
 import { Heatmap } from "./visuals/Heatmap";
 import { Histogram } from "./visuals/Histogram";
 import { LineChart } from "./visuals/LineChart";
+import { AreaChart } from "./visuals/AreaChart";
 import { BoxPlot } from "./visuals/BoxPlot";
 import { Gauge } from "./visuals/Gauge";
 
@@ -20,6 +21,7 @@ const componentRegistry: { [key: string]: React.FC<any> } = {
     'stackedBar': StackedBarChart,
     'clusteredBar': ClusteredBarChart,
     'line': LineChart,
+    'area': AreaChart,
     'kpi': KPI,
     'scatter': ScatterPlot,
     'table': Table,
