@@ -8,6 +8,35 @@ import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
 
 /**
+ * Threshold configuration for pass/fail coloring.
+ */
+export interface ThresholdConfig {
+    /** The threshold value to compare against. */
+    value: number;
+    /** Color for values that pass the threshold check. Defaults to green. */
+    passColor?: string;
+    /** Color for values that fail the threshold check. Defaults to red. */
+    failColor?: string;
+    /** 
+     * How to determine pass/fail:
+     * - 'above': values >= threshold pass (default)
+     * - 'below': values <= threshold pass
+     * - 'equals': values === threshold pass
+     */
+    mode?: 'above' | 'below' | 'equals';
+    /** Whether to show the threshold line on the chart. Defaults to true. */
+    showLine?: boolean;
+    /** Style for the threshold line. Defaults to 'dashed'. */
+    lineStyle?: 'solid' | 'dashed' | 'dotted';
+    /** 
+     * Width of the color blend transition zone as a percentage of the chart width (0-50).
+     * Higher values create a more gradual color transition. Defaults to 5.
+     * Set to 0 for a hard edge at the threshold crossing.
+     */
+    blendWidth?: number;
+}
+
+/**
  * Props for the LineChart component.
  */
 export interface LineChartProps extends ReportVisual {
@@ -37,6 +66,12 @@ export interface LineChartProps extends ReportVisual {
     showLabels?: boolean;
     /** Whether to use monotone cubic interpolation for smooth lines. Defaults to false. */
     smooth?: boolean;
+    /** 
+     * Optional threshold configuration for pass/fail coloring.
+     * When provided, lines and markers will be colored based on whether values pass or fail the threshold.
+     * Lines will seamlessly blend colors at threshold crossing points.
+     */
+    threshold?: ThresholdConfig;
 }
 
 const defaultMargin = { top: 20, right: 20, bottom: 50, left: 50 };
@@ -68,7 +103,8 @@ export const LineChart: React.FC<LineChartProps> = ({
     showLegend = true,
     legendTitle,
     showLabels = false,
-    smooth = false
+    smooth = false,
+    threshold
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [chartWidth, setChartWidth] = useState(width);
@@ -134,6 +170,37 @@ export const LineChart: React.FC<LineChartProps> = ({
 
     const { data, keys } = processedData;
 
+    // Threshold configuration with defaults
+    const thresholdConfig = useMemo(() => {
+        if (!threshold) return null;
+        return {
+            value: threshold.value,
+            passColor: threshold.passColor || '#22c55e', // green-500
+            failColor: threshold.failColor || '#ef4444', // red-500
+            mode: threshold.mode || 'above',
+            showLine: threshold.showLine !== false,
+            lineStyle: threshold.lineStyle || 'dashed',
+            blendWidth: Math.max(0, Math.min(50, threshold.blendWidth ?? 5)) // Clamp between 0-50%
+        };
+    }, [threshold]);
+
+    /** Determine if a value passes the threshold check */
+    const passesThreshold = (value: number): boolean => {
+        if (!thresholdConfig) return true;
+        switch (thresholdConfig.mode) {
+            case 'above': return value >= thresholdConfig.value;
+            case 'below': return value <= thresholdConfig.value;
+            case 'equals': return value === thresholdConfig.value;
+            default: return value >= thresholdConfig.value;
+        }
+    };
+
+    /** Get color for a specific value based on threshold */
+    const getThresholdColor = (value: number): string | null => {
+        if (!thresholdConfig) return null;
+        return passesThreshold(value) ? thresholdConfig.passColor : thresholdConfig.failColor;
+    };
+
     const resolvedColors = useMemo(() => resolveColors(colors), [colors]);
 
     // Ordinal scale for series colors
@@ -169,6 +236,72 @@ export const LineChart: React.FC<LineChartProps> = ({
             .domain([computedMinY, computedMaxY])
             .range([innerHeight, 0]);
     }, [data, keys, maxY, minY, innerHeight]);
+
+    /**
+     * Generate threshold-based gradient definitions for smooth color transitions.
+     * The gradient is oriented along the x-axis and blends colors around threshold crossings.
+     */
+    const thresholdGradients = useMemo(() => {
+        if (!thresholdConfig || innerWidth === 0) return {};
+
+        const gradients: Record<string, { id: string; stops: Array<{ offset: string; color: string }> }> = {};
+        const blendWidth = thresholdConfig.blendWidth; // Percentage of chart width for blend zone
+
+        keys.forEach((key) => {
+            const seriesData = data.map(d => ({ x: d.x, value: d[key] }));
+            const gradientId = `threshold-gradient-${key.replace(/\s+/g, '-')}`;
+            const stops: Array<{ offset: string; color: string }> = [];
+
+            for (let i = 0; i < seriesData.length; i++) {
+                const point = seriesData[i];
+                const xPos = xScale(point.x) ?? 0;
+                const offsetPercent = (xPos / innerWidth) * 100;
+                const color = passesThreshold(point.value) ? thresholdConfig.passColor : thresholdConfig.failColor;
+
+                // Check for threshold crossing between this point and the previous
+                if (i > 0) {
+                    const prevPoint = seriesData[i - 1];
+                    const prevXPos = xScale(prevPoint.x) ?? 0;
+                    const prevPasses = passesThreshold(prevPoint.value);
+                    const currPasses = passesThreshold(point.value);
+
+                    if (prevPasses !== currPasses) {
+                        // Calculate the interpolated crossing point
+                        const thresholdVal = thresholdConfig.value;
+                        const t = (thresholdVal - prevPoint.value) / (point.value - prevPoint.value);
+                        const crossingX = prevXPos + t * (xPos - prevXPos);
+                        const crossingOffset = (crossingX / innerWidth) * 100;
+
+                        const prevColor = prevPasses ? thresholdConfig.passColor : thresholdConfig.failColor;
+                        const currColor = currPasses ? thresholdConfig.passColor : thresholdConfig.failColor;
+
+                        if (blendWidth > 0) {
+                            // Create a smooth blend zone around the crossing point
+                            const blendStart = Math.max(0, crossingOffset - blendWidth);
+                            const blendEnd = Math.min(100, crossingOffset + blendWidth);
+                            
+                            stops.push({ offset: `${blendStart}%`, color: prevColor });
+                            stops.push({ offset: `${blendEnd}%`, color: currColor });
+                        } else {
+                            // Hard edge at the crossing point
+                            stops.push({ offset: `${crossingOffset}%`, color: prevColor });
+                            stops.push({ offset: `${crossingOffset}%`, color: currColor });
+                        }
+                    }
+                }
+
+                // Add stop for current point
+                stops.push({ offset: `${offsetPercent}%`, color: color });
+            }
+
+            // Sort stops by offset and remove duplicates
+            stops.sort((a, b) => parseFloat(a.offset) - parseFloat(b.offset));
+
+            gradients[key] = { id: gradientId, stops };
+        });
+
+        return gradients;
+    }, [thresholdConfig, keys, data, xScale, innerWidth, passesThreshold]);
 
     const containerStyle: React.CSSProperties = {
         padding: padding || 10,
@@ -231,6 +364,27 @@ export const LineChart: React.FC<LineChartProps> = ({
                     aria-label={title ?? "Line Chart"}
                     style={{ display: "block", maxWidth: "100%" }}
                 >
+                    {/* Gradient definitions for threshold-based coloring */}
+                    <defs>
+                        {thresholdConfig && Object.entries(thresholdGradients).map(([key, gradient]) => (
+                            <linearGradient
+                                key={gradient.id}
+                                id={gradient.id}
+                                x1="0%"
+                                y1="0%"
+                                x2="100%"
+                                y2="0%"
+                            >
+                                {gradient.stops.map((stop, idx) => (
+                                    <stop
+                                        key={`${stop.offset}-${idx}`}
+                                        offset={stop.offset}
+                                        stopColor={stop.color}
+                                    />
+                                ))}
+                            </linearGradient>
+                        ))}
+                    </defs>
                     <g transform={`translate(${resolvedMargin.left}, ${resolvedMargin.top})`}>
                         {/* Horizontal Grid lines */}
                         <g className="grid-lines">
@@ -247,11 +401,33 @@ export const LineChart: React.FC<LineChartProps> = ({
                             ))}
                         </g>
 
+                        {/* Threshold reference line */}
+                        {thresholdConfig && thresholdConfig.showLine && (
+                            <line
+                                x1={0}
+                                x2={innerWidth}
+                                y1={yScale(thresholdConfig.value)}
+                                y2={yScale(thresholdConfig.value)}
+                                stroke="var(--dl2-text-muted)"
+                                strokeWidth={1.5}
+                                strokeDasharray={
+                                    thresholdConfig.lineStyle === 'dashed' ? '8 4' :
+                                    thresholdConfig.lineStyle === 'dotted' ? '2 2' : 'none'
+                                }
+                                opacity={0.7}
+                            />
+                        )}
+
                         {/* Render Lines and Points for each series */}
                         {keys.map((key) => {
                             const seriesData = data.map(d => ({ x: d.x, value: d[key] }));
                             const pathD = lineGenerator(seriesData);
-                            const color = colorScale(key);
+                            const baseColor = colorScale(key);
+                            const gradient = thresholdGradients[key];
+                            // Use gradient if threshold is configured, otherwise use base color
+                            const strokeColor = thresholdConfig && gradient 
+                                ? `url(#${gradient.id})` 
+                                : baseColor;
 
                             return (
                                 <g key={key}>
@@ -259,7 +435,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                     <path
                                         d={pathD || ""}
                                         fill="none"
-                                        stroke={color}
+                                        stroke={strokeColor}
                                         strokeWidth={2}
                                     />
                                     
@@ -267,6 +443,8 @@ export const LineChart: React.FC<LineChartProps> = ({
                                     {seriesData.map((d, i) => {
                                         const cx = xScale(d.x);
                                         const cy = yScale(d.value);
+                                        // Use threshold color for marker if configured, otherwise base color
+                                        const markerColor = getThresholdColor(d.value) || baseColor;
                                         
                                         if (cx === undefined) return null;
 
@@ -276,7 +454,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                     cx={cx}
                                                     cy={cy}
                                                     r={hoveredData?.label === d.x && hoveredData?.series === key ? 7 : 4}
-                                                    fill={color}
+                                                    fill={markerColor}
                                                     stroke="var(--dl2-bg-visual)"
                                                     strokeWidth={1}
                                                     onMouseEnter={(e) => {

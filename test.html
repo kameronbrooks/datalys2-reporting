@@ -506,14 +506,23 @@
                             "type": "line",
                             "datasetId": "quarterlySales",
                             "title": "Quarterly Sales Trends",
-                            "description": "Sales trends over quarters by category.",
+                            "description": "Sales trends over quarters by category. Values above 4000 are highlighted in green.",
                             "xColumn": "Quarter",
                             "yColumns": ["Electronics", "Clothing", "Home"],
                             "border": true,
                             "shadow": true,
                             "height": 300,
                             "showLabels": true,
-                            "smooth": true
+                            "smooth": true,
+                            "threshold": {
+                                "value": 4000,
+                                "passColor": "#22c55e",
+                                "failColor": "#ef4444",
+                                "mode": "above",
+                                "showLine": true,
+                                "lineStyle": "dashed",
+                                "blendWidth": 8
+                            }
                         }
                     ]
                 },
