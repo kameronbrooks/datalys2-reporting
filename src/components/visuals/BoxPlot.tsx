@@ -137,15 +137,15 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
             const groups = new Map<string, number[]>();
 
             dataset.data.forEach(row => {
-                const val = Array.isArray(row) ? row[dataColIdx] : row[dataColName];
+                const val = (dataset.format === 'records' || (!Array.isArray(row) && typeof row === 'object')) ? row[dataColName] : row[dataColIdx];
                 const numVal = typeof val === 'number' ? val : parseFloat(val);
                 
                 if (isNaN(numVal)) return;
 
                 let cat: any = "All";
                 if (catColIdx !== undefined) {
-                    cat = Array.isArray(row) ? row[catColIdx] : row[catColName!];
-                    cat = isDate(cat) ? printDate(cat) : String(cat);
+                    const rawCat = (dataset.format === 'records' || (!Array.isArray(row) && typeof row === 'object')) ? row[catColName!] : row[catColIdx];
+                    cat = isDate(rawCat) ? printDate(rawCat, undefined, true) : String(rawCat);
                 }
 
                 if (!groups.has(cat)) groups.set(cat, []);
@@ -205,15 +205,15 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
 
             return dataset.data.map((row, i) => {
                 const getValue = (idx: number) => {
-                    const val = Array.isArray(row) ? row[idx] : row[dataset.columns[idx]];
+                    const val = (dataset.format === 'records' || (!Array.isArray(row) && typeof row === 'object')) ? row[dataset.columns[idx]] : row[idx];
                     return typeof val === 'number' ? val : parseFloat(val);
                 };
 
                 const catRaw = catIdx !== undefined 
-                    ? (Array.isArray(row) ? row[catIdx] : row[dataset.columns[catIdx]])
+                    ? ((dataset.format === 'records' || (!Array.isArray(row) && typeof row === 'object')) ? row[dataset.columns[catIdx]] : row[catIdx])
                     : `Row ${i + 1}`;
                 
-                const category = isDate(catRaw) ? printDate(catRaw) : String(catRaw);
+                const category = isDate(catRaw) ? printDate(catRaw, undefined, true) : String(catRaw);
 
                 return {
                     category,

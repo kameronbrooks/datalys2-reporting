@@ -109,7 +109,7 @@ export const Histogram: React.FC<HistogramProps> = ({
         // Extract and normalize numerical data
         const data = dataset.data.map(row => {
             let val;
-            if (dataset.format === 'records' || !Array.isArray(row)) {
+            if (dataset.format === 'records' || (!Array.isArray(row) && typeof row === 'object')) {
                 val = row[colName];
             } else {
                 val = row[colIdx];
