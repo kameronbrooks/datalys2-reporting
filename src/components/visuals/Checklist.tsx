@@ -92,7 +92,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
             data = data.filter(row => 
                 displayColumns.some(col => {
                     const val = row[col];
-                    const stringVal = isDate(val) ? printDate(val) : String(val);
+                    const stringVal = isDate(val) ? printDate(val, undefined, true) : String(val);
                     return stringVal.toLowerCase().includes(lowerTerm);
                 })
             );
@@ -214,7 +214,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
                                         const val = row[col];
                                         return (
                                             <td key={col} className={col === warningColumn ? 'dl2-checklist-date' : ''}>
-                                                {isDate(val) ? printDate(val) : String(val)}
+                                                {isDate(val) ? printDate(val, undefined, true) : String(val)}
                                                 {col === warningColumn && status === 'warning' && (
                                                     <span className="dl2-checklist-badge warning">Due Soon</span>
                                                 )}

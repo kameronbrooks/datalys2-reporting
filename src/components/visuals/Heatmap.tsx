@@ -134,7 +134,9 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
     // Resolve the color interpolator (e.g., d3.interpolateBlues)
     const interpolator = useMemo(() => resolveInterpolator(color), [color]);
-    const gradientId = useMemo(() => `dl2-heatmap-gradient-${id.replace(/\s+/g, '-')}`, [id]);
+    // Generate a safe ID for the gradient definition, falling back to a random string if no ID is provided
+    const safeId = useMemo(() => id || `heatmap-${Math.random().toString(36).substr(2, 5)}`, [id]);
+    const gradientId = useMemo(() => `dl2-heatmap-gradient-${safeId.replace(/\s+/g, '-')}`, [safeId]);
 
     // Process dataset into cells and unique categories for axes
     const processed = useMemo(() => {
@@ -159,8 +161,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         for (const row of dataset.data) {
             const xRaw = getCellValue(row, dataset, xIdx);
             const yRaw = getCellValue(row, dataset, yIdx);
-            const xVal = isDate(xRaw) ? printDate(xRaw) : String(xRaw);
-            const yVal = isDate(yRaw) ? printDate(yRaw) : String(yRaw);
+            const xVal = isDate(xRaw) ? printDate(xRaw, undefined, true) : String(xRaw);
+            const yVal = isDate(yRaw) ? printDate(yRaw, undefined, true) : String(yRaw);
             const vRaw = getCellValue(row, dataset, vIdx);
             const vNum = Number(vRaw);
             if (!Number.isFinite(vNum)) continue;

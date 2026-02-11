@@ -12,7 +12,21 @@ function convertToDate(value: any): any {
 
     if (typeof value === 'string') {
         const date = fromISOString(value);
-        return isNaN(date.getTime()) ? value : date;
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
+
+        // Check if string is actually a numeric timestamp
+        const numVal = Number(value);
+        if (!isNaN(numVal) && value.trim() !== "") {
+            // Heuristic for seconds vs ms
+            if (numVal > 10000000000) {
+                return fromUnixTimestampMs(numVal);
+            } else {
+                return fromUnixTimestamp(numVal);
+            }
+        }
+        return value;
     } else if (typeof value === 'number') {
         // Heuristic: if it's a large number, it's likely ms, otherwise seconds
         if (value > 10000000000) {

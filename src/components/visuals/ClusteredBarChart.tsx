@@ -125,11 +125,22 @@ export const ClusteredBarChart: React.FC<ClusteredBarChartProps> = ({
         const yIndices = yCols.map(col => findColumnIndex(col, dataset)).filter(idx => idx !== undefined) as number[];
         const keys = yIndices.map(idx => dataset.columns[idx]);
 
+        // Helper to get value from row regardless of format
+        const getValue = (row: any, colIdx: number | undefined) => {
+            if (colIdx === undefined) return undefined;
+            if (dataset.format === 'records' || dataset.format === 'record') {
+                const colName = dataset.columns[colIdx];
+                return row[colName];
+            }
+            return row[colIdx];
+        };
+
         const data = dataset.data.map(row => {
-            const xVal = row[xIdx ?? 0];
-            const item: any = { x: isDate(xVal) ? printDate(xVal) : String(xVal) };
+            const xVal = getValue(row, xIdx ?? 0);
+            // Use UTC for printing dates on categories to avoid off-by-one errors due to timezone
+            const item: any = { x: isDate(xVal) ? printDate(xVal, undefined, true) : String(xVal) };
             yIndices.forEach((yIdx, i) => {
-                item[keys[i]] = Number(row[yIdx]);
+                item[keys[i]] = Number(getValue(row, yIdx));
             });
             return item;
         });

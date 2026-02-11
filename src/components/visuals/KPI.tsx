@@ -108,7 +108,16 @@ export const KPI: React.FC<KPIProps> = ({
 
         if (!row || !comparisonRow) return null;
 
-        const rawValue = row[valIdx];
+        const getValue = (r: any, idx: number | undefined) => {
+            if (idx === undefined) return undefined;
+            if (dataset.format === 'records' || dataset.format === 'record') {
+                const colName = dataset.columns[idx];
+                return r[colName];
+            }
+            return r[idx];
+        }
+
+        const rawValue = getValue(row, valIdx);
         const value = isDate(rawValue) ? rawValue.getTime() : Number(rawValue);
         const isDateValue = isDate(rawValue);
         
@@ -117,7 +126,7 @@ export const KPI: React.FC<KPIProps> = ({
 
         let comparisonValue = undefined;
         if (comparisonRowIndex !== undefined ||  comparisonColumn !== undefined) {
-            const rawComparison = comparisonIdx !== undefined ? comparisonRow[comparisonIdx] : undefined;
+            const rawComparison = getValue(comparisonRow, comparisonIdx);
             comparisonValue = isDate(rawComparison) ? rawComparison.getTime() : (rawComparison !== undefined ? Number(rawComparison) : undefined);
         }
         

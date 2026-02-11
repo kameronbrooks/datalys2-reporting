@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - Comprehensive Visuals Test</title>
+    <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script id="report-data" type="application/json">
+    {
+        "pages": [
+            {
+                "title": "Visuals Test Suite",
+                "description": "Verifying Date Handling (UTC), Epoch Parsing, and Records Format across all visuals.",
+                "rows": [
+                    {
+                        "title": "Dataset 1: Records Format + ISO Dates ('2023-10-25')",
+                        "description": "All visuals below use a dataset in 'records' format. Dates should appear as 2023-10-25 (not 24th).",
+                        "direction": "grid",
+                        "children": [
+                            {
+                                "type": "clusteredBar",
+                                "datasetId": "isoRecords",
+                                "xColumn": "Date",
+                                "yColumns": ["Value"],
+                                "title": "Clustered Bar",
+                                "width": 400, "height": 250
+                            },
+                            {
+                                "type": "stackedBar",
+                                "datasetId": "isoRecords",
+                                "xColumn": "Date",
+                                "yColumns": ["Value", "Value2"],
+                                "title": "Stacked Bar",
+                                "width": 400, "height": 250
+                            },
+                            {
+                                "type": "line",
+                                "datasetId": "isoRecords",
+                                "xColumn": "Date",
+                                "yColumns": ["Value"],
+                                "title": "Line Chart",
+                                "showLabels": true,
+                                "width": 400, "height": 250
+                            },
+                            {
+                                "type": "area",
+                                "datasetId": "isoRecords",
+                                "xColumn": "Date",
+                                "yColumns": ["Value"],
+                                "title": "Area Chart",
+                                "width": 400, "height": 250
+                            },
+                            {
+                                "type": "pie",
+                                "datasetId": "isoRecords",
+                                "categoryColumn": "Date",
+                                "valueColumn": "Value",
+                                "title": "Pie Chart",
+                                "width": 400, "height": 250
+                            },
+                            {
+                                "type": "scatter",
+                                "datasetId": "isoRecords",
+                                "xColumn": "Value",
+                                "yColumn": "Value2",
+                                "categoryColumn": "Date",
+                                "title": "Scatter Plot (Category = Date)",
+                                "width": 400, "height": 250
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Dataset 2: Table Format + Epoch Strings ('1700000000')",
+                        "description": "All visuals below use 'table' format with Epoch Strings. Date should be ~2023-11-14.",
+                        "direction": "grid",
+                        "children": [
+                            {
+                                "type": "table",
+                                "datasetId": "epochTable",
+                                "title": "Table (Check Dates)",
+                                "width": "100%"
+                            },
+                            {
+                                "type": "checklist",
+                                "datasetId": "epochTable",
+                                "statusColumn": "Completed",
+                                "warningColumn": "Date",
+                                "title": "Checklist",
+                                "width": "100%"
+                            },
+                            {
+                                "type": "kpi",
+                                "datasetId": "epochTable",
+                                "valueColumn": "Date",
+                                "format": "date",
+                                "title": "KPI (Date Format)",
+                                "rowIndex": 0,
+                                "width": 200
+                            },
+                            {
+                                "type": "clusteredBar",
+                                "datasetId": "epochTable",
+                                "xColumn": "Date",
+                                "yColumns": ["Value"],
+                                "title": "Clustered Bar (Epoch)",
+                                "width": 400, "height": 250
+                            },
+                            {
+                                "type": "heatmap",
+                                "datasetId": "heatmapData",
+                                "xColumn": "Date",
+                                "yColumn": "Category",
+                                "valueColumn": "Value",
+                                "title": "Heatmap (X=Date)",
+                                "width": 500, "height": 300
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "datasets": {
+            "isoRecords": {
+                "id": "isoRecords",
+                "format": "records",
+                "columns": ["Date", "Category", "Value", "Value2"],
+                "dtypes": ["date", "string", "number", "number"],
+                "data": [
+                    { "Date": "2023-10-25", "Category": "A", "Value": 10, "Value2": 5 },
+                    { "Date": "2023-10-26", "Category": "A", "Value": 25, "Value2": 15 },
+                    { "Date": "2023-10-27", "Category": "B", "Value": 15, "Value2": 10 }
+                ]
+            },
+            "epochTable": {
+                "id": "epochTable",
+                "format": "table",
+                "columns": ["Date", "Value", "Completed"],
+                "dtypes": ["date", "number", "boolean"],
+                "data": [
+                    ["1700000000", 100, true],
+                    ["1700100000", 150, false],
+                    ["1700200000", 200, false]
+                ]
+            },
+            "heatmapData": {
+                 "id": "heatmapData",
+                 "format": "records",
+                 "columns": ["Date", "Category", "Value"],
+                 "dtypes": ["date", "string", "number"],
+                 "data": [
+                     { "Date": "2023-10-25", "Category": "Cat A", "Value": 50 },
+                     { "Date": "2023-10-26", "Category": "Cat A", "Value": 60 },
+                     { "Date": "2023-10-25", "Category": "Cat B", "Value": 30 },
+                     { "Date": "2023-10-26", "Category": "Cat B", "Value": 80 }
+                 ]
+            }
+        }
+    }
+    </script>
+    <script src="http://localhost:8080/datalys2-reports.min.js"></script>
+</body>
+</html>

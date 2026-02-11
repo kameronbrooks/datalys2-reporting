@@ -1,5 +1,5 @@
 # Datalys2 Reporting Documentation
-**Version 0.2.10**
+**Version 0.2.11**
 
 
 This documentation guides you on how to create HTML reports using the Datalys2 Reporting library.

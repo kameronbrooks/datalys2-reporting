@@ -110,11 +110,21 @@ export const PieChart: React.FC<PieChartProps> = ({
         if (!dataset) return [];
         const catIdx = findColumnIndex(categoryColumn, dataset);
         const valIdx = findColumnIndex(valueColumn, dataset);
+
+        const getValue = (row: any, colIdx: number | undefined) => {
+            if (colIdx === undefined) return undefined;
+            if (dataset.format === 'records' || dataset.format === 'record') {
+                const colName = dataset.columns[colIdx];
+                return row[colName];
+            }
+            return row[colIdx];
+        };
+
         return dataset.data.map((row) => {
-            const catVal = row[catIdx ?? 0];
+            const catVal = getValue(row, catIdx ?? 0);
             return {
-                label: isDate(catVal) ? printDate(catVal) : String(catVal),
-                value: Number(row[valIdx ?? 1])
+                label: isDate(catVal) ? printDate(catVal, undefined, true) : String(catVal),
+                value: Number(getValue(row, valIdx ?? 1))
             };
         });
     }

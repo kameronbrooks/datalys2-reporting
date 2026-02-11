@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - Bug Reproduction</title>
+    <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
+</head>
+<body>
+    <script id="report-data" type="application/json">
+    {
+        "pages": [
+            {
+                "title": "Bug Repo: Date Issues",
+                "rows": [
+                    {
+                        "title": "Issue 1: Date Off-By-One (UTC vs Local)",
+                        "description": "The chart below uses ISO strings '2023-10-25'. If buggy, it shows Oct 24 (Timezone Dependent).",
+                        "children": [
+                            {
+                                "elementType": "visual",
+                                "type": "clusteredBar",
+                                "datasetId": "dateDataset",
+                                "xColumn": "DateISO",
+                                "yColumns": ["Value"],
+                                "title": "ISO Dates (Expect: 2023-10-25, 2023-10-26)",
+                                "width": 500,
+                                "height": 300,
+                                "showLabels": true
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Issue 2: Epoch Parsing",
+                        "description": "The charts below use Epoch timestamps (1700000000 -> Nov 2023). Left is String, Right is Number.",
+                        "children": [
+                            {
+                                "elementType": "visual",
+                                "type": "clusteredBar",
+                                "datasetId": "epochDataset",
+                                "xColumn": "EpochString",
+                                "yColumns": ["Value"],
+                                "title": "Epoch Strings (Expect: ~2023-11-14)",
+                                "width": 500,
+                                "height": 300,
+                                "showLabels": true
+                            },
+                             {
+                                "elementType": "visual",
+                                "type": "clusteredBar",
+                                "datasetId": "epochDataset",
+                                "xColumn": "EpochNumber",
+                                "yColumns": ["Value"],
+                                "title": "Epoch Numbers (Expect: ~2023-11-14)",
+                                "width": 500,
+                                "height": 300,
+                                "showLabels": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "datasets": {
+            "dateDataset": {
+                "id": "dateDataset",
+                "format": "table",
+                "columns": ["DateISO", "Value"],
+                "data": [
+                    ["2023-10-25", 10],
+                    ["2023-10-26", 20]
+                ],
+                "dtypes": ["date", "number"]
+            },
+            "epochDataset": {
+                 "id": "epochDataset",
+                 "format": "table",
+                 "columns": ["EpochString", "EpochNumber", "Value"],
+                 "data": [
+                     ["1700000000", 1700000000, 100],
+                     ["1710000000", 1710000000, 200]
+                 ],
+                 "dtypes": ["date", "date", "number"]
+            }
+        }
+    }
+    </script>
+    <div id="root"></div>
+    <script src="http://localhost:8080/datalys2-reports.min.js"></script>
+</body>
+</html>

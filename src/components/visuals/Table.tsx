@@ -81,7 +81,7 @@ export const Table: React.FC<TableProps> = ({
             data = data.filter(row => 
                 displayColumns.some(col => {
                     const val = row[col];
-                    const stringVal = isDate(val) ? printDate(val) : String(val);
+                    const stringVal = isDate(val) ? printDate(val, undefined, true) : String(val);
                     return stringVal.toLowerCase().includes(lowerTerm);
                 })
             );
@@ -178,7 +178,7 @@ export const Table: React.FC<TableProps> = ({
                                     const val = row[col];
                                     return (
                                         <td key={col}>
-                                            {isDate(val) ? printDate(val) : String(val)}
+                                            {isDate(val) ? printDate(val, undefined, true) : String(val)}
                                         </td>
                                     );
                                 })}
