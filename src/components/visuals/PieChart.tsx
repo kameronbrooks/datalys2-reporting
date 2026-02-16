@@ -7,6 +7,7 @@ import type { ReportVisual, Dataset, ColorProperty } from "../../lib/types";
 import { VisualLegend } from "./VisualLegend";
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 export interface PieChartDatum {
     id?: string;
@@ -296,8 +297,8 @@ export const PieChart: React.FC<PieChartProps> = ({
                                         const rect = containerRef.current?.getBoundingClientRect();
                                         if (rect) {
                                             setTooltipData({
-                                                x: e.clientX - rect.left,
-                                                y: e.clientY - rect.top,
+                                                x: e.clientX,
+                                                y: e.clientY,
                                                 label: datum.data.label,
                                                 value: datum.value,
                                                 percentage: totalValue > 0 ? (datum.value / totalValue) * 100 : 0
@@ -308,8 +309,8 @@ export const PieChart: React.FC<PieChartProps> = ({
                                         const rect = containerRef.current?.getBoundingClientRect();
                                         if (rect) {
                                             setTooltipData({
-                                                x: e.clientX - rect.left,
-                                                y: e.clientY - rect.top,
+                                                x: e.clientX,
+                                                y: e.clientY,
                                                 label: datum.data.label,
                                                 value: datum.value,
                                                 percentage: totalValue > 0 ? (datum.value / totalValue) * 100 : 0
@@ -358,25 +359,16 @@ export const PieChart: React.FC<PieChartProps> = ({
                 </svg>
                 {/* Custom Tooltip */}
                 {tooltipData && (
-                    <div style={{
-                        position: "absolute",
-                        left: tooltipData.x + 15,
-                        top: tooltipData.y - 10,
-                        transform: "translateY(-100%)",
-                        backgroundColor: "var(--dl2-bg-main)",
-                        color: "var(--dl2-text-main)",
-                        border: "1px solid var(--dl2-border-main)",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        pointerEvents: "none",
-                        fontSize: "12px",
-                        zIndex: 10,
-                        whiteSpace: "nowrap",
-                        boxShadow: "0 2px 4px var(--dl2-shadow)"
-                    }}>
-                        <div style={{ fontWeight: "bold" }}>{tooltipData.label}</div>
-                        <div>{tooltipData.value.toLocaleString()} ({tooltipData.percentage.toFixed(1)}%)</div>
-                    </div>
+                    <FloatingTooltip
+                        left={tooltipData.x}
+                        top={tooltipData.y}
+                        content={
+                            <>
+                                <div style={{ fontWeight: "bold" }}>{tooltipData.label}</div>
+                                <div>{tooltipData.value.toLocaleString()} ({tooltipData.percentage.toFixed(1)}%)</div>
+                            </>
+                        }
+                    />
                 )}
             </div>
             {/* Optional Legend */}

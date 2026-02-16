@@ -5,6 +5,7 @@ import type { Dataset, ReportVisual, ColorProperty } from "../../lib/types";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveInterpolator } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 /**
  * Props for the Heatmap component.
@@ -311,8 +312,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                             const rect = containerRef.current?.getBoundingClientRect();
                                             if (!rect) return;
                                             setHoveredData({
-                                                x: e.clientX - rect.left,
-                                                y: e.clientY - rect.top,
+                                                x: e.clientX,
+                                                y: e.clientY,
                                                 xLabel: cell.x,
                                                 yLabel: cell.y,
                                                 value: cell.value
@@ -322,8 +323,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                                             const rect = containerRef.current?.getBoundingClientRect();
                                             if (!rect) return;
                                             setHoveredData({
-                                                x: e.clientX - rect.left,
-                                                y: e.clientY - rect.top,
+                                                x: e.clientX,
+                                                y: e.clientY,
                                                 xLabel: cell.x,
                                                 yLabel: cell.y,
                                                 value: cell.value
@@ -463,27 +464,16 @@ export const Heatmap: React.FC<HeatmapProps> = ({
 
                 {/* Floating Tooltip */}
                 {hoveredData && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            left: hoveredData.x + 15,
-                            top: hoveredData.y - 10,
-                            transform: "translateY(-100%)",
-                            backgroundColor: "var(--dl2-bg-main)",
-                            color: "var(--dl2-text-main)",
-                            border: "1px solid var(--dl2-border-main)",
-                            padding: "8px",
-                            borderRadius: "4px",
-                            pointerEvents: "none",
-                            fontSize: "12px",
-                            zIndex: 10,
-                            whiteSpace: "nowrap",
-                            boxShadow: "0 2px 4px var(--dl2-shadow)"
-                        }}
-                    >
-                        <div style={{ fontWeight: "bold" }}>{hoveredData.yLabel} · {hoveredData.xLabel}</div>
-                        <div>{hoveredData.value.toLocaleString()}</div>
-                    </div>
+                    <FloatingTooltip
+                        left={hoveredData.x}
+                        top={hoveredData.y}
+                        content={
+                            <>
+                                <div style={{ fontWeight: "bold" }}>{hoveredData.yLabel} · {hoveredData.xLabel}</div>
+                                <div>{hoveredData.value.toLocaleString()}</div>
+                            </>
+                        }
+                    />
                 )}
             </div>
         </div>

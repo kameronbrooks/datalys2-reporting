@@ -6,6 +6,7 @@ import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 export interface StackedBarChartProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -272,8 +273,8 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                                                     const rect = containerRef.current?.getBoundingClientRect();
                                                     if (rect) {
                                                         setHoveredData({
-                                                            x: e.clientX - rect.left,
-                                                            y: e.clientY - rect.top,
+                                                            x: e.clientX,
+                                                            y: e.clientY,
                                                             label: String(d.data.x),
                                                             value: value,
                                                             series: layer.key
@@ -284,8 +285,8 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
                                                     const rect = containerRef.current?.getBoundingClientRect();
                                                     if (rect) {
                                                         setHoveredData({
-                                                            x: e.clientX - rect.left,
-                                                            y: e.clientY - rect.top,
+                                                            x: e.clientX,
+                                                            y: e.clientY,
                                                             label: String(d.data.x),
                                                             value: value,
                                                             series: layer.key
@@ -404,23 +405,16 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
                 {/* Interactive Tooltip */}
                 {hoveredData && (
-                    <div style={{
-                        position: "absolute",
-                        left: hoveredData.x + 15,
-                        top: hoveredData.y - 10,
-                        transform: "translateY(-100%)",
-                        backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        color: "white",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        pointerEvents: "none",
-                        fontSize: "12px",
-                        zIndex: 10,
-                        whiteSpace: "nowrap"
-                    }}>
-                        <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>
-                        <div>{hoveredData.series}: {hoveredData.value.toLocaleString()}</div>
-                    </div>
+                    <FloatingTooltip
+                        left={hoveredData.x}
+                        top={hoveredData.y}
+                        content={
+                            <>
+                                <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>
+                                <div>{hoveredData.series}: {hoveredData.value.toLocaleString()}</div>
+                            </>
+                        }
+                    />
                 )}
             </div>
 

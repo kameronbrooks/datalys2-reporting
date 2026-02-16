@@ -7,6 +7,7 @@ import { findColumnIndex } from "../../lib/dataset-utility";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 export interface ScatterPlotProps extends ReportVisual {
     otherElements?: ReportVisualElement[];
@@ -341,24 +342,26 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                 </svg>
 
                 {/* Interactive Tooltip */}
-                {hoveredData && (
-                    <div style={{
-                        position: 'absolute',
-                        left: resolvedMargin.left + xScale(hoveredData.x) + 10,
-                        top: resolvedMargin.top + yScale(hoveredData.y) - 10,
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        color: 'white',
-                        padding: '5px 10px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        pointerEvents: 'none',
-                        zIndex: 10
-                    }}>
-                        <div><strong>{hoveredData.category}</strong></div>
-                        <div>X: {hoveredData.x}</div>
-                        <div>Y: {hoveredData.y}</div>
-                    </div>
-                )}
+                {hoveredData && (() => {
+                     const rect = containerRef.current?.getBoundingClientRect();
+                     if (!rect) return null;
+                     const left = rect.left + resolvedMargin.left + (xScale(hoveredData.x) || 0);
+                     const top = rect.top + resolvedMargin.top + (yScale(hoveredData.y) || 0);
+                     
+                     return (
+                        <FloatingTooltip
+                            left={left}
+                            top={top}
+                            content={
+                                <>
+                                    <div><strong>{hoveredData.category}</strong></div>
+                                    <div>X: {hoveredData.x}</div>
+                                    <div>Y: {hoveredData.y}</div>
+                                </>
+                            }
+                        />
+                     );
+                })()}
 
                 {/* Statistical Correlation Information Overlay */}
                 {showCorrelation && (

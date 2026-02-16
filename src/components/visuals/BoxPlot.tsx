@@ -5,6 +5,7 @@ import type { ReportVisual, Dataset, ColorProperty } from "../../lib/types";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveColors, getColor } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 /**
  * Props for the BoxPlot component.
@@ -519,29 +520,22 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
 
             {/* Floating Tooltip */}
             {hoveredItem && tooltipPos && (
-                <div style={{
-                    position: 'fixed',
-                    left: tooltipPos.x + 10,
-                    top: tooltipPos.y + 10,
-                    backgroundColor: 'var(--dl2-bg-main)',
-                    color: 'var(--dl2-text-main)',
-                    border: '1px solid var(--dl2-border-main)',
-                    padding: '5px',
-                    borderRadius: '4px',
-                    pointerEvents: 'none',
-                    zIndex: 1000,
-                    fontSize: '12px',
-                    boxShadow: '0 2px 4px var(--dl2-shadow)'
-                }}>
-                    <strong>{hoveredItem.category}</strong><br/>
-                    Max: {hoveredItem.max.toFixed(2)}<br/>
-                    Q3: {hoveredItem.q3.toFixed(2)}<br/>
-                    Median: {hoveredItem.median.toFixed(2)}<br/>
-                    Q1: {hoveredItem.q1.toFixed(2)}<br/>
-                    Min: {hoveredItem.min.toFixed(2)}<br/>
-                    {hoveredItem.mean !== undefined && <>Mean: {hoveredItem.mean.toFixed(2)}<br/></>}
-                    {hoveredItem.outliers.length > 0 && <>Outliers: {hoveredItem.outliers.length}</>}
-                </div>
+                <FloatingTooltip
+                    left={tooltipPos.x}
+                    top={tooltipPos.y}
+                    content={
+                        <>
+                            <strong>{hoveredItem.category}</strong><br/>
+                            Max: {hoveredItem.max.toFixed(2)}<br/>
+                            Q3: {hoveredItem.q3.toFixed(2)}<br/>
+                            Median: {hoveredItem.median.toFixed(2)}<br/>
+                            Q1: {hoveredItem.q1.toFixed(2)}<br/>
+                            Min: {hoveredItem.min.toFixed(2)}<br/>
+                            {hoveredItem.mean !== undefined && <>Mean: {hoveredItem.mean.toFixed(2)}<br/></>}
+                            {hoveredItem.outliers.length > 0 && <>Outliers: {hoveredItem.outliers.length}</>}
+                        </>
+                    }
+                />
             )}
         </div>
     );

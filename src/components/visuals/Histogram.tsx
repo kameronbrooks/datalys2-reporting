@@ -5,6 +5,7 @@ import type { ReportVisual, ReportVisualElement, Dataset, ColorProperty } from "
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors, getColor } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 /**
  * Props for the Histogram component.
@@ -222,22 +223,16 @@ export const Histogram: React.FC<HistogramProps> = ({
                                     }}
                                     onMouseEnter={(e) => {
                                         setHoveredBin(d);
-                                        const rect = containerRef.current?.getBoundingClientRect();
-                                        if (rect) {
-                                            setTooltipPos({
-                                                x: e.clientX - rect.left,
-                                                y: e.clientY - rect.top
-                                            });
-                                        }
+                                        setTooltipPos({
+                                                x: e.clientX,
+                                                y: e.clientY
+                                        });
                                     }}
                                     onMouseMove={(e) => {
-                                        const rect = containerRef.current?.getBoundingClientRect();
-                                        if (rect) {
-                                            setTooltipPos({
-                                                x: e.clientX - rect.left,
-                                                y: e.clientY - rect.top
-                                            });
-                                        }
+                                        setTooltipPos({
+                                            x: e.clientX,
+                                            y: e.clientY
+                                        });
                                     }}
                                     onMouseLeave={() => {
                                         setHoveredBin(null);
@@ -337,27 +332,16 @@ export const Histogram: React.FC<HistogramProps> = ({
 
             {/* Floating Tooltip */}
             {hoveredBin && tooltipPos && (
-                <div
-                    style={{
-                        position: "absolute",
-                        left: tooltipPos.x + 15,
-                        top: tooltipPos.y - 10,
-                        transform: "translateY(-100%)",
-                        backgroundColor: "var(--dl2-bg-main)",
-                        color: "var(--dl2-text-main)",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid var(--dl2-border-main)",
-                        boxShadow: "0 2px 4px var(--dl2-shadow)",
-                        pointerEvents: "none",
-                        fontSize: "12px",
-                        zIndex: 10,
-                        whiteSpace: "nowrap"
-                    }}
-                >
-                    <div style={{ fontWeight: "bold" }}>Range: {hoveredBin.x0} - {hoveredBin.x1}</div>
-                    <div>Count: {hoveredBin.length}</div>
-                </div>
+                <FloatingTooltip
+                    left={tooltipPos.x}
+                    top={tooltipPos.y}
+                    content={
+                        <>
+                            <div style={{ fontWeight: "bold" }}>Range: {hoveredBin.x0} - {hoveredBin.x1}</div>
+                            <div>Count: {hoveredBin.length}</div>
+                        </>
+                    }
+                />
             )}
         </div>
     );

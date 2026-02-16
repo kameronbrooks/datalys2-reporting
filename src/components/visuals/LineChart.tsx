@@ -6,6 +6,7 @@ import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 /**
  * Props for the LineChart component.
@@ -445,8 +446,8 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                         const rect = containerRef.current?.getBoundingClientRect();
                                                         if (rect) {
                                                             setHoveredData({
-                                                                x: e.clientX - rect.left,
-                                                                y: e.clientY - rect.top,
+                                                                x: e.clientX,
+                                                                y: e.clientY,
                                                                 label: d.x,
                                                                 value: d.value,
                                                                 series: key
@@ -457,8 +458,8 @@ export const LineChart: React.FC<LineChartProps> = ({
                                                         const rect = containerRef.current?.getBoundingClientRect();
                                                         if (rect) {
                                                             setHoveredData({
-                                                                x: e.clientX - rect.left,
-                                                                y: e.clientY - rect.top,
+                                                                x: e.clientX,
+                                                                y: e.clientY,
                                                                 label: d.x,
                                                                 value: d.value,
                                                                 series: key
@@ -573,23 +574,16 @@ export const LineChart: React.FC<LineChartProps> = ({
 
                 {/* Floating Tooltip */}
                 {hoveredData && (
-                    <div style={{
-                        position: "absolute",
-                        left: hoveredData.x + 15,
-                        top: hoveredData.y - 10,
-                        transform: "translateY(-100%)",
-                        backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        color: "white",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        pointerEvents: "none",
-                        fontSize: "12px",
-                        zIndex: 10,
-                        whiteSpace: "nowrap"
-                    }}>
-                        <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>
-                        <div>{hoveredData.series}: {hoveredData.value.toLocaleString()}</div>
-                    </div>
+                    <FloatingTooltip
+                        left={hoveredData.x}
+                        top={hoveredData.y}
+                        content={
+                            <>
+                                <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>
+                                <div>{hoveredData.series}: {hoveredData.value.toLocaleString()}</div>
+                            </>
+                        }
+                    />
                 )}
             </div>
 

@@ -6,6 +6,7 @@ import { VisualLegend, VisualLegendItem } from "./VisualLegend";
 import { ReportVisualElementsLayer } from "./elements/ReportVisualElementsLayer";
 import { resolveColors } from "../../lib/color-utility";
 import { isDate, printDate } from "../../lib/date-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 /**
  * Props for the AreaChart component.
@@ -244,7 +245,9 @@ export const AreaChart: React.FC<AreaChartProps> = ({
 
         keys.forEach((key) => {
             const seriesData = data.map(d => ({ x: d.x, value: d[key] }));
-            const gradientId = `area-threshold-gradient-${key.replace(/\s+/g, '-')}`;
+            // Sanitize key for use in ID - remove all non-alphanumeric chars
+            const safeKey = key.replace(/[^a-zA-Z0-9-_]/g, '-');
+            const gradientId = `area-threshold-gradient-${safeKey}`;
             const stops: Array<{ offset: string; color: string }> = [];
 
             for (let i = 0; i < seriesData.length; i++) {
@@ -487,8 +490,8 @@ export const AreaChart: React.FC<AreaChartProps> = ({
                                                         const rect = containerRef.current?.getBoundingClientRect();
                                                         if (rect) {
                                                             setHoveredData({
-                                                                x: e.clientX - rect.left,
-                                                                y: e.clientY - rect.top,
+                                                                x: e.clientX,
+                                                                y: e.clientY,
                                                                 label: d.x,
                                                                 value: d.value,
                                                                 series: key
@@ -499,8 +502,8 @@ export const AreaChart: React.FC<AreaChartProps> = ({
                                                         const rect = containerRef.current?.getBoundingClientRect();
                                                         if (rect) {
                                                             setHoveredData({
-                                                                x: e.clientX - rect.left,
-                                                                y: e.clientY - rect.top,
+                                                                x: e.clientX,
+                                                                y: e.clientY,
                                                                 label: d.x,
                                                                 value: d.value,
                                                                 series: key
@@ -615,23 +618,16 @@ export const AreaChart: React.FC<AreaChartProps> = ({
 
                 {/* Floating Tooltip */}
                 {hoveredData && (
-                    <div style={{
-                        position: "absolute",
-                        left: hoveredData.x + 15,
-                        top: hoveredData.y - 10,
-                        transform: "translateY(-100%)",
-                        backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        color: "white",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        pointerEvents: "none",
-                        fontSize: "12px",
-                        zIndex: 10,
-                        whiteSpace: "nowrap"
-                    }}>
-                        <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>
-                        <div>{hoveredData.series}: {hoveredData.value.toLocaleString()}</div>
-                    </div>
+                    <FloatingTooltip
+                        left={hoveredData.x}
+                        top={hoveredData.y}
+                        content={
+                            <>
+                                <div style={{ fontWeight: "bold" }}>{hoveredData.label}</div>
+                                <div>{hoveredData.series}: {hoveredData.value.toLocaleString()}</div>
+                            </>
+                        }
+                    />
                 )}
             </div>
 

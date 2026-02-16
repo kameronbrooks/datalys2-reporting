@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8080;
+const PORT = 8081;
 const FILE_PATH = path.join(__dirname, 'dist', 'datalys2-reports.min.js');
 
 const server = http.createServer((req, res) => {

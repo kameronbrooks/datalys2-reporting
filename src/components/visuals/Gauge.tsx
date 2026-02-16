@@ -4,6 +4,7 @@ import { AppContext } from "../context/AppContext";
 import type { ReportVisual, Dataset, ColorProperty } from "../../lib/types";
 import { findColumnIndex } from "../../lib/dataset-utility";
 import { resolveColors, getColor } from "../../lib/color-utility";
+import { FloatingTooltip } from "./Tooltip";
 
 export interface GaugeRange {
     from: number;
@@ -331,12 +332,10 @@ export const Gauge: React.FC<GaugeProps> = ({
     const textBgHeight = unit ? (activeRange?.label ? 70 : 50) : (activeRange?.label ? 50 : 30);
 
     const handleMouseMove = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-        const svg = event.currentTarget;
-        const [x, y] = pointer(event, svg);
         setIsHovered(true);
         setTooltipData({
-            x,
-            y,
+            x: event.clientX,
+            y: event.clientY,
             value: clampedValue,
             percent: percentOfRange
         });
@@ -509,47 +508,36 @@ export const Gauge: React.FC<GaugeProps> = ({
                     </g>
                 </svg>
                 {tooltipData && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            left: tooltipData.x + 15,
-                            top: tooltipData.y - 10,
-                            transform: "translateY(-100%)",
-                            backgroundColor: "var(--dl2-bg-main)",
-                            color: "var(--dl2-text-main)",
-                            border: "1px solid var(--dl2-border-main)",
-                            padding: "10px 12px",
-                            borderRadius: "6px",
-                            pointerEvents: "none",
-                            fontSize: "12px",
-                            zIndex: 10,
-                            whiteSpace: "nowrap",
-                            boxShadow: "0 2px 6px var(--dl2-shadow)"
-                        }}
-                    >
-                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Value: {formattedValue}</div>
-                        <div style={{ marginBottom: 4 }}>Position: {(tooltipData.percent * 100).toFixed(1)}%</div>
-                        {activeRange && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                                <span
-                                    style={{
-                                        display: "inline-block",
-                                        width: 10,
-                                        height: 10,
-                                        borderRadius: 2,
-                                        backgroundColor: activeRange.color || resolvedValueColor
-                                    }}
-                                />
-                                <span style={{ fontWeight: 600, color: activeRange.color || resolvedValueColor }}>
-                                    {activeRange.label || "Current Range"}
-                                </span>
-                                <span style={{ color: "var(--dl2-text-muted)" }}>({activeRange.from} – {activeRange.to})</span>
-                            </div>
-                        )}
-                        <div style={{ color: "var(--dl2-text-muted)", fontSize: 11 }}>
-                            Scale: {minValue} – {maxValue}
-                        </div>
-                    </div>
+                    <FloatingTooltip
+                        left={tooltipData.x}
+                        top={tooltipData.y}
+                        content={
+                            <>
+                                <div style={{ fontWeight: 600, marginBottom: 4 }}>Value: {formattedValue}</div>
+                                <div style={{ marginBottom: 4 }}>Position: {(tooltipData.percent * 100).toFixed(1)}%</div>
+                                {activeRange && (
+                                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                        <span
+                                            style={{
+                                                display: "inline-block",
+                                                width: 10,
+                                                height: 10,
+                                                borderRadius: 2,
+                                                backgroundColor: activeRange.color || resolvedValueColor
+                                            }}
+                                        />
+                                        <span style={{ fontWeight: 600, color: activeRange.color || resolvedValueColor }}>
+                                            {activeRange.label || "Current Range"}
+                                        </span>
+                                        <span style={{ color: "var(--dl2-text-muted)" }}>({activeRange.from} – {activeRange.to})</span>
+                                    </div>
+                                )}
+                                <div style={{ color: "var(--dl2-text-muted)", fontSize: 11 }}>
+                                    Scale: {minValue} – {maxValue}
+                                </div>
+                            </>
+                        }
+                    />
                 )}
             </div>
         </div>
