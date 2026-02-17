@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 - Gauge Range Tests</title>
+    <link rel="stylesheet" href="http://localhost:8081/dl2-style.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        #root { max-width: 1200px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script id="report-data" type="application/json">
+    {
+        "pages": [
+            {
+                "title": "Gauge Range Tests",
+                "description": "Testing null/undefined values in range definitions (greater than / less than) combined with value formatting.",
+                "rows": [
+                    {
+                        "title": "Open-Ended Ranges (Low < 50, High > 100)",
+                        "description": "Gauges using 'to: 50' and 'from: 100' to define open ranges. Currency formatting applies to min/max/ranges.",
+                        "direction": "grid",
+                        "children": [
+                            {
+                                "type": "gauge",
+                                "datasetId": "gaugeData",
+                                "valueColumn": "ValLow",
+                                "minValue": 0,
+                                "maxValue": 200,
+                                "title": "Value: 25 (Falls in < $50)",
+                                "format": "currency",
+                                "showLegend": true,
+                                "ranges": [
+                                    { "to": 50, "color": "#e74c3c", "label": "Low Risk" },
+                                    { "from": 50, "to": 100, "color": "#f1c40f", "label": "Medium Risk" },
+                                    { "from": 100, "color": "#2ecc71", "label": "High Risk" }
+                                ]
+                            },
+                            {
+                                "type": "gauge",
+                                "datasetId": "gaugeData",
+                                "valueColumn": "ValMid",
+                                "minValue": 0,
+                                "maxValue": 200,
+                                "title": "Value: 75 (Falls in $50 - $100)",
+                                "format": "currency",
+                                "showLegend": true,
+                                "ranges": [
+                                    { "to": 50, "color": "#e74c3c", "label": "Low Risk" },
+                                    { "from": 50, "to": 100, "color": "#f1c40f", "label": "Medium Risk" },
+                                    { "from": 100, "color": "#2ecc71", "label": "High Risk" }
+                                ]
+                            },
+                            {
+                                "type": "gauge",
+                                "datasetId": "gaugeData",
+                                "valueColumn": "ValHigh",
+                                "minValue": 0,
+                                "maxValue": 200,
+                                "title": "Value: 150 (Falls in > $100)",
+                                "format": "currency",
+                                "showLegend": true,
+                                "ranges": [
+                                    { "to": 50, "color": "#e74c3c", "label": "Low Risk" },
+                                    { "from": 50, "to": 100, "color": "#f1c40f", "label": "Medium Risk" },
+                                    { "from": 100, "color": "#2ecc71", "label": "High Risk" }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Percentage Format + Gaps",
+                        "description": "Testing percentage formatting with explicit gaps between ranges.",
+                        "children": [
+                            {
+                                "type": "gauge",
+                                "datasetId": "gaugePercent",
+                                "valueColumn": "Score",
+                                "minValue": 0,
+                                "maxValue": 1,
+                                "title": "Percentage Score",
+                                "format": "percent",
+                                "showLegend": true,
+                                "ranges": [
+                                    { "to": 0.5, "color": "#e74c3c", "label": "Fail" },
+                                    { "from": 0.5, "color": "#2ecc71", "label": "Pass" }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "datasets": {
+            "gaugeData": {
+                "format": "records",
+                "data": [
+                    { "ValLow": 25, "ValMid": 75, "ValHigh": 150 }
+                ]
+            },
+            "gaugePercent": {
+                "format": "records",
+                "data": [
+                    { "Score": 0.85 }
+                ]
+            }
+        }
+    }
+    </script>
+    <script src="http://localhost:8081/datalys2-reports.min.js"></script>
+</body>
+</html>

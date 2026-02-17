@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8081;
+const PORT = 8080;
 const FILE_PATH = path.join(__dirname, 'dist', 'datalys2-reports.min.js');
 
 const server = http.createServer((req, res) => {
@@ -17,7 +17,7 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    if (req.url === '/datalys2-reports.min.js' || req.url === '/') {
+    if (req.url === '/datalys2-reports.min.js') {
         fs.readFile(FILE_PATH, (err, data) => {
             if (err) {
                 res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -47,8 +47,29 @@ const server = http.createServer((req, res) => {
             res.end(data);
         });
     } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not found');
+        // Serve any other file from root if it exists
+        const safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+        const localPath = path.join(__dirname, safePath === '/' ? 'index.html' : safePath);
+        
+        fs.readFile(localPath, (err, data) => {
+             if (err) {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('File not found: ' + req.url);
+                return;
+            }
+            
+            let contentType = 'text/plain';
+            if (localPath.endsWith('.html')) contentType = 'text/html';
+            else if (localPath.endsWith('.js')) contentType = 'application/javascript';
+            else if (localPath.endsWith('.css')) contentType = 'text/css';
+            else if (localPath.endsWith('.json')) contentType = 'application/json';
+
+            res.writeHead(200, {
+                'Content-Type': contentType,
+                'Content-Length': data.length
+            });
+            res.end(data);
+        });
     }
 });
 

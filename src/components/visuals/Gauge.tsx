@@ -301,7 +301,11 @@ export const Gauge: React.FC<GaugeProps> = ({
                 };
             })
             .filter((range) => range.to > range.from)
-            .sort((a, b) => b.from - a.from);           // I sort in descending order to handle overlapping ranges correctly
+            // Sort by 'from' descending primarily, and by 'to' ascending secondarily (tightest fit first for same start)
+            .sort((a, b) => {
+                if (b.from !== a.from) return b.from - a.from;
+                return a.to - b.to;
+            });
     }, [ranges, minValue, maxValue]);
 
     const activeRange = useMemo(() => {
