@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 - Area Chart Threshold Tests</title>
+    <link rel="stylesheet" href="http://localhost:8081/dl2-style.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        #root { max-width: 1200px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script id="report-data" type="application/json">
+    {
+        "pages": [
+            {
+                "title": "Area Chart Threshold Tests",
+                "description": "Testing threshold pass/fail coloring logic.",
+                "rows": [
+                    {
+                        "title": "Basic Threshold (Smooth Blend)",
+                        "description": "Area chart with threshold at 50. Should be green above, red below, with smooth transition.",
+                        "direction": "grid",
+                        "children": [
+                            {
+                                "type": "area",
+                                "datasetId": "thresholdData",
+                                "xColumn": "Time",
+                                "yColumns": ["Value"],
+                                "title": "Threshold at 50 (Default Blend)",
+                                "minY": 0,
+                                "maxY": 100,
+                                "threshold": {
+                                    "value": 50,
+                                    "passColor": "#2ecc71",
+                                    "failColor": "#e74c3c",
+                                    "mode": "above"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "title": "Hard Edge Threshold (No Blend)",
+                        "description": "Area chart with threshold at 50 and blendWidth: 0. Should change color instantly at crossing point.",
+                        "direction": "grid",
+                        "children": [
+                            {
+                                "type": "area",
+                                "datasetId": "thresholdData",
+                                "xColumn": "Time",
+                                "yColumns": ["Value"],
+                                "title": "Threshold at 50 (Hard Edge)",
+                                "minY": 0,
+                                "maxY": 100,
+                                "threshold": {
+                                    "value": 50,
+                                    "passColor": "#2ecc71",
+                                    "failColor": "#e74c3c",
+                                    "mode": "above",
+                                    "blendWidth": 0
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "datasets": {
+            "thresholdData": {
+                "format": "table",
+                "columns": ["Time", "Value"],
+                "data": [
+                    ["T1", 80],
+                    ["T2", 60],
+                    ["T3", 40],
+                    ["T4", 20],
+                    ["T5", 45],
+                    ["T6", 55],
+                    ["T7", 90]
+                ]
+            }
+        }
+    }
+    </script>
+    <script src="http://localhost:8081/datalys2-reports.min.js"></script>
+</body>
+</html>

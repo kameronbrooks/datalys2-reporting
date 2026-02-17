@@ -256,6 +256,11 @@ export const AreaChart: React.FC<AreaChartProps> = ({
                 const offsetPercent = (xPos / innerWidth) * 100;
                 const color = passesThreshold(point.value) ? thresholdConfig.passColor : thresholdConfig.failColor;
 
+                // Always add a stop for the very first point
+                if (i === 0) {
+                     stops.push({ offset: `${offsetPercent}%`, color: color });
+                }
+
                 // Check for threshold crossing between this point and the previous
                 if (i > 0) {
                     const prevPoint = seriesData[i - 1];
@@ -281,15 +286,18 @@ export const AreaChart: React.FC<AreaChartProps> = ({
                             stops.push({ offset: `${blendStart}%`, color: prevColor });
                             stops.push({ offset: `${blendEnd}%`, color: currColor });
                         } else {
-                            // Hard edge at the crossing point
+                            // Hard edge at the crossing point without blending
+                            // We need two stops at the same offset to create a hard transition
                             stops.push({ offset: `${crossingOffset}%`, color: prevColor });
                             stops.push({ offset: `${crossingOffset}%`, color: currColor });
                         }
                     }
                 }
 
-                // Add stop for current point
-                stops.push({ offset: `${offsetPercent}%`, color: color });
+                // Always add a stop for the last point
+                if (i === seriesData.length - 1) {
+                    stops.push({ offset: `${offsetPercent}%`, color: color });
+                }
             }
 
             // Sort stops by offset and remove duplicates
