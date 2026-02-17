@@ -44,6 +44,8 @@ export interface GaugeProps extends ReportVisual {
     showNeedle?: boolean;
     /** Whether to show the center value. Defaults to true. */
     showValue?: boolean;
+    /** Whether to show a legend for the ranges. Defaults to false. */
+    showLegend?: boolean;
     /** Whether to show min/max labels. Defaults to true. */
     showMinMax?: boolean;
     /** Display format for the value. */

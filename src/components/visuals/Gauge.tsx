@@ -51,6 +51,8 @@ export interface GaugeProps extends ReportVisual {
     showNeedle?: boolean;
     /** Whether to show the center value. Defaults to true. */
     showValue?: boolean;
+    /** Whether to show a legend for the ranges. Defaults to false. */
+    showLegend?: boolean;
     /** Whether to show min/max labels. Defaults to true. */
     showMinMax?: boolean;
     /** Display format for the value. */
@@ -92,6 +94,7 @@ export const Gauge: React.FC<GaugeProps> = ({
     needleColor = "var(--dl2-text-main)",
     showNeedle = true,
     showValue = true,
+    showLegend = false,
     showMinMax = true,
     format = "number",
     roundingPrecision = 1,
@@ -540,6 +543,57 @@ export const Gauge: React.FC<GaugeProps> = ({
                     />
                 )}
             </div>
+
+            {/* Legend */}
+            {showLegend && normalizedRanges.length > 0 && (
+                <div style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    gap: "16px",
+                    paddingTop: "12px",
+                    marginTop: "auto",
+                    width: "100%"
+                }}>
+                    {[...normalizedRanges].reverse().map((range, i) => {
+                        // Original index is needed for consistent coloring if colors are array-based
+                        // normalizedRanges is sorted descending (large-to-small)
+                        // So the mirrored index is:
+                        const originalIndex = normalizedRanges.length - 1 - i;
+                        const isActive = activeRange === range;
+                        const color = range.color || getColor(resolvedColors, originalIndex, trackColor);
+                        
+                        return (
+                            <div 
+                                key={`${range.from}-${range.to}`} 
+                                style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    fontSize: "12px",
+                                    opacity: isActive ? 1 : 0.5,
+                                    fontWeight: isActive ? 600 : 400,
+                                    color: isActive ? "var(--dl2-text-main)" : "var(--dl2-text-muted)",
+                                    transition: "all 0.2s"
+                                }}
+                            >
+                                <span style={{
+                                    display: "inline-block",
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: "50%",
+                                    backgroundColor: color,
+                                    marginRight: 6,
+                                    boxShadow: isActive ? `0 0 0 2px var(--dl2-bg-visual), 0 0 0 4px ${color}` : "none"
+                                }} />
+                                <span>
+                                    {range.label ? `${range.label} ` : ""}
+                                    <span style={{ opacity: 0.85 }}>({range.from} - {range.to})</span>
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };
