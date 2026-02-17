@@ -529,17 +529,16 @@ Displays a gauge/speedometer visualization with an animated needle, optional ran
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `from` | `number` | Start value of the range. |
-| `to` | `number` | End value of the range. |
+| `from` | `number` | Optional. Start value of the range. If null/undefined, effectively minValue (or -Infinity). |
+| `to` | `number` | Optional. End value of the range. If null/undefined, effectively maxValue (or +Infinity). |
 | `color` | `string` | Optional. Color for this range segment. |
 | `label` | `string` | Optional. Label for this range. |
-| `showPlus` | `boolean` | Optional. If true, displays the range as "{from}+" instead of "{from} - {to}" in the legend and tooltip. |
 
 **Features:**
 - **Animation:** The needle animates from 0 to the target value when the gauge first appears.
 - **Interactivity:** Hovering over arc segments highlights them and shows a tooltip with range information.
 - **Value Background:** A subtle background appears behind the value text when the needle might overlap it for better readability.
-- **Legend:** Optionally displays a legend below the gauge with color indicators, labels, and range values with support for "X+" format.
+- **Legend:** Optionally displays a legend below the gauge with color indicators, labels, and range values with support for open-ended ranges (e.g. `100+` or `< 50`).
 
 **Example Gauge (Simple):**
 

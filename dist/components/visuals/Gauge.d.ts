@@ -1,12 +1,10 @@
 import React from "react";
 import type { ReportVisual, ColorProperty } from "../../lib/types";
 export interface GaugeRange {
-    from: number;
-    to: number;
+    from?: number | null;
+    to?: number | null;
     color?: string;
     label?: string;
-    /** If true, displays the range as "{from}+" instead of "{from} - {to}" */
-    showPlus?: boolean;
 }
 /**
  * Props for the Gauge component.

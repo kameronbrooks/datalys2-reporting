@@ -7,12 +7,10 @@ import { resolveColors, getColor } from "../../lib/color-utility";
 import { FloatingTooltip } from "./Tooltip";
 
 export interface GaugeRange {
-    from: number;
-    to: number;
+    from?: number | null;
+    to?: number | null;
     color?: string;
     label?: string;
-    /** If true, displays the range as "{from}+" instead of "{from} - {to}" */
-    showPlus?: boolean;
 }
 
 /**
@@ -177,17 +175,19 @@ export const Gauge: React.FC<GaugeProps> = ({
         return numericValue;
     }, [dataset, valueColumn, rowIndex]);
 
-    const formattedValue = useMemo(() => {
-        if (value === null) return "";
+    const formatNumber = (val: number | undefined | null) => {
+        if (val === undefined || val === null) return "";
         if (format === "currency") {
-            return `${currencySymbol}${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: roundingPrecision })}`;
+            return `${currencySymbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: roundingPrecision })}`;
         }
         if (format === "percent") {
-            return `${(value * 100).toFixed(roundingPrecision)}%`;
+            return `${(val * 100).toFixed(roundingPrecision)}%`;
         }
-        const rounded = Number(value.toFixed(roundingPrecision));
+        const rounded = Number(val.toFixed(roundingPrecision));
         return rounded.toLocaleString();
-    }, [value, format, roundingPrecision, currencySymbol]);
+    };
+
+    const formattedValue = useMemo(() => formatNumber(value), [value, format, roundingPrecision, currencySymbol]);
 
     // Animate the needle from minValue to actual value on mount
     useEffect(() => {
@@ -286,11 +286,20 @@ export const Gauge: React.FC<GaugeProps> = ({
     const normalizedRanges = useMemo(() => {
         if (!ranges || ranges.length === 0) return [];
         return ranges
-            .map((range) => ({
-                ...range,
-                from: Math.max(minValue, range.from),
-                to: Math.min(maxValue, range.to)
-            }))
+            .map((range) => {
+                // If 'from' is null/undefined, treat it as negative infinity (clamped to minValue later)
+                // If 'to' is null/undefined, treat it as positive infinity (clamped to maxValue later)
+                const fromVal = range.from ?? -Infinity;
+                const toVal = range.to ?? Infinity;
+
+                return {
+                    ...range,
+                    originalFrom: range.from,
+                    originalTo: range.to,
+                    from: Math.max(minValue, fromVal),
+                    to: Math.min(maxValue, toVal)
+                };
+            })
             .filter((range) => range.to > range.from)
             .sort((a, b) => b.from - a.from);           // I sort in descending order to handle overlapping ranges correctly
     }, [ranges, minValue, maxValue]);
@@ -494,7 +503,7 @@ export const Gauge: React.FC<GaugeProps> = ({
                                     style={{ fill: "var(--dl2-text-main)" }}
                                     className="dl2-gauge-minmax"
                                 >
-                                    {minValue}
+                                    {formatNumber(minValue)}
                                 </text>
                                 <text
                                     x={endLabelX}
@@ -506,7 +515,7 @@ export const Gauge: React.FC<GaugeProps> = ({
                                     style={{ fill: "var(--dl2-text-main)" }}
                                     className="dl2-gauge-minmax"
                                 >
-                                    {maxValue}
+                                    {formatNumber(maxValue)}
                                 </text>
                             </>
                         )}
@@ -535,12 +544,18 @@ export const Gauge: React.FC<GaugeProps> = ({
                                             {activeRange.label || "Current Range"}
                                         </span>
                                         <span style={{ color: "var(--dl2-text-muted)" }}>
-                                            {(activeRange as any).showPlus ? `(${activeRange.from}+)` : `(${activeRange.from} – ${activeRange.to})`}
+                                            {
+                                                (activeRange as any).originalFrom != null && (activeRange as any).originalTo == null
+                                                ? `(${formatNumber((activeRange as any).originalFrom)}+)`
+                                                : (activeRange as any).originalFrom == null && (activeRange as any).originalTo != null
+                                                    ? `(< ${formatNumber((activeRange as any).originalTo)})`
+                                                    : `(${formatNumber(activeRange.from)} – ${formatNumber(activeRange.to)})`
+                                            }
                                         </span>
                                     </div>
                                 )}
                                 <div style={{ color: "var(--dl2-text-muted)", fontSize: 11 }}>
-                                    Scale: {minValue} – {maxValue}
+                                    Scale: {formatNumber(minValue)} – {formatNumber(maxValue)}
                                 </div>
                             </>
                         }
@@ -566,9 +581,15 @@ export const Gauge: React.FC<GaugeProps> = ({
                         const originalIndex = normalizedRanges.length - 1 - i;
                         const isActive = activeRange === range;
                         const color = range.color || getColor(resolvedColors, originalIndex, trackColor);
-                        const rangeText = (range as any).showPlus 
-                            ? `${range.from}+` 
-                            : `${range.from} - ${range.to}`;
+                        
+                        let rangeText = "";
+                        if ((range as any).originalFrom != null && (range as any).originalTo == null) {
+                            rangeText = `${formatNumber((range as any).originalFrom)}+`;
+                        } else if ((range as any).originalFrom == null && (range as any).originalTo != null) {
+                            rangeText = `< ${formatNumber((range as any).originalTo)}`;
+                        } else {
+                            rangeText = `${formatNumber(range.from)} - ${formatNumber(range.to)}`;
+                        }
                         
                         return (
                             <div 
