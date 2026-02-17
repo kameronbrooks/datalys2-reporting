@@ -11,6 +11,8 @@ export interface GaugeRange {
     to: number;
     color?: string;
     label?: string;
+    /** If true, displays the range as "{from}+" instead of "{from} - {to}" */
+    showPlus?: boolean;
 }
 
 /**
@@ -532,7 +534,9 @@ export const Gauge: React.FC<GaugeProps> = ({
                                         <span style={{ fontWeight: 600, color: activeRange.color || resolvedValueColor }}>
                                             {activeRange.label || "Current Range"}
                                         </span>
-                                        <span style={{ color: "var(--dl2-text-muted)" }}>({activeRange.from} – {activeRange.to})</span>
+                                        <span style={{ color: "var(--dl2-text-muted)" }}>
+                                            {(activeRange as any).showPlus ? `(${activeRange.from}+)` : `(${activeRange.from} – ${activeRange.to})`}
+                                        </span>
                                     </div>
                                 )}
                                 <div style={{ color: "var(--dl2-text-muted)", fontSize: 11 }}>
@@ -562,6 +566,9 @@ export const Gauge: React.FC<GaugeProps> = ({
                         const originalIndex = normalizedRanges.length - 1 - i;
                         const isActive = activeRange === range;
                         const color = range.color || getColor(resolvedColors, originalIndex, trackColor);
+                        const rangeText = (range as any).showPlus 
+                            ? `${range.from}+` 
+                            : `${range.from} - ${range.to}`;
                         
                         return (
                             <div 
@@ -587,7 +594,7 @@ export const Gauge: React.FC<GaugeProps> = ({
                                 }} />
                                 <span>
                                     {range.label ? `${range.label} ` : ""}
-                                    <span style={{ opacity: 0.85 }}>({range.from} - {range.to})</span>
+                                    <span style={{ opacity: 0.85 }}>({rangeText})</span>
                                 </span>
                             </div>
                         );

@@ -5,6 +5,8 @@ export interface GaugeRange {
     to: number;
     color?: string;
     label?: string;
+    /** If true, displays the range as "{from}+" instead of "{from} - {to}" */
+    showPlus?: boolean;
 }
 /**
  * Props for the Gauge component.

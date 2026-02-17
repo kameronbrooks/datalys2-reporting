@@ -517,6 +517,7 @@ Displays a gauge/speedometer visualization with an animated needle, optional ran
 | `needleColor` | `string` | Color of the needle (default: `var(--dl2-text-main)`). |
 | `showNeedle` | `boolean` | Whether to show the needle (default: true). |
 | `showValue` | `boolean` | Whether to show the center value (default: true). |
+| `showLegend` | `boolean` | Whether to show a legend for the ranges (default: false). |
 | `showMinMax` | `boolean` | Whether to show min/max labels (default: true). |
 | `format` | `'number' \| 'currency' \| 'percent'` | Display format for the value. |
 | `roundingPrecision` | `number` | Decimal precision for the value (default: 1). |
@@ -531,12 +532,14 @@ Displays a gauge/speedometer visualization with an animated needle, optional ran
 | `from` | `number` | Start value of the range. |
 | `to` | `number` | End value of the range. |
 | `color` | `string` | Optional. Color for this range segment. |
-| `label` | `string` | Optional. Label for this range (shown in tooltip). |
+| `label` | `string` | Optional. Label for this range. |
+| `showPlus` | `boolean` | Optional. If true, displays the range as "{from}+" instead of "{from} - {to}" in the legend and tooltip. |
 
 **Features:**
 - **Animation:** The needle animates from 0 to the target value when the gauge first appears.
 - **Interactivity:** Hovering over arc segments highlights them and shows a tooltip with range information.
 - **Value Background:** A subtle background appears behind the value text when the needle might overlap it for better readability.
+- **Legend:** Optionally displays a legend below the gauge with color indicators, labels, and range values with support for "X+" format.
 
 **Example Gauge (Simple):**
 
