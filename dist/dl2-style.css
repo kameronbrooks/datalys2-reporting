@@ -469,6 +469,125 @@ a:hover {
     border-color: var(--dl2-primary);
 }
 
+/* Table toolbar buttons (Columns, Export, grouping chip) */
+.dl2-table-toolbar-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--dl2-border-main);
+    background: var(--dl2-bg-main);
+    color: var(--dl2-text-main);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.dl2-table-toolbar-btn:hover {
+    background-color: var(--dl2-bg-tab-hover);
+    border-color: var(--dl2-primary);
+}
+
+.dl2-table-group-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid var(--dl2-border-main);
+    border-radius: 12px;
+    font-size: 0.85em;
+    background-color: var(--dl2-bg-tab);
+    color: var(--dl2-text-main);
+    white-space: nowrap;
+}
+
+.dl2-table-group-chip .dl2-table-toolbar-btn {
+    padding: 0 4px;
+    border: none;
+    background: transparent;
+    font-size: 1em;
+    line-height: 1;
+}
+
+/* Grouped table rows */
+.dl2-table-group-row {
+    background-color: var(--dl2-bg-tab);
+    cursor: pointer;
+    user-select: none;
+}
+
+.dl2-table-group-row:hover {
+    background-color: var(--dl2-bg-tab-hover);
+}
+
+.dl2-table-group-row td {
+    font-size: 0.95em;
+    border-bottom: 1px solid var(--dl2-border-table);
+}
+
+.dl2-table-group-caret {
+    display: inline-block;
+    width: 16px;
+    color: var(--dl2-text-secondary);
+}
+
+.dl2-table-group-agg {
+    margin-left: 12px;
+    padding: 1px 6px;
+    border: 1px solid var(--dl2-border-table);
+    border-radius: 10px;
+    font-size: 0.85em;
+    color: var(--dl2-text-secondary);
+    white-space: nowrap;
+}
+
+/* Context Menu */
+.dl2-context-menu {
+    min-width: 180px;
+    background-color: var(--dl2-bg-visual);
+    border: 1px solid var(--dl2-border-main);
+    border-radius: var(--dl2-default-border-radius);
+    box-shadow: 2px 2px 8px var(--dl2-shadow);
+    padding: 4px 0;
+    font-family: var(--dl2-font-family);
+    font-size: 0.9em;
+    color: var(--dl2-text-main);
+}
+
+.dl2-context-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px 6px 6px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.dl2-context-menu-item:hover {
+    background-color: var(--dl2-bg-tab);
+}
+
+.dl2-context-menu-item--disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.dl2-context-menu-item--disabled:hover {
+    background-color: transparent;
+}
+
+.dl2-context-menu-check {
+    display: inline-block;
+    width: 18px;
+    text-align: center;
+    color: var(--dl2-primary);
+    flex-shrink: 0;
+}
+
+.dl2-context-menu-separator {
+    height: 1px;
+    margin: 4px 0;
+    background-color: var(--dl2-border-main);
+}
+
 
 /* Checklist Styles */
 .dl2-checklist-row.complete {

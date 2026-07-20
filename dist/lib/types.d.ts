@@ -10,6 +10,64 @@ export interface Dataset {
     format: 'table' | 'records' | 'list' | 'record';
     compression?: 'none' | 'gzip';
     compressedData?: string;
+    /**
+     * Derived dataset: the id of another dataset to derive this one from.
+     * When set, `data`/`columns`/`dtypes`/`format` may be omitted — they are
+     * computed by applying `filter` and/or `aggregate` to the source dataset.
+     */
+    source?: string;
+    /** Filter applied to the source dataset (derived datasets only). */
+    filter?: FilterExpression;
+    /** Group/aggregate applied after the filter (derived datasets only). */
+    aggregate?: AggregateSpec;
+}
+/**
+ * Supported filter operators for client-side dataset filtering.
+ */
+export type FilterOp = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'startsWith' | 'endsWith' | 'between' | 'isNull' | 'notNull';
+/**
+ * A single filter condition against one column.
+ * - `column`: column name (or index for table-format datasets)
+ * - `op`: comparison operator
+ * - `value`: comparison value (or `[low, high]` for 'between')
+ * - `values`: value list for 'in' / 'nin' (falls back to `value` if it is an array)
+ */
+export interface FilterCondition {
+    column: string | number;
+    op: FilterOp;
+    value?: any;
+    values?: any[];
+}
+/**
+ * Boolean composition of filter expressions.
+ * Exactly one of `and`, `or`, `not` should be set.
+ */
+export interface FilterGroup {
+    and?: FilterExpression[];
+    or?: FilterExpression[];
+    not?: FilterExpression;
+}
+export type FilterExpression = FilterCondition | FilterGroup;
+/**
+ * Supported aggregate functions.
+ */
+export type AggFn = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'countDistinct' | 'first' | 'last';
+/**
+ * One aggregate output column: apply `fn` to `column`, expose it as `as`
+ * (defaults to `${fn}_${column}`).
+ */
+export interface AggregateColumn {
+    column: string | number;
+    fn: AggFn;
+    as?: string;
+}
+/**
+ * Group/aggregate specification: group rows by `groupBy` columns and compute
+ * `aggregates` per group. Produces a records-format dataset with one row per group.
+ */
+export interface AggregateSpec {
+    groupBy: (string | number)[];
+    aggregates: AggregateColumn[];
 }
 /**
  * Type for color properties in visuals
@@ -29,7 +87,17 @@ export type ColorProperty = string | string[];
  * - flex?: number - optional flex value for layout sizing
  */
 export interface LayoutElement {
-    elementType: string;
+    /**
+     * The element's type as used in JSON configs: 'layout', 'modal', or a
+     * visual type key such as 'table', 'pie', 'kpi', 'tabs', ...
+     * This is the preferred property; see resolveElementKind in element-utility.
+     */
+    type?: string;
+    /**
+     * @deprecated Use `type` instead. Kept for backward compatibility with
+     * older configs (`elementType: 'visual'` + `type`, or a bare visual key).
+     */
+    elementType?: string;
     padding?: number;
     margin?: number;
     border?: string | boolean;
@@ -69,6 +137,16 @@ export interface ReportVisual extends LayoutElement {
     description?: string;
     visualType: string;
     otherElements?: ReportVisualElement[];
+    /**
+     * Client-side filter applied to this visual's view of the dataset.
+     * Other visuals referencing the same datasetId are unaffected.
+     */
+    filter?: FilterExpression;
+    /**
+     * Client-side group/aggregate applied (after `filter`) to this visual's
+     * view of the dataset.
+     */
+    aggregate?: AggregateSpec;
 }
 /**
  * An element that can be added to a report visual
@@ -181,8 +259,21 @@ export interface ThresholdConfig {
 export interface Layout extends LayoutElement {
     title?: string;
     direction: 'row' | 'column' | 'grid';
+    /** Number of grid columns (grid direction only). Default 3. */
     columns?: number;
+    /** Space between children. Defaults to 10px for all directions. */
     gap?: string | number;
+    /** Allow flex children to wrap onto multiple lines (row/column only). */
+    wrap?: boolean;
+    /** CSS align-items for row/column layouts (e.g. 'center', 'stretch'). */
+    align?: string;
+    /** CSS justify-content for row/column layouts (e.g. 'center', 'space-between'). */
+    justify?: string;
+    /**
+     * Responsive grid: when set, grid columns are computed as
+     * repeat(auto-fit, minmax(minChildWidth, 1fr)) instead of a fixed count.
+     */
+    minChildWidth?: number | string;
     children: LayoutElement[];
 }
 /**

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - Filter & Aggregate Test</title>
+    <meta name="description" content="Tests for per-visual filters, aggregates, and derived datasets against a single shared datasource">
+    <meta name="author" content="Brooks, Kameron">
+    <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
+</head>
+<body>
+    <script id="report-data" type="application/json">
+{
+    "pages": [
+        {
+            "title": "Per-Visual Filters",
+            "description": "One shared 'sales' dataset — each table applies its own filter without affecting the others.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Three views of ONE dataset",
+                    "children": [
+                        {
+                            "type": "table",
+                            "datasetId": "sales",
+                            "title": "All Sales (no filter)",
+                            "pageSize": 6,
+                            "border": true
+                        },
+                        {
+                            "type": "table",
+                            "datasetId": "sales",
+                            "title": "West only",
+                            "filter": { "column": "region", "op": "eq", "value": "West" },
+                            "pageSize": 6,
+                            "border": true
+                        },
+                        {
+                            "type": "table",
+                            "datasetId": "sales",
+                            "title": "Amount > 400 AND Electronics",
+                            "filter": {
+                                "and": [
+                                    { "column": "amount", "op": "gt", "value": 400 },
+                                    { "column": "category", "op": "eq", "value": "Electronics" }
+                                ]
+                            },
+                            "pageSize": 6,
+                            "border": true
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Date range filter (between 2026-02-01 and 2026-03-31)",
+                    "children": [
+                        {
+                            "type": "table",
+                            "datasetId": "sales",
+                            "title": "Feb–Mar sales",
+                            "filter": { "column": "date", "op": "between", "values": ["2026-02-01", "2026-03-31"] },
+                            "pageSize": 8,
+                            "border": true
+                        },
+                        {
+                            "type": "line",
+                            "datasetId": "sales",
+                            "title": "Feb–Mar amounts over time",
+                            "xColumn": "date",
+                            "yColumns": "amount",
+                            "filter": { "column": "date", "op": "between", "values": ["2026-02-01", "2026-03-31"] },
+                            "border": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Aggregation",
+            "description": "Per-visual aggregate props and config-level derived datasets.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Per-visual aggregate: sum(amount) grouped by region",
+                    "children": [
+                        {
+                            "type": "clusteredBar",
+                            "datasetId": "sales",
+                            "title": "Total by region (aggregate prop)",
+                            "aggregate": {
+                                "groupBy": ["region"],
+                                "aggregates": [{ "column": "amount", "fn": "sum", "as": "total" }]
+                            },
+                            "xColumn": "region",
+                            "yColumns": "total",
+                            "border": true
+                        },
+                        {
+                            "type": "table",
+                            "datasetId": "sales",
+                            "title": "Avg & count by category (aggregate prop)",
+                            "aggregate": {
+                                "groupBy": ["category"],
+                                "aggregates": [
+                                    { "column": "amount", "fn": "avg", "as": "avg_amount" },
+                                    { "column": "amount", "fn": "count", "as": "orders" }
+                                ]
+                            },
+                            "border": true
+                        }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Derived datasets (defined in 'datasets', reused by visuals)",
+                    "children": [
+                        {
+                            "type": "pie",
+                            "datasetId": "westByCategory",
+                            "title": "West sales by category (derived dataset)",
+                            "categoryColumn": "category",
+                            "valueColumn": "total",
+                            "border": true
+                        },
+                        {
+                            "type": "table",
+                            "datasetId": "bigDeals",
+                            "title": "Big deals (derived: amount >= 500)",
+                            "pageSize": 8,
+                            "border": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "datasets": {
+        "sales": {
+            "id": "sales",
+            "columns": ["date", "region", "category", "rep", "amount"],
+            "dtypes": ["date", "str", "str", "str", "float"],
+            "format": "records",
+            "data": [
+                { "date": "2026-01-05", "region": "West", "category": "Electronics", "rep": "Ana", "amount": 620.5 },
+                { "date": "2026-01-12", "region": "East", "category": "Furniture", "rep": "Ben", "amount": 310.0 },
+                { "date": "2026-01-19", "region": "West", "category": "Furniture", "rep": "Ana", "amount": 145.25 },
+                { "date": "2026-01-26", "region": "North", "category": "Electronics", "rep": "Cody", "amount": 88.0 },
+                { "date": "2026-02-02", "region": "West", "category": "Electronics", "rep": "Dee", "amount": 505.75 },
+                { "date": "2026-02-09", "region": "East", "category": "Office", "rep": "Ben", "amount": 220.1 },
+                { "date": "2026-02-16", "region": "North", "category": "Office", "rep": "Cody", "amount": 430.0 },
+                { "date": "2026-02-23", "region": "West", "category": "Office", "rep": "Ana", "amount": 615.3 },
+                { "date": "2026-03-02", "region": "East", "category": "Electronics", "rep": "Dee", "amount": 780.9 },
+                { "date": "2026-03-09", "region": "West", "category": "Furniture", "rep": "Ben", "amount": 95.5 },
+                { "date": "2026-03-16", "region": "North", "category": "Furniture", "rep": "Ana", "amount": 260.0 },
+                { "date": "2026-03-23", "region": "East", "category": "Office", "rep": "Cody", "amount": 510.45 },
+                { "date": "2026-04-01", "region": "West", "category": "Electronics", "rep": "Dee", "amount": 999.99 },
+                { "date": "2026-04-08", "region": "North", "category": "Electronics", "rep": "Ben", "amount": 350.0 },
+                { "date": "2026-04-15", "region": "East", "category": "Furniture", "rep": "Ana", "amount": 199.99 }
+            ]
+        },
+        "westByCategory": {
+            "id": "westByCategory",
+            "source": "sales",
+            "filter": { "column": "region", "op": "eq", "value": "West" },
+            "aggregate": {
+                "groupBy": ["category"],
+                "aggregates": [{ "column": "amount", "fn": "sum", "as": "total" }]
+            },
+            "columns": [],
+            "dtypes": [],
+            "format": "records",
+            "data": []
+        },
+        "bigDeals": {
+            "id": "bigDeals",
+            "source": "sales",
+            "filter": { "column": "amount", "op": "gte", "value": 500 },
+            "columns": [],
+            "dtypes": [],
+            "format": "records",
+            "data": []
+        }
+    }
+}
+    </script>
+    <div id="root"></div>
+    <script src="http://localhost:8080/datalys2-reports.min.js"></script>
+</body>
+</html>

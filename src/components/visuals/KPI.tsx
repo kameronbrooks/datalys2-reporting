@@ -147,8 +147,8 @@ export const KPI: React.FC<KPIProps> = ({
     // Render empty state if no data is available
     if (!data) {
         const emptyContainerStyle: React.CSSProperties = {
-            padding: padding || 15,
-            margin: margin || 10,
+            padding: padding ?? 15,
+            margin: margin ?? 0,
             border: border ? "1px solid var(--dl2-border-main)" : undefined,
             boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
             display: "flex",
@@ -255,8 +255,8 @@ export const KPI: React.FC<KPIProps> = ({
     }
 
     const containerStyle: React.CSSProperties = {
-        padding: padding || 15,
-        margin: margin || 10,
+        padding: padding ?? 15,
+        margin: margin ?? 0,
         border: borderWidth && borderColor ? `${borderWidth} solid ${borderColor}` : undefined,
         boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         display: "flex",

@@ -156,7 +156,7 @@ export const Histogram: React.FC<HistogramProps> = ({
 
     if (!dataset) {
         return (
-            <div className="dl2-histogram dl2-visual-container" style={{ padding: padding || 10, margin: margin || 10, border: border ? '1px solid var(--dl2-border-main)' : undefined }}>
+            <div className="dl2-histogram dl2-visual-container" style={{ padding: padding ?? 10, margin: margin ?? 0, border: border ? '1px solid var(--dl2-border-main)' : undefined }}>
                 <div className="dl2-chart-empty">Dataset not found: {datasetId}</div>
             </div>
         );
@@ -167,12 +167,12 @@ export const Histogram: React.FC<HistogramProps> = ({
             ref={containerRef}
             className="dl2-histogram dl2-visual-container"
             style={{ 
-                padding: padding || 10, 
-                margin: margin || 10, 
+                padding: padding ?? 10, 
+                margin: margin ?? 0, 
                 border: border ? '1px solid var(--dl2-border-main)' : undefined, 
                 boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
                 width: '100%',
-                flex: flex || 1,
+                flex: flex ?? 1,
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative'

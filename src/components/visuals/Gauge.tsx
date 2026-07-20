@@ -217,15 +217,15 @@ export const Gauge: React.FC<GaugeProps> = ({
     }, [value, minValue, hasAnimated]);
 
     const containerStyle: React.CSSProperties = {
-        padding: padding || 10,
-        margin: margin || 10,
+        padding: padding ?? 10,
+        margin: margin ?? 0,
         border: border ? "1px solid var(--dl2-border-main)" : undefined,
         boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         minHeight: "200px",
         minWidth: 0,
         display: "flex",
         flexDirection: "column",
-        flex: flex || 1,
+        flex: flex ?? 1,
         backgroundColor: "var(--dl2-bg-visual)"
     };
 

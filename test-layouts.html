@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - Layout Test</title>
+    <meta name="description" content="Tests for the layout system: row, column, grid, nesting, wrap, minChildWidth, flex sizing">
+    <meta name="author" content="Brooks, Kameron">
+    <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
+</head>
+<body>
+    <script id="report-data" type="application/json">
+{
+    "pages": [
+        {
+            "title": "Row & Column",
+            "description": "Row and column layouts should space children evenly with a default 10px gap.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Simple Row (3 cards, default gap)",
+                    "children": [
+                        { "type": "card", "text": "Card A", "border": true },
+                        { "type": "card", "text": "Card B", "border": true },
+                        { "type": "card", "text": "Card C", "border": true }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "column",
+                    "title": "Simple Column",
+                    "children": [
+                        { "type": "card", "text": "Row 1 of the column", "border": true },
+                        { "type": "card", "text": "Row 2 of the column", "border": true }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Row with flex sizing (2 : 1 : flex 0)",
+                    "children": [
+                        { "type": "card", "text": "flex 2", "flex": 2, "border": true },
+                        { "type": "card", "text": "flex 1", "flex": 1, "border": true },
+                        { "type": "card", "text": "flex 0 (natural width)", "flex": 0, "border": true }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "wrap": true,
+                    "title": "Wrapping Row (shrink the window)",
+                    "children": [
+                        { "type": "kpi", "datasetId": "nums", "valueColumn": "value", "rowIndex": 0, "title": "KPI 1", "border": true },
+                        { "type": "kpi", "datasetId": "nums", "valueColumn": "value", "rowIndex": 1, "title": "KPI 2", "border": true },
+                        { "type": "kpi", "datasetId": "nums", "valueColumn": "value", "rowIndex": 2, "title": "KPI 3", "border": true },
+                        { "type": "kpi", "datasetId": "nums", "valueColumn": "value", "rowIndex": 3, "title": "KPI 4", "border": true },
+                        { "type": "kpi", "datasetId": "nums", "valueColumn": "value", "rowIndex": 4, "title": "KPI 5", "border": true }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "align": "center",
+                    "justify": "space-between",
+                    "gap": 30,
+                    "title": "Row with align:center, justify:space-between, gap:30",
+                    "children": [
+                        { "type": "card", "text": "Left", "flex": 0, "border": true },
+                        { "type": "card", "text": "Middle", "flex": 0, "border": true },
+                        { "type": "card", "text": "Right", "flex": 0, "border": true }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Grid",
+            "description": "Fixed-count and responsive grids.",
+            "rows": [
+                {
+                    "type": "layout",
+                    "direction": "grid",
+                    "columns": 4,
+                    "title": "Fixed 4-column grid",
+                    "children": [
+                        { "type": "card", "text": "1", "border": true },
+                        { "type": "card", "text": "2", "border": true },
+                        { "type": "card", "text": "3", "border": true },
+                        { "type": "card", "text": "4", "border": true },
+                        { "type": "card", "text": "5", "border": true },
+                        { "type": "card", "text": "6", "border": true }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "grid",
+                    "minChildWidth": 220,
+                    "title": "Responsive grid (minChildWidth: 220) — resize the window",
+                    "children": [
+                        { "type": "card", "text": "Auto A", "border": true },
+                        { "type": "card", "text": "Auto B", "border": true },
+                        { "type": "card", "text": "Auto C", "border": true },
+                        { "type": "card", "text": "Auto D", "border": true },
+                        { "type": "card", "text": "Auto E", "border": true }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Nesting",
+            "description": "Deeply nested layouts: row → column → grid → row. Also an untyped layout (no type, just children).",
+            "rows": [
+                {
+                    "type": "layout",
+                    "direction": "row",
+                    "title": "Row containing a column and a grid",
+                    "children": [
+                        {
+                            "type": "layout",
+                            "direction": "column",
+                            "flex": 1,
+                            "children": [
+                                { "type": "card", "text": "Column child 1", "border": true },
+                                { "type": "card", "text": "Column child 2", "border": true },
+                                {
+                                    "type": "layout",
+                                    "direction": "row",
+                                    "children": [
+                                        { "type": "card", "text": "Nested row A", "border": true },
+                                        { "type": "card", "text": "Nested row B", "border": true }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "layout",
+                            "direction": "grid",
+                            "columns": 2,
+                            "flex": 2,
+                            "children": [
+                                { "type": "card", "text": "Grid 1", "border": true },
+                                { "type": "card", "text": "Grid 2", "border": true },
+                                { "type": "card", "text": "Grid 3", "border": true },
+                                { "type": "card", "text": "Grid 4", "border": true }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "direction": "row",
+                    "title": "Untyped layout (no \"type\" key — should still render as a layout)",
+                    "children": [
+                        { "type": "card", "text": "It works!", "border": true },
+                        { "type": "card", "text": "No 'type: layout' needed when children[] is present", "border": true }
+                    ]
+                }
+            ]
+        }
+    ],
+    "datasets": {
+        "nums": {
+            "id": "nums",
+            "columns": ["value"],
+            "dtypes": ["int"],
+            "format": "records",
+            "data": [
+                { "value": 12 }, { "value": 7 }, { "value": 31 }, { "value": 18 }, { "value": 24 }
+            ]
+        }
+    }
+}
+    </script>
+    <div id="root"></div>
+    <script src="http://localhost:8080/datalys2-reports.min.js"></script>
+</body>
+</html>

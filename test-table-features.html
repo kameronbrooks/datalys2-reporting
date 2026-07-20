@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - Table Features Test</title>
+    <meta name="description" content="Tests for the table UX: multi-sort, column hiding, grouping, export, context menu, sticky header">
+    <meta name="author" content="Brooks, Kameron">
+    <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
+</head>
+<body>
+    <!-- Placeholder; filled by the generator script below before the library loads -->
+    <script id="report-data" type="application/json">{}</script>
+    <script type="text/javascript">
+        // Generate a 200-row mixed-dtype dataset so the JSON stays readable.
+        (function () {
+            const regions = ['West', 'East', 'North', 'South'];
+            const categories = ['Electronics', 'Furniture', 'Office', 'Apparel', 'Grocery'];
+            const reps = ['Ana', 'Ben', 'Cody', 'Dee', 'Eli', 'Fay'];
+            const rows = [];
+            let seed = 42;
+            const rand = () => {
+                // Deterministic LCG so the page is stable between reloads
+                seed = (seed * 1664525 + 1013904223) % 4294967296;
+                return seed / 4294967296;
+            };
+            for (let i = 0; i < 200; i++) {
+                const day = new Date(2026, 0, 1 + Math.floor(rand() * 180));
+                rows.push({
+                    id: i + 1,
+                    date: day.toISOString().slice(0, 10),
+                    region: regions[Math.floor(rand() * regions.length)],
+                    category: categories[Math.floor(rand() * categories.length)],
+                    rep: reps[Math.floor(rand() * reps.length)],
+                    units: 1 + Math.floor(rand() * 40),
+                    amount: Math.round(rand() * 150000) / 100,
+                    returned: rand() < 0.12 ? 'yes' : 'no'
+                });
+            }
+
+            const config = {
+                pages: [
+                    {
+                        title: 'Table UX',
+                        description: 'Try: click headers to sort, Shift+click for multi-sort, right-click headers/cells for the context menu, the Columns and Export buttons.',
+                        rows: [
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: 'Full-featured table (200 rows, sticky header, maxHeight 420)',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Orders',
+                                        pageSize: 25,
+                                        tableStyle: 'alternating',
+                                        maxHeight: 420,
+                                        exportFileName: 'orders-export',
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: 'Config-driven: grouped by region with aggregates, initially collapsed, amount hidden',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Grouped Orders',
+                                        pageSize: 4,
+                                        groupBy: 'region',
+                                        groupAggregates: [
+                                            { column: 'amount', fn: 'sum', as: 'total' },
+                                            { column: 'units', fn: 'avg', as: 'avg units' }
+                                        ],
+                                        groupsCollapsed: true,
+                                        hiddenColumns: ['id', 'returned'],
+                                        defaultSort: [
+                                            { column: 'region', direction: 'asc' },
+                                            { column: 'amount', direction: 'desc' }
+                                        ],
+                                        tableStyle: 'bordered',
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: 'Legacy config (regression: no new props — old behavior plus new UX defaults)',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Legacy Table',
+                                        columns: ['date', 'region', 'rep', 'amount'],
+                                        pageSize: 10,
+                                        tableStyle: 'plain',
+                                        border: true
+                                    },
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Locked-down table (no sort, no menu, no export, no hiding)',
+                                        columns: ['date', 'region', 'amount'],
+                                        pageSize: 10,
+                                        sortable: false,
+                                        contextMenu: false,
+                                        enableExport: false,
+                                        allowColumnHiding: false,
+                                        showSearch: false,
+                                        border: true
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                datasets: {
+                    orders: {
+                        id: 'orders',
+                        columns: ['id', 'date', 'region', 'category', 'rep', 'units', 'amount', 'returned'],
+                        dtypes: ['int', 'date', 'str', 'str', 'str', 'int', 'float', 'str'],
+                        format: 'records',
+                        data: rows
+                    }
+                }
+            };
+
+            document.getElementById('report-data').textContent = JSON.stringify(config);
+        })();
+    </script>
+    <div id="root"></div>
+    <script src="http://localhost:8080/datalys2-reports.min.js"></script>
+</body>
+</html>

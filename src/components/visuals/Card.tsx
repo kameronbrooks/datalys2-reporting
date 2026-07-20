@@ -91,8 +91,8 @@ export const Card: React.FC<CardProps> = ({ text, title, shadow, border, descrip
 
     return (
         <div className="dl2-card" style={{
-            padding: padding || 10,
-            margin: margin || 10,
+            padding: padding ?? 10,
+            margin: margin ?? 0,
             border: border ? '1px solid var(--dl2-border-main)' : undefined,
             boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
             flex: 1,

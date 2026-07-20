@@ -96,6 +96,11 @@ Datasets are defined in the `datasets` object. The key is the `datasetId` refere
 | `format` | `string` | Data format: `'table'`, `'records'`, `'list'`, or `'record'`. |
 | `compression` | `string` | Optional. Set to `'gzip'` to enable decompression. |
 | `compressedData` | `string` | Optional. The ID of a script tag containing the base64-encoded gzip data. |
+| `source` | `string` | Optional. Makes this a **derived dataset**: the ID of another dataset to derive from. See [Derived Datasets](#derived-datasets). |
+| `filter` | `FilterExpression` | Optional (derived datasets). Filter applied to the source dataset. See [Filtering & Aggregation](#filtering--aggregation). |
+| `aggregate` | `AggregateSpec` | Optional (derived datasets). Group/aggregate applied after the filter. |
+
+> The inner `id` property may be omitted — it is filled in automatically from the dictionary key.
 
 **Example Dataset (Records Format):**
 ```json
@@ -194,13 +199,17 @@ The `rows` array contains layout objects. Layouts can contain other layouts or v
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `type` | `string` | The type of component (e.g., `layout`, `card`, `kpi`). |
-| `padding` | `number` | Padding in pixels. |
-| `margin` | `number` | Margin in pixels. |
+| `type` | `string` | The type of component (e.g., `layout`, `card`, `kpi`, `tabs`). |
+| `padding` | `number` | Padding in pixels (default 10 for visuals). |
+| `margin` | `number` | Margin in pixels (default 0 — spacing between elements is owned by the layout `gap`). |
 | `border` | `boolean/string` | CSS border or boolean to enable default. |
 | `shadow` | `boolean/string` | CSS box-shadow or boolean to enable default. |
-| `flex` | `number` | Flex grow value. |
+| `flex` | `number` | Flex grow value. `flex: 0` keeps the element at its natural size. |
 | `modalId` | `string` | Optional. The ID of a modal to open when the element is hovered and the expand icon is clicked. |
+| `filter` | `FilterExpression` | Optional (visuals). Per-visual filter over the referenced dataset. See [Filtering & Aggregation](#filtering--aggregation). |
+| `aggregate` | `AggregateSpec` | Optional (visuals). Per-visual group/aggregate (applied after `filter`). |
+
+**How element types are resolved:** the preferred key is `type`. For backward compatibility the older `elementType` key still works (`"elementType": "visual"` + `"type": "gauge"`, or a bare `"elementType": "pie"`); when both are present, `type` wins. As a safety net, an object with a `children` array and no visual type is treated as a layout.
 
 #### Layout Component (`type: "layout"`)
 
@@ -208,8 +217,35 @@ The `rows` array contains layout objects. Layouts can contain other layouts or v
 |----------|------|-------------|
 | `direction` | `'row' \| 'column' \| 'grid'` | Direction of children. |
 | `columns` | `number` | Optional. Number of columns for grid layout (default: 3). |
-| `gap` | `string \| number` | Optional. Gap between elements (default: 10px for grid). |
+| `gap` | `string \| number` | Optional. Gap between elements (default: 10px for all directions). |
+| `wrap` | `boolean` | Optional (row/column). Allow children to wrap onto multiple lines. |
+| `align` | `string` | Optional (row/column). CSS `align-items` (e.g. `'center'`, `'stretch'`). |
+| `justify` | `string` | Optional (row/column). CSS `justify-content` (e.g. `'center'`, `'space-between'`). |
+| `minChildWidth` | `number \| string` | Optional (grid). Responsive grid: columns become `repeat(auto-fit, minmax(minChildWidth, 1fr))` instead of a fixed count. |
+| `title` | `string` | Optional. Rendered above the layout's content in all directions. |
 | `children` | `Array` | Array of child elements (Layouts or Visuals). |
+
+**Example — responsive grid and a wrapping row:**
+
+```json
+{
+    "type": "layout",
+    "direction": "grid",
+    "minChildWidth": 240,
+    "children": [ { "type": "card", "text": "A" }, { "type": "card", "text": "B" } ]
+}
+```
+
+```json
+{
+    "type": "layout",
+    "direction": "row",
+    "wrap": true,
+    "align": "center",
+    "gap": 20,
+    "children": [ { "type": "kpi", "datasetId": "d1", "flex": 0 }, { "type": "kpi", "datasetId": "d1", "flex": 0 } ]
+}
+```
 
 #### Visual Components
 
@@ -318,15 +354,54 @@ Displays a Key Performance Indicator with optional comparison and breach status.
 
 **6. Table (`type: "table"`)**
 
-Displays data in a tabular format with sorting, filtering, and pagination.
+Displays data in a tabular format with type-aware sorting (single and multi-column), search, pagination, column hiding, grouping with aggregates, CSV export / clipboard copy, and a right-click context menu.
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `columns` | `string[]` | Optional array of column names to display. Defaults to all. |
-| `pageSize` | `number` | Number of rows per page (default 10). |
+| `pageSize` | `number` | Number of rows per page (default 10). When grouped, this is the number of **groups** per page. |
 | `tableStyle` | `'plain' \| 'bordered' \| 'alternating'` | Visual style of the table (default 'plain'). |
 | `showSearch` | `boolean` | Whether to show the search bar (default true). |
 | `title` | `string` | Optional title for the table. |
+| `sortable` | `boolean` | Enable click-to-sort on headers (default true). |
+| `defaultSort` | `{column, direction}[]` | Initial sort keys in priority order, e.g. `[{"column": "region", "direction": "asc"}]`. |
+| `hiddenColumns` | `string[]` | Columns hidden initially; users can re-show them via the **Columns** menu. |
+| `allowColumnHiding` | `boolean` | Show the Columns menu and Hide options (default true). |
+| `groupBy` | `string` | Group rows by this column initially. Users can also group via right-click. |
+| `groupAggregates` | `{column, fn, as?}[]` | Aggregates shown in each group header (fns: `sum`, `avg`, `min`, `max`, `count`, `countDistinct`, `first`, `last`). |
+| `groupsCollapsed` | `boolean` | Start with all groups collapsed (default false). |
+| `enableExport` | `boolean` | Show the Export button and menu entries (default true). |
+| `exportFileName` | `string` | File name for CSV export (default: title or datasetId). |
+| `contextMenu` | `boolean` | Enable the right-click menu (default true). |
+| `maxHeight` | `number` | Max body height in px; enables scrolling with a sticky header. |
+| `stickyHeader` | `boolean` | Sticky header (defaults to true when `maxHeight` is set). |
+
+**Built-in user interactions:**
+
+| Interaction | Effect |
+|-------------|--------|
+| Click a header | Sort by that column (asc → desc → clear). |
+| Shift+click a header | Add the column as a secondary sort key (priority numbers appear next to the arrows). |
+| Right-click a header | Sort asc/desc, clear sort, hide column, group by column, export CSV, copy table. |
+| Right-click a cell | Copy cell, copy row, export CSV. |
+| **Columns** button | Check/uncheck columns to show/hide. |
+| **Export** button | Download the current view (filtered + sorted, all pages, visible columns) as CSV. |
+| Click a group header | Collapse/expand the group. |
+
+**Example — grouped, pre-sorted table with a sticky header:**
+
+```json
+{
+    "type": "table",
+    "datasetId": "orders",
+    "title": "Orders by Region",
+    "groupBy": "region",
+    "groupAggregates": [{ "column": "amount", "fn": "sum", "as": "total" }],
+    "defaultSort": [{ "column": "amount", "direction": "desc" }],
+    "hiddenColumns": ["internal_id"],
+    "maxHeight": 400
+}
+```
 
 **7. Checklist (`type: "checklist"`)**
 
@@ -571,6 +646,189 @@ Displays a gauge/speedometer visualization with an animated needle, optional ran
         { "from": 75, "to": 100, "color": "#27ae60", "label": "Good" }
     ]
 }
+```
+
+**14. Tabs (`type: "tabs"`, alias `type: "tabgroup"`)**
+
+A **container visual** that shows one child view at a time behind a tab strip. Usable anywhere a visual can go — for example, a row can contain a tab group that switches between a chart, a table, and a grid. Tabs may contain any layouts/visuals, including nested tab groups. Tabs does not require a `datasetId`.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `tabs` | `Tab[]` | **Required.** The tabs to show. |
+| `defaultTab` | `number` | Index of the tab shown initially (default 0). |
+| `title` | `string` | Optional title above the tab strip. |
+
+Each tab object:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `title` | `string` | The tab label. |
+| `children` | `Array` | Visuals/layouts to show in this tab (rendered as a row). |
+| `layout` | `Layout` | Alternative to `children`: a full layout object for complete control (direction, gap, etc.). |
+
+Inactive tabs are unmounted, so charts re-measure correctly whenever their tab becomes visible.
+
+**Example — a row with a KPI beside a tab group:**
+
+```json
+{
+    "type": "layout",
+    "direction": "row",
+    "children": [
+        { "type": "kpi", "datasetId": "metrics", "valueColumn": "score", "flex": 0 },
+        {
+            "type": "tabs",
+            "flex": 2,
+            "tabs": [
+                {
+                    "title": "Trend",
+                    "children": [ { "type": "line", "datasetId": "metrics", "xColumn": "date", "yColumns": "score" } ]
+                },
+                {
+                    "title": "Data",
+                    "children": [ { "type": "table", "datasetId": "metrics" } ]
+                },
+                {
+                    "title": "Breakdown",
+                    "layout": {
+                        "direction": "grid",
+                        "columns": 2,
+                        "children": [ { "type": "card", "text": "..." }, { "type": "card", "text": "..." } ]
+                    }
+                }
+            ]
+        }
+    ]
+}
+```
+
+## Filtering & Aggregation
+
+A single dataset can feed many visuals, each with its own client-side filter and/or aggregation — no need to pre-filter data before loading it. There are two mechanisms, powered by the same engine:
+
+1. **Per-visual `filter` / `aggregate` props** — any visual can declare them; only that visual's view of the dataset is affected.
+2. **Derived datasets** — a dataset defined as a transformation of another dataset; computed once and reusable by any number of visuals.
+
+### Filter Expressions
+
+A `FilterExpression` is either a single **condition**:
+
+```json
+{ "column": "region", "op": "eq", "value": "West" }
+```
+
+or a boolean **composition** (`and` / `or` / `not`, nestable to any depth):
+
+```json
+{
+    "and": [
+        { "column": "amount", "op": "gt", "value": 400 },
+        { "or": [
+            { "column": "category", "op": "eq", "value": "Electronics" },
+            { "column": "category", "op": "eq", "value": "Office" }
+        ]}
+    ]
+}
+```
+
+**Condition properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `column` | `string \| number` | Column name (or index for table-format datasets). |
+| `op` | `string` | Operator — see below. |
+| `value` | `any` | Comparison value. For `between`, a `[low, high]` pair (or use `values`). |
+| `values` | `any[]` | Value list for `in` / `nin` / `between`. |
+
+**Operators:**
+
+| Op | Meaning |
+|----|---------|
+| `eq`, `neq` | Equals / not equals |
+| `gt`, `gte`, `lt`, `lte` | Greater/less than (or equal) |
+| `in`, `nin` | Value is in / not in `values` |
+| `contains`, `startsWith`, `endsWith` | Case-insensitive string matching |
+| `between` | Inclusive range: `"values": [low, high]` |
+| `isNull`, `notNull` | Null/empty check (`value` not needed) |
+
+**Dates:** when the column's dtype is `date`/`datetime`, filter values are parsed with the same rules as dataset loading — ISO strings (`"2026-02-01"`) or unix timestamps both work:
+
+```json
+{ "column": "date", "op": "between", "values": ["2026-02-01", "2026-03-31"] }
+```
+
+### Aggregate Specs
+
+An `AggregateSpec` groups rows and computes one row per group (records format):
+
+```json
+{
+    "groupBy": ["region"],
+    "aggregates": [
+        { "column": "amount", "fn": "sum", "as": "total" },
+        { "column": "amount", "fn": "count", "as": "orders" }
+    ]
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `groupBy` | `(string \| number)[]` | Columns to group by (become the first output columns). |
+| `aggregates` | `{column, fn, as?}[]` | Aggregate output columns. `as` defaults to `"{fn}_{column}"`. |
+
+Aggregate functions: `sum`, `avg`, `min`, `max`, `count`, `countDistinct`, `first`, `last`.
+
+### Per-Visual Filters
+
+Add `filter` and/or `aggregate` directly on a visual. Other visuals referencing the same `datasetId` are unaffected:
+
+```json
+{
+    "type": "layout",
+    "direction": "row",
+    "children": [
+        { "type": "table", "datasetId": "sales", "title": "All" },
+        { "type": "table", "datasetId": "sales", "title": "West",
+          "filter": { "column": "region", "op": "eq", "value": "West" } },
+        { "type": "clusteredBar", "datasetId": "sales", "title": "Total by region",
+          "aggregate": { "groupBy": ["region"], "aggregates": [{ "column": "amount", "fn": "sum", "as": "total" }] },
+          "xColumn": "region", "yColumns": "total" }
+    ]
+}
+```
+
+When both are present, `filter` runs first, then `aggregate`.
+
+### Derived Datasets
+
+Define a dataset as a transformation of another by giving it a `source`. Useful when several visuals share the same filtered/aggregated view — it is computed once at load time:
+
+```json
+"datasets": {
+    "sales": { "format": "records", "columns": ["region", "category", "amount"], "dtypes": ["str", "str", "float"], "data": [ ... ] },
+    "westSales": {
+        "source": "sales",
+        "filter": { "column": "region", "op": "eq", "value": "West" }
+    },
+    "westByCategory": {
+        "source": "westSales",
+        "aggregate": { "groupBy": ["category"], "aggregates": [{ "column": "amount", "fn": "sum", "as": "total" }] }
+    }
+}
+```
+
+Derived datasets can chain (as above). Circular `source` chains and missing sources are reported as console warnings and left unresolved.
+
+> Filtering/aggregation applies to `table` and `records` format datasets. `list` and `record` formats pass through unchanged with a console warning.
+
+## Config Validation
+
+On load, the library validates the report config and emits `console.warn` messages prefixed with `[datalys2]` for common mistakes: unknown visual types, missing/unknown `datasetId`s, column names that don't exist in the referenced dataset, unknown filter ops or aggregate functions, empty layouts, tabs without a `tabs` array, and unresolvable derived datasets. Warnings never block rendering.
+
+To disable validation, add:
+
+```html
+<meta name="dl2-validate" content="false">
 ```
 
 ## Visual Elements

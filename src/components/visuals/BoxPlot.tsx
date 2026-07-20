@@ -276,14 +276,14 @@ export const BoxPlot: React.FC<BoxPlotProps> = ({
     }, [processedData, innerWidth, innerHeight, direction]);
 
     const containerStyle: React.CSSProperties = {
-        padding: padding || 10,
-        margin: margin || 10,
+        padding: padding ?? 10,
+        margin: margin ?? 0,
         border: border ? "1px solid var(--dl2-border-main)" : undefined,
         boxShadow: shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
         minHeight: "300px",
         display: "flex",
         flexDirection: "column",
-        flex: flex || "1",
+        flex: flex ?? 1,
         width: '100%',
         minWidth: 0,
         position: 'relative',

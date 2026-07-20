@@ -7,6 +7,8 @@ import { Modal } from './components/Modal';
 import { ApplicationData, Dataset, ReportModal } from './lib/types';
 import { decompressDatasets } from './lib/dataset-utility';
 import { decompressGzipB64ToObject } from './lib/compression-utility';
+import { validateAppData } from './lib/validation-utility';
+import { getDatasetlessTypes, getKnownVisualTypes } from './components/component-registry';
 
 function App() {
     const [datasets, setDatasets] = useState<Record<string, Dataset>>({});
@@ -61,10 +63,21 @@ function App() {
 
             setAppData(parsedData);
 
-            // Decompress datasets if present
+            // Decompress datasets if present (also resolves derived datasets)
+            let loadedDatasets: Record<string, Dataset> = parsedData.datasets || {};
             if (parsedData.datasets) {
-                const decompressed = await decompressDatasets(parsedData.datasets, shouldGC);
-                setDatasets(decompressed);
+                loadedDatasets = await decompressDatasets(parsedData.datasets, shouldGC);
+                setDatasets(loadedDatasets);
+            }
+
+            // Validate the config and warn about common mistakes.
+            // Opt out with <meta name="dl2-validate" content="false">.
+            const validateOptOut = document.querySelector('meta[name="dl2-validate"]')?.getAttribute('content') === 'false';
+            if (!validateOptOut) {
+                validateAppData({ ...parsedData, datasets: loadedDatasets }, {
+                    knownVisualTypes: getKnownVisualTypes(),
+                    datasetlessTypes: getDatasetlessTypes()
+                });
             }
 
             setIsLoaded(true);

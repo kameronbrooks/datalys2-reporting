@@ -213,7 +213,7 @@
                             "type": "kpi",
                             "datasetId": "kpiData",
                             "rowIndex": 0,
-                            "valueColumn": "Ptp",
+                            "valueColumn": "Value",
                             "comparisonColumn": "Yesterday",
                             "title": "Total Revenue",
                             "format": "currency",
@@ -626,8 +626,8 @@
         },
         "tasksData": {
             "format": "records",
-            "columns": ["Task", "Assignee", "DueDate", "Completed"],
-            "dtypes": ["string", "string", "date", "boolean"],
+            "columns": ["Task", "State", "Assignee", "DueDate", "Completed"],
+            "dtypes": ["string", "string", "string", "date", "boolean"],
             "data": [
                 { "Task": "Initial Planning", "State": "Complete", "Assignee": "Alice", "DueDate": "2024-01-15", "Completed": true },
                 { "Task": "Design Mockups", "State": "Complete", "Assignee": "Bob", "DueDate": "2024-02-01", "Completed": true },

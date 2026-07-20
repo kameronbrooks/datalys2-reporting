@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Layout, LayoutElement, ReportModal } from "../lib/types"
 import { Visual } from "./component-registry";
 import { AppContext } from "./context/AppContext";
+import { resolveElementKind } from "../lib/element-utility";
 
 export interface PageRowProps {
     layout: Layout;
@@ -11,22 +12,22 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
     const { openModal } = useContext(AppContext);
 
     const renderChild = (child: LayoutElement, index: number) => {
-        const childType = (typeof (child as any).type === 'string' ? (child as any).type : child.elementType) as string;
+        const resolved = resolveElementKind(child);
         let component;
 
-        if (childType === 'layout') {
+        if (resolved.kind === 'layout') {
             component = <PageRow key={index} layout={child as Layout} />;
-        } else if (childType === 'modal') {
+        } else if (resolved.kind === 'modal') {
             const modal = child as ReportModal;
             component = (
-                <button 
-                    key={index} 
+                <button
+                    key={index}
                     className="dl2-modal-trigger-btn"
                     onClick={() => openModal(modal)}
                     style={{
-                        padding: modal.padding || '10px 20px',
-                        margin: modal.margin || '5px',
-                        flex: modal.flex || 0
+                        padding: modal.padding ?? '10px 20px',
+                        margin: modal.margin ?? '5px',
+                        flex: modal.flex ?? 0
                     }}
                 >
                     {modal.buttonLabel || modal.title || 'Open Modal'}
@@ -34,14 +35,14 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
             );
         } else {
             // For visual types, use the Visual component from the registry
-            component = <Visual key={index} {...(child as any)} type={childType} />;
+            component = <Visual key={index} {...(child as any)} type={resolved.visualType} />;
         }
 
-        if (child.modalId && childType !== 'modal') {
+        if (child.modalId && resolved.kind !== 'modal') {
             return (
-                <div key={index} className="dl2-element-wrapper" style={{ flex: child.flex || 1, display: 'flex' }}>
-                    <button 
-                        className="dl2-modal-icon-trigger" 
+                <div key={index} className="dl2-element-wrapper" style={{ flex: child.flex ?? 1, display: 'flex' }}>
+                    <button
+                        className="dl2-modal-icon-trigger"
                         onClick={() => openModal(child.modalId!)}
                         title="View Details"
                     >
@@ -59,31 +60,53 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
 
         return component;
     }
-    return (
-        <div 
-            className="dl2-page-row"
-            style={{ 
-                display: layout.direction === 'grid' ? 'grid' : 'flex',
-                flexDirection: layout.direction !== 'grid' ? (layout.direction || 'row') : undefined,
-                gridTemplateColumns: layout.direction === 'grid' ? `repeat(${layout.columns || 3}, 1fr)` : undefined,
-                gap: layout.gap || (layout.direction === 'grid' ? '10px' : 0),
-                flex: 1,
-                padding: layout.padding || 0,
-                margin: layout.margin || 0,
-                border: layout.border ? "1px solid var(--dl2-border-main)" : undefined,
-                boxShadow: layout.shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
-            }}
-        >
-            {layout.title && (
-                <h3 className='dl2-row-title' style={{
-                    gridColumn: layout.direction === 'grid' ? `span ${layout.columns || 3}` : undefined
-                }}>
-                    {layout.title}
-                </h3>
-            )}
+
+    const isGrid = layout.direction === 'grid';
+
+    // Grid columns: fixed count by default, responsive auto-fit when
+    // minChildWidth is provided.
+    const minChildWidth = typeof layout.minChildWidth === 'number'
+        ? `${layout.minChildWidth}px`
+        : layout.minChildWidth;
+    const gridTemplateColumns = isGrid
+        ? (minChildWidth
+            ? `repeat(auto-fit, minmax(${minChildWidth}, 1fr))`
+            : `repeat(${layout.columns || 3}, 1fr)`)
+        : undefined;
+
+    const contentStyle: React.CSSProperties = {
+        display: isGrid ? 'grid' : 'flex',
+        flexDirection: !isGrid ? ((layout.direction || 'row') as 'row' | 'column') : undefined,
+        gridTemplateColumns,
+        flexWrap: !isGrid && layout.wrap ? 'wrap' : undefined,
+        alignItems: !isGrid ? layout.align : undefined,
+        justifyContent: !isGrid ? layout.justify : undefined,
+        gap: layout.gap ?? '10px',
+        flex: layout.flex ?? 1,
+        padding: layout.padding ?? 0,
+        margin: layout.margin ?? 0,
+        border: layout.border ? "1px solid var(--dl2-border-main)" : undefined,
+        boxShadow: layout.shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
+    };
+
+    const content = (
+        <div className="dl2-page-row" style={contentStyle}>
             {layout.children.map((child, index) => (
                 renderChild(child, index)
             ))}
+        </div>
+    );
+
+    if (!layout.title) {
+        return content;
+    }
+
+    // With a title, render it above the content regardless of direction so
+    // titles behave the same for row, column, and grid layouts.
+    return (
+        <div className="dl2-page-row-titled" style={{ flex: layout.flex ?? 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <h3 className='dl2-row-title'>{layout.title}</h3>
+            {content}
         </div>
     );
 };

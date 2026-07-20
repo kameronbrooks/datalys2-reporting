@@ -1,13 +1,15 @@
 import { Dataset } from "./types"
 import { decompressGzipB64ToObject } from "./compression-utility";
 import { fromISOString, fromUnixTimestamp, fromUnixTimestampMs } from "./date-utility";
+import { applyFilter } from "./filter-utility";
+import { aggregateDataset } from "./aggregate-utility";
 
 /**
  * Converts a value to a Date object if it is a string or number.
  * @param value 
  * @returns 
  */
-function convertToDate(value: any): any {
+export function convertToDate(value: any): any {
     if (value === null || value === undefined || value === "") return value;
 
     if (typeof value === 'string') {
@@ -108,6 +110,9 @@ export async function decompressDatasets(datasets: Record<string, Dataset>, shou
 
     for (const id in decompressedDatasets) {
         const dataset = decompressedDatasets[id];
+        // Foolproofing: configs often omit the redundant inner `id` — fill it
+        // from the record key so warnings and lookups can name the dataset.
+        if (!dataset.id) dataset.id = id;
         if (dataset.compressedData && dataset.compression === "gzip") {
             try {
                 // compressedData is now the ID of the script tag
@@ -142,5 +147,65 @@ export async function decompressDatasets(datasets: Record<string, Dataset>, shou
         }
     }
 
-    return decompressedDatasets;
+    return resolveDerivedDatasets(decompressedDatasets);
+}
+
+/**
+ * Resolves derived datasets — datasets that declare a `source` (the id of
+ * another dataset) plus an optional `filter` and/or `aggregate`. Chains of
+ * derived datasets are resolved in dependency order; cycles and missing
+ * sources are reported with a console warning and left unresolved (the
+ * dataset keeps whatever `data` it declared, defaulting to empty).
+ * @param datasets All datasets keyed by id.
+ * @returns The same record with derived datasets materialized.
+ */
+export function resolveDerivedDatasets(datasets: Record<string, Dataset>): Record<string, Dataset> {
+    const resolved: Record<string, Dataset> = { ...datasets };
+    const state: Record<string, 'resolving' | 'done' | 'failed'> = {};
+
+    const resolve = (id: string): boolean => {
+        const dataset = resolved[id];
+        if (!dataset) return false;
+        if (state[id] === 'done') return true;
+        if (state[id] === 'failed') return false;
+        if (state[id] === 'resolving') {
+            console.warn(`[datalys2] Derived dataset "${id}" is part of a circular "source" chain — left unresolved.`);
+            state[id] = 'failed';
+            return false;
+        }
+
+        if (!dataset.source) {
+            state[id] = 'done';
+            return true;
+        }
+
+        state[id] = 'resolving';
+        const sourceOk = resolve(dataset.source);
+        // The recursive call may have marked this id as failed (cycle).
+        if ((state[id] as string) === 'failed') return false;
+
+        if (!sourceOk) {
+            console.warn(`[datalys2] Derived dataset "${id}": source dataset "${dataset.source}" could not be resolved.`);
+            state[id] = 'failed';
+            return false;
+        }
+
+        let derived: Dataset = {
+            ...resolved[dataset.source],
+            id,
+            // derived output is materialized data, never re-decompressed
+            compression: 'none',
+            compressedData: undefined
+        };
+        if (dataset.filter) derived = applyFilter(derived, dataset.filter);
+        if (dataset.aggregate) derived = aggregateDataset(derived, dataset.aggregate);
+        resolved[id] = derived;
+        state[id] = 'done';
+        return true;
+    };
+
+    for (const id in resolved) {
+        resolve(id);
+    }
+    return resolved;
 }

@@ -206,11 +206,11 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             ref={containerRef}
             className="dl2-scatter-plot dl2-visual-container"
             style={{
-                padding: padding || 10,
-                margin: margin || 10,
+                padding: padding ?? 10,
+                margin: margin ?? 0,
                 border: border ? '1px solid var(--dl2-border-main)' : undefined,
                 boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
-                flex: flex || 1,
+                flex: flex ?? 1,
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden'
