@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.4.0 — Tables & Interactivity
+
+### Table totals
+
+- `totalRow`: grand-total row over the filtered data (all pages) — `true` sums numeric columns, or `{ label, fns }` for per-column aggregate fns. Sticky when `maxHeight` is set.
+- `totalColumn`: per-row total column — `true` sums numeric visible columns, or `{ label, columns }`.
+- Totals are display-only (CSV/clipboard exports contain data rows only).
+
+### Row detail modals
+
+- `rowModal: true`: double-click a row (or right-click → Open details) to open a built-in modal listing the row's values (`rowModalColumns`, `rowModalTitle` to customize).
+- `rowModalId`: open a **custom modal** from `modals` instead; cards inside can use `{{ row.ColumnName }}` templates (full template engine, e.g. `{{ formatCurrency(row.amount) }}`).
+
+### Persistent view state
+
+- Runtime changes (table sort / hidden columns / grouping, tabs active tab) are saved to localStorage per report + visual `id` and restored on reload. Opt out with `persistState: false`.
+- Per-visual reset: right-click header → **Reset view**. Report-wide reset: **Reset view** button in the headbar (appears only when the report has saved customizations).
+- Reports are namespaced by `<meta name="report-id">` (falls back to title, then path).
+
+### Links & navigation
+
+- Every visual with an `id` is now a DOM anchor.
+- New `link` visual (`targetId` or external `href`, `linkStyle: 'link' | 'button'`): switches to the containing page, activates containing tabs (nested included), scrolls to the visual, flashes it.
+- Plain `#visual-id` hash links navigate too (markdown cards, deep links on page load).
+
+### Validation
+
+- New warnings: duplicate visual ids, unknown `rowModalId`, unknown link `targetId`, `rowModalColumns` column checks.
+- Dataset `id` auto-fills from the datasets dictionary key.
+
+### Housekeeping
+
+- Dev CDN server and all test pages unified on port 8080.
+
 ## 0.3.0 — Breaking Update
 
 Large usability release: layout fixes, per-visual filtering/aggregation, derived datasets, a tabs container visual, a table UX overhaul, and config validation.
