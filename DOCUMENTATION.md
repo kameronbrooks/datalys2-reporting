@@ -375,6 +375,10 @@ Displays data in a tabular format with type-aware sorting (single and multi-colu
 | `contextMenu` | `boolean` | Enable the right-click menu (default true). |
 | `maxHeight` | `number` | Max body height in px; enables scrolling with a sticky header. |
 | `stickyHeader` | `boolean` | Sticky header (defaults to true when `maxHeight` is set). |
+| `totalRow` | `boolean \| object` | Grand-total row at the bottom, computed over the **filtered** data (all pages). `true` sums every numeric column. Or `{ "label": "Grand Total", "fns": { "amount": "sum", "units": "avg" } }` for per-column aggregate functions. Sticky when `maxHeight` is set. |
+| `totalColumn` | `boolean \| object` | Per-row total column appended on the right. `true` sums every numeric visible column, or `{ "label": "Sum", "columns": ["units", "amount"] }` to control the summed columns. |
+
+> Totals are display-only: CSV export and clipboard copy contain the data rows without the totals.
 
 **Built-in user interactions:**
 

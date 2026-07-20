@@ -1,6 +1,6 @@
 import React, { useContext, useMemo, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import type { ReportVisual, AggregateColumn } from "../../lib/types";
+import type { ReportVisual, AggregateColumn, AggFn } from "../../lib/types";
 import { isDate, printDate } from "../../lib/date-utility";
 import { multiSort, SortKey } from "../../lib/sort-utility";
 import { computeAggregates } from "../../lib/aggregate-utility";
@@ -38,6 +38,18 @@ export interface TableProps extends ReportVisual {
     maxHeight?: number;
     /** Sticky header. Defaults to true when maxHeight is set. */
     stickyHeader?: boolean;
+    /**
+     * Grand-total row at the bottom (computed over the filtered data, all
+     * pages). `true` sums every numeric column; or pass `{ label, fns }`
+     * with per-column aggregate fns, e.g. { "fns": { "amount": "sum", "units": "avg" } }.
+     */
+    totalRow?: boolean | { label?: string; fns?: Record<string, AggFn> };
+    /**
+     * Per-row total column appended on the right. `true` sums every numeric
+     * visible column; or pass `{ label, columns }` to control which columns
+     * are summed.
+     */
+    totalColumn?: boolean | { label?: string; columns?: string[] };
 }
 
 interface MenuState {
@@ -69,7 +81,9 @@ export const Table: React.FC<TableProps> = ({
     exportFileName,
     contextMenu = true,
     maxHeight,
-    stickyHeader
+    stickyHeader,
+    totalRow,
+    totalColumn
 }) => {
     const ctx = useContext(AppContext);
     const dataset = ctx.datasets[datasetId];
@@ -188,6 +202,57 @@ export const Table: React.FC<TableProps> = ({
                 : null
         }));
     }, [processedData, groupByCol, groupAggregates, dataset]);
+
+    // --- Totals ---------------------------------------------------------
+    const totalRowCfg = totalRow === true ? {} : (totalRow || null);
+    const totalColCfg = totalColumn === true ? {} : (totalColumn || null);
+
+    /** Whether a column holds numeric data (by dtype, falling back to values). */
+    const isNumericColumn = (col: string): boolean => {
+        if (dataset && dataset.columns && dataset.dtypes) {
+            const index = dataset.columns.indexOf(col);
+            if (index >= 0 && dataset.dtypes[index]) {
+                return ['int', 'float', 'number'].includes(dataset.dtypes[index]);
+            }
+        }
+        const sample = normalizedData.find(row => row[col] !== null && row[col] !== undefined);
+        return sample ? typeof sample[col] === 'number' : false;
+    };
+
+    /** Columns included in the per-row total column. */
+    const totalColSourceColumns = useMemo(() => {
+        if (!totalColCfg) return [];
+        if (totalColCfg.columns && totalColCfg.columns.length > 0) return totalColCfg.columns;
+        return displayColumns.filter(isNumericColumn);
+    }, [totalColCfg, displayColumns, dataset, normalizedData]);
+
+    const rowTotal = (row: any): number =>
+        totalColSourceColumns.reduce((acc, col) => {
+            const val = row[col];
+            return acc + (typeof val === 'number' && !isNaN(val) ? val : 0);
+        }, 0);
+
+    /** Grand-total values per visible column (over ALL filtered rows). */
+    const totalRowValues = useMemo(() => {
+        if (!totalRowCfg || !dataset) return null;
+        const fns = totalRowCfg.fns;
+        const specs: AggregateColumn[] = displayColumns
+            .filter(col => fns ? fns[col] !== undefined : isNumericColumn(col))
+            .map(col => ({ column: col, fn: (fns ? fns[col] : 'sum') as AggFn, as: col }));
+        if (specs.length === 0) return null;
+        return computeAggregates(processedData, specs, dataset);
+    }, [totalRowCfg, displayColumns, processedData, dataset]);
+
+    const totalColLabel = totalColCfg?.label ?? 'Total';
+    const totalRowLabel = totalRowCfg?.label ?? 'Total';
+    /** Total number of rendered columns incl. the virtual total column. */
+    const renderColumnCount = displayColumns.length + (totalColCfg ? 1 : 0);
+
+    const formatTotal = (value: any): string => {
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'number') return (+value.toFixed(4)).toLocaleString();
+        return isDate(value) ? printDate(value, undefined, true) : String(value);
+    };
 
     // Pagination: by rows normally, by groups when grouped.
     const totalPages = groupedData
@@ -357,6 +422,9 @@ export const Table: React.FC<TableProps> = ({
                     </td>
                 );
             })}
+            {totalColCfg && (
+                <td className="dl2-table-total-col">{formatTotal(rowTotal(row))}</td>
+            )}
         </tr>
     );
 
@@ -439,6 +507,11 @@ export const Table: React.FC<TableProps> = ({
                                     {sortIndicator(col)}
                                 </th>
                             ))}
+                            {totalColCfg && (
+                                <th className="dl2-table-total-col" style={{ ...thStyle, cursor: 'default' }}>
+                                    {totalColLabel}
+                                </th>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
@@ -449,7 +522,7 @@ export const Table: React.FC<TableProps> = ({
                                         className="dl2-table-group-row"
                                         onClick={() => toggleGroup(group.keyString)}
                                     >
-                                        <td colSpan={displayColumns.length}>
+                                        <td colSpan={renderColumnCount}>
                                             <span className="dl2-table-group-caret">
                                                 {isGroupCollapsed(group.keyString) ? '▸' : '▾'}
                                             </span>
@@ -472,12 +545,30 @@ export const Table: React.FC<TableProps> = ({
                         )}
                         {((paginatedGroups && paginatedGroups.length === 0) || (!paginatedGroups && paginatedData.length === 0)) && (
                             <tr>
-                                <td colSpan={displayColumns.length} style={{ textAlign: 'center', padding: 20 }}>
+                                <td colSpan={renderColumnCount} style={{ textAlign: 'center', padding: 20 }}>
                                     No data found
                                 </td>
                             </tr>
                         )}
                     </tbody>
+                    {(totalRowValues || (totalColCfg && totalRowCfg)) && processedData.length > 0 && (
+                        <tfoot>
+                            <tr className={`dl2-table-total-row${useStickyHeader ? ' dl2-table-total-row--sticky' : ''}`}>
+                                {displayColumns.map((col, colIndex) => {
+                                    const value = totalRowValues?.[col];
+                                    if (value !== undefined && value !== null) {
+                                        return <td key={col}>{formatTotal(value)}</td>;
+                                    }
+                                    return <td key={col}>{colIndex === 0 ? totalRowLabel : ''}</td>;
+                                })}
+                                {totalColCfg && (
+                                    <td className="dl2-table-total-col">
+                                        {formatTotal(processedData.reduce((acc, row) => acc + rowTotal(row), 0))}
+                                    </td>
+                                )}
+                            </tr>
+                        </tfoot>
+                    )}
                 </table>
             </div>
 

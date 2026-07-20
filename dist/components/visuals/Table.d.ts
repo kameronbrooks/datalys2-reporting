@@ -1,5 +1,5 @@
 import React from "react";
-import type { ReportVisual, AggregateColumn } from "../../lib/types";
+import type { ReportVisual, AggregateColumn, AggFn } from "../../lib/types";
 export interface TableProps extends ReportVisual {
     columns?: string[];
     pageSize?: number;
@@ -33,5 +33,23 @@ export interface TableProps extends ReportVisual {
     maxHeight?: number;
     /** Sticky header. Defaults to true when maxHeight is set. */
     stickyHeader?: boolean;
+    /**
+     * Grand-total row at the bottom (computed over the filtered data, all
+     * pages). `true` sums every numeric column; or pass `{ label, fns }`
+     * with per-column aggregate fns, e.g. { "fns": { "amount": "sum", "units": "avg" } }.
+     */
+    totalRow?: boolean | {
+        label?: string;
+        fns?: Record<string, AggFn>;
+    };
+    /**
+     * Per-row total column appended on the right. `true` sums every numeric
+     * visible column; or pass `{ label, columns }` to control which columns
+     * are summed.
+     */
+    totalColumn?: boolean | {
+        label?: string;
+        columns?: string[];
+    };
 }
 export declare const Table: React.FC<TableProps>;

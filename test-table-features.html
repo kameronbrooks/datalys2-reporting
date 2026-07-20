@@ -90,6 +90,34 @@
                             {
                                 type: 'layout',
                                 direction: 'row',
+                                title: 'Totals: total row (sum/avg) + per-row total column',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Totals table',
+                                        columns: ['region', 'category', 'units', 'amount'],
+                                        pageSize: 8,
+                                        totalRow: { fns: { units: 'sum', amount: 'sum' } },
+                                        totalColumn: { columns: ['units', 'amount'] },
+                                        maxHeight: 320,
+                                        tableStyle: 'bordered',
+                                        border: true
+                                    },
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'totalRow: true (auto-sums numeric columns)',
+                                        columns: ['region', 'units', 'amount'],
+                                        pageSize: 8,
+                                        totalRow: true,
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
                                 title: 'Legacy config (regression: no new props — old behavior plus new UX defaults)',
                                 children: [
                                     {
