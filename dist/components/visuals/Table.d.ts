@@ -51,5 +51,21 @@ export interface TableProps extends ReportVisual {
         label?: string;
         columns?: string[];
     };
+    /**
+     * Allow opening a row (double-click or context menu) in a detail modal
+     * showing the row's values. Defaults to the visible columns; use
+     * `rowModalColumns` to show any dataset columns instead.
+     */
+    rowModal?: boolean;
+    /**
+     * Open rows in a custom modal (from the report's `modals` array) instead
+     * of the default detail view. Cards inside the modal can reference the
+     * clicked row via {{ row.ColumnName }}. Implies `rowModal`.
+     */
+    rowModalId?: string;
+    /** Columns shown in the DEFAULT row detail modal (may include hidden ones). */
+    rowModalColumns?: string[];
+    /** Title of the default row detail modal. Default: "Details". */
+    rowModalTitle?: string;
 }
 export declare const Table: React.FC<TableProps>;

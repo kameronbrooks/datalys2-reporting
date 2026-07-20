@@ -539,6 +539,33 @@ a:hover {
     white-space: nowrap;
 }
 
+/* Openable rows + row detail modal */
+.dl2-table-row--openable {
+    cursor: pointer;
+}
+
+.dl2-table-row--openable:hover td {
+    background-color: var(--dl2-bg-tab);
+}
+
+.dl2-row-detail-modal {
+    max-width: 480px;
+}
+
+.dl2-row-detail-table th {
+    text-align: left;
+    width: 40%;
+    color: var(--dl2-text-secondary);
+    font-weight: 600;
+    vertical-align: top;
+    cursor: default;
+}
+
+.dl2-row-detail-table th,
+.dl2-row-detail-table td {
+    border-bottom: 1px solid var(--dl2-border-plain-td);
+}
+
 /* Table totals */
 .dl2-table-total-row td {
     font-weight: 600;

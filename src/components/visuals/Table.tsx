@@ -50,6 +50,22 @@ export interface TableProps extends ReportVisual {
      * are summed.
      */
     totalColumn?: boolean | { label?: string; columns?: string[] };
+    /**
+     * Allow opening a row (double-click or context menu) in a detail modal
+     * showing the row's values. Defaults to the visible columns; use
+     * `rowModalColumns` to show any dataset columns instead.
+     */
+    rowModal?: boolean;
+    /**
+     * Open rows in a custom modal (from the report's `modals` array) instead
+     * of the default detail view. Cards inside the modal can reference the
+     * clicked row via {{ row.ColumnName }}. Implies `rowModal`.
+     */
+    rowModalId?: string;
+    /** Columns shown in the DEFAULT row detail modal (may include hidden ones). */
+    rowModalColumns?: string[];
+    /** Title of the default row detail modal. Default: "Details". */
+    rowModalTitle?: string;
 }
 
 interface MenuState {
@@ -83,10 +99,15 @@ export const Table: React.FC<TableProps> = ({
     maxHeight,
     stickyHeader,
     totalRow,
-    totalColumn
+    totalColumn,
+    rowModal,
+    rowModalId,
+    rowModalColumns,
+    rowModalTitle
 }) => {
     const ctx = useContext(AppContext);
     const dataset = ctx.datasets[datasetId];
+    const rowOpenEnabled = rowModal === true || !!rowModalId;
 
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
@@ -98,8 +119,19 @@ export const Table: React.FC<TableProps> = ({
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const [allCollapsed] = useState(groupsCollapsed);
     const [menu, setMenu] = useState<MenuState | null>(null);
+    const [detailRow, setDetailRow] = useState<any | null>(null);
 
     const useStickyHeader = stickyHeader ?? (maxHeight !== undefined);
+
+    /** Opens the detail view for a row — custom modal if configured, else the built-in one. */
+    const openRowDetails = (row: any) => {
+        if (!rowOpenEnabled) return;
+        if (rowModalId) {
+            ctx.openModal(rowModalId, { row, datasetId });
+        } else {
+            setDetailRow(row);
+        }
+    };
 
     /**
      * Normalizes the dataset into an array of objects (records).
@@ -362,10 +394,17 @@ export const Table: React.FC<TableProps> = ({
         if (!contextMenu) return;
         e.preventDefault();
         e.stopPropagation();
-        const items: ContextMenuItem[] = [
+        const items: ContextMenuItem[] = [];
+        if (rowOpenEnabled) {
+            items.push(
+                { label: 'Open details', onClick: () => openRowDetails(row) },
+                { separator: true }
+            );
+        }
+        items.push(
             { label: 'Copy cell', onClick: () => copyTextToClipboard(formatCellForExport(row[col])) },
             { label: 'Copy row', onClick: () => copyTextToClipboard(displayColumns.map(c => formatCellForExport(row[c])).join('\t')) },
-        ];
+        );
         if (enableExport) {
             items.push(
                 { separator: true },
@@ -409,7 +448,12 @@ export const Table: React.FC<TableProps> = ({
     const renderCell = (val: any) => isDate(val) ? printDate(val, undefined, true) : String(val);
 
     const renderDataRow = (row: any, i: number, indent: boolean = false) => (
-        <tr key={i}>
+        <tr
+            key={i}
+            className={rowOpenEnabled ? 'dl2-table-row--openable' : undefined}
+            onDoubleClick={rowOpenEnabled ? () => openRowDetails(row) : undefined}
+            title={rowOpenEnabled ? 'Double-click to open details' : undefined}
+        >
             {displayColumns.map((col, colIndex) => {
                 const val = row[col];
                 return (
@@ -601,6 +645,30 @@ export const Table: React.FC<TableProps> = ({
                     position={menu.position}
                     onClose={() => setMenu(null)}
                 />
+            )}
+
+            {/* Built-in row detail modal (used when no rowModalId is configured) */}
+            {detailRow && (
+                <div className="dl2-modal-overlay" onClick={() => setDetailRow(null)}>
+                    <div className="dl2-modal-content dl2-row-detail-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="dl2-modal-header">
+                            <h2>{rowModalTitle || 'Details'}</h2>
+                            <button className="dl2-modal-close-btn" onClick={() => setDetailRow(null)}>&times;</button>
+                        </div>
+                        <div className="dl2-modal-body">
+                            <table className="dl2-table dl2-row-detail-table">
+                                <tbody>
+                                    {(rowModalColumns && rowModalColumns.length > 0 ? rowModalColumns : displayColumns).map(col => (
+                                        <tr key={col}>
+                                            <th>{col}</th>
+                                            <td>{renderCell(detailRow[col])}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             )}
         </VisualContainer>
     );

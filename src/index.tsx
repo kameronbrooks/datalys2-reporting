@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { AppContext } from './components/context/AppContext';
+import { AppContext, ModalContext } from './components/context/AppContext';
 import { Headbar } from './components/Headbar';
 import { TabGroup } from './components/TabGroup';
 import { Modal } from './components/Modal';
@@ -14,12 +14,18 @@ function App() {
     const [datasets, setDatasets] = useState<Record<string, Dataset>>({});
     const [isLoaded, setIsLoaded] = useState(false);
     const [activeModal, setActiveModal] = useState<ReportModal | null>(null);
+    const [modalContext, setModalContext] = useState<ModalContext | null>(null);
     const [appData, setAppData] = useState<ApplicationData>({ pages: [], datasets: {} });
 
-    const openModal = (modalOrId: ReportModal | string) => {
+    const openModal = (modalOrId: ReportModal | string, context?: ModalContext) => {
+        setModalContext(context || null);
         if (typeof modalOrId === 'string') {
             const found = (appData.modals || []).find(m => m.id === modalOrId);
-            if (found) setActiveModal(found);
+            if (found) {
+                setActiveModal(found);
+            } else {
+                console.warn(`[datalys2] Modal "${modalOrId}" not found.`);
+            }
         } else {
             // If the object passed doesn't have rows, try to find it in global modals by ID
             if (!modalOrId.rows && modalOrId.id) {
@@ -32,7 +38,10 @@ function App() {
             setActiveModal(modalOrId);
         }
     };
-    const closeModal = () => setActiveModal(null);
+    const closeModal = () => {
+        setActiveModal(null);
+        setModalContext(null);
+    };
 
     const documentTitle = document.title || 'Datalys2 Report';
     const documentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
@@ -90,11 +99,12 @@ function App() {
     }
 
     return (
-        <AppContext.Provider value={{ 
-            datasets: datasets, 
+        <AppContext.Provider value={{
+            datasets: datasets,
             modals: appData.modals || [],
             openModal,
-            closeModal
+            closeModal,
+            modalContext
         }}>
             <div>
                 <Headbar

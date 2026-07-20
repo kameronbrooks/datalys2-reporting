@@ -155,6 +155,10 @@ function validateElement(
     if (anyEl.filter) validateFilterExpression(anyEl.filter, dataset, `${desc}.filter`);
     if (anyEl.aggregate) validateAggregateSpec(anyEl.aggregate, dataset, `${desc}.aggregate`);
 
+    if (anyEl.rowModalId && !(data.modals || []).some(m => m.id === anyEl.rowModalId)) {
+        warn(`${desc}: rowModalId "${anyEl.rowModalId}" is not defined in "modals".`);
+    }
+
     // Column-name references common across visuals
     const columnProps = ['xColumn', 'yColumn', 'valueColumn', 'labelColumn', 'categoryColumn', 'groupBy'];
     // Note: when filter/aggregate is present the effective columns may differ
@@ -166,7 +170,7 @@ function validateElement(
                 warn(`${desc}: ${prop} "${val}" is not a column of dataset "${dataset.id}" (columns: ${dataset.columns.join(', ')}).`);
             }
         });
-        const columnListProps = ['yColumns', 'columns', 'hiddenColumns'];
+        const columnListProps = ['yColumns', 'columns', 'hiddenColumns', 'rowModalColumns'];
         columnListProps.forEach(prop => {
             const val = anyEl[prop];
             if (Array.isArray(val)) {

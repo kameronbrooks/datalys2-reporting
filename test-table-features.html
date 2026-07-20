@@ -90,6 +90,33 @@
                             {
                                 type: 'layout',
                                 direction: 'row',
+                                title: 'Row detail modals: double-click a row (left: default modal, right: custom modal with row templates)',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Default row modal',
+                                        columns: ['date', 'region', 'rep', 'amount'],
+                                        pageSize: 6,
+                                        rowModal: true,
+                                        rowModalColumns: ['id', 'date', 'region', 'category', 'rep', 'units', 'amount', 'returned'],
+                                        rowModalTitle: 'Order Details',
+                                        border: true
+                                    },
+                                    {
+                                        type: 'table',
+                                        datasetId: 'orders',
+                                        title: 'Custom row modal (rowModalId)',
+                                        columns: ['date', 'region', 'rep', 'amount'],
+                                        pageSize: 6,
+                                        rowModalId: 'order-detail-modal',
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
                                 title: 'Totals: total row (sum/avg) + per-row total column',
                                 children: [
                                     {
@@ -141,6 +168,26 @@
                                         allowColumnHiding: false,
                                         showSearch: false,
                                         border: true
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                modals: [
+                    {
+                        id: 'order-detail-modal',
+                        title: 'Order',
+                        rows: [
+                            {
+                                type: 'layout',
+                                direction: 'column',
+                                children: [
+                                    {
+                                        type: 'card',
+                                        title: 'Order #{{ row.id }} — {{ row.region }}',
+                                        contentType: 'md',
+                                        text: '**Rep:** {{ row.rep }}\n**Category:** {{ row.category }}\n**Units:** {{ row.units }}\n**Amount:** {{ formatCurrency(row.amount) }}\n**Returned:** {{ row.returned }}\n\n_This modal is a normal report modal — cards inside it can use `{{ row.* }}` templates._'
                                     }
                                 ]
                             }

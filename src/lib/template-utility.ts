@@ -14,6 +14,11 @@ export type TemplateValue =
 export interface TemplateContext {
     datasets: Record<string, Dataset>;
     props?: Record<string, unknown>;
+    /**
+     * The data row a modal was opened for (row-detail modals). Lets card
+     * templates reference the clicked row, e.g. {{ row.Region }}.
+     */
+    row?: Record<string, unknown>;
 }
 
 const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
@@ -295,12 +300,14 @@ function evalUnsafeJsExpression(code: string, ctx: TemplateContext): unknown {
     // for arbitrary JS provided by content. This is only for trusted inputs.
     const datasets = ctx.datasets;
     const props = ctx.props ?? {};
+    const row = ctx.row ?? {};
     const helpers = createHelpers(ctx);
 
     // Wrap in parentheses so `a ? b : c` works.
     const fn = new Function(
         "datasets",
         "props",
+        "row",
         "helpers",
         `"use strict";
          const { count, sum, avg, min, max, formatNumber, formatPercent, formatCurrency } = helpers;
@@ -308,10 +315,11 @@ function evalUnsafeJsExpression(code: string, ctx: TemplateContext): unknown {
     ) as unknown as (
         datasets: Record<string, Dataset>,
         props: Record<string, unknown>,
+        row: Record<string, unknown>,
         helpers: ReturnType<typeof createHelpers>
     ) => unknown;
 
-    return fn(datasets, props as Record<string, unknown>, helpers);
+    return fn(datasets, props as Record<string, unknown>, row as Record<string, unknown>, helpers);
 }
 
 function evalPlaceholder(content: string, ctx: TemplateContext): unknown {

@@ -10,6 +10,11 @@ export type TemplateValue = string | {
 export interface TemplateContext {
     datasets: Record<string, Dataset>;
     props?: Record<string, unknown>;
+    /**
+     * The data row a modal was opened for (row-detail modals). Lets card
+     * templates reference the clicked row, e.g. {{ row.Region }}.
+     */
+    row?: Record<string, unknown>;
 }
 /**
  * Renders a template with `{{ ... }}` placeholders.

@@ -380,6 +380,39 @@ Displays data in a tabular format with type-aware sorting (single and multi-colu
 
 > Totals are display-only: CSV export and clipboard copy contain the data rows without the totals.
 
+**Row detail modals:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `rowModal` | `boolean` | Allow opening a row (double-click, or right-click → Open details) in a built-in detail modal listing the row's values. |
+| `rowModalId` | `string` | Open rows in a **custom modal** from the report's `modals` array instead. Implies `rowModal`. |
+| `rowModalColumns` | `string[]` | Columns shown in the built-in modal (defaults to the visible columns; may include any dataset column, e.g. hidden ones). |
+| `rowModalTitle` | `string` | Title of the built-in modal (default "Details"). |
+
+Inside a custom row modal, **card templates can reference the clicked row** via the `row` variable:
+
+```json
+"modals": [
+    {
+        "id": "order-detail-modal",
+        "title": "Order",
+        "rows": [{
+            "direction": "column",
+            "children": [{
+                "type": "card",
+                "title": "Order #{{ row.id }} — {{ row.region }}",
+                "contentType": "md",
+                "text": "**Rep:** {{ row.rep }}\n**Amount:** {{ formatCurrency(row.amount) }}"
+            }]
+        }]
+    }
+]
+```
+
+```json
+{ "type": "table", "datasetId": "orders", "rowModalId": "order-detail-modal" }
+```
+
 **Built-in user interactions:**
 
 | Interaction | Effect |

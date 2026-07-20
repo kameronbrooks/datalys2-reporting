@@ -57,7 +57,11 @@ export const Card: React.FC<CardProps> = ({ text, title, shadow, border, descrip
     const ctx = useContext(AppContext) || { datasets: {} };
 
     // Prepare context for template rendering, including all available datasets
-    const templateCtx = useMemo(() => ({ datasets: ctx.datasets, props: {} }), [ctx.datasets]);
+    // and, when inside a row-detail modal, the clicked row ({{ row.Column }}).
+    const templateCtx = useMemo(
+        () => ({ datasets: ctx.datasets, props: {}, row: (ctx as any).modalContext?.row }),
+        [ctx.datasets, (ctx as any).modalContext]
+    );
 
     // Render title template if provided
     const renderedTitle = useMemo(
