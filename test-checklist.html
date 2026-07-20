@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datalys2 Reports - Checklist Test</title>
+    <meta name="description" content="Tests for the 0.4.1 checklist overhaul: status chips, progress bar, urgency sort, column hiding, export, row modals, formats, persistState">
+    <meta name="author" content="Brooks, Kameron">
+    <meta name="report-id" content="test-checklist">
+    <link rel="stylesheet" href="http://localhost:8080/dl2-style.css">
+</head>
+<body>
+    <!-- Placeholder; filled by the generator script below before the library loads -->
+    <script id="report-data" type="application/json">{}</script>
+    <script type="text/javascript">
+        (function () {
+            // Deterministic LCG so the page is stable between reloads; due dates
+            // are relative to "today" so every status (overdue / due soon /
+            // pending / complete) actually occurs.
+            const owners = ['Ana', 'Ben', 'Cody', 'Dee', 'Eli', 'Fay'];
+            const priorities = ['High', 'Medium', 'Low'];
+            const verbs = ['Draft', 'Review', 'Ship', 'Test', 'Design', 'Refactor', 'Document', 'Deploy'];
+            const things = ['login flow', 'billing report', 'export module', 'landing page', 'API client', 'data model', 'onboarding email', 'dashboard'];
+            let seed = 1337;
+            const rand = () => {
+                seed = (seed * 1664525 + 1013904223) % 4294967296;
+                return seed / 4294967296;
+            };
+            const rows = [];
+            for (let i = 0; i < 42; i++) {
+                const done = rand() < 0.4;
+                // Done tasks in the past; open tasks spread from 12 days late to 25 days out
+                const offsetDays = done
+                    ? -Math.floor(rand() * 30)
+                    : Math.floor(rand() * 38) - 12;
+                const due = new Date(Date.now() + offsetDays * 86400000);
+                const hasDue = rand() < 0.9; // a few tasks have no due date → plain "pending"
+                rows.push({
+                    task: `${verbs[Math.floor(rand() * verbs.length)]} ${things[Math.floor(rand() * things.length)]} #${i + 1}`,
+                    owner: owners[Math.floor(rand() * owners.length)],
+                    priority: priorities[Math.floor(rand() * priorities.length)],
+                    due: hasDue ? due.toISOString().slice(0, 10) : null,
+                    estHours: Math.round(rand() * 240) / 10,
+                    done: done
+                });
+            }
+
+            const config = {
+                pages: [
+                    {
+                        title: 'Checklist UX (0.4.1)',
+                        description: 'Try: status chips (click to hide/show a status), header clicks to sort (Status header sorts by urgency), Shift+click multi-sort, right-click headers/rows, Columns/Export buttons, double-click rows for details. View changes persist — use right-click → Reset view or the headbar Reset view button.',
+                        rows: [
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: 'Full-featured checklist: chips + progress, urgency default sort, sticky header, built-in row modal, formatted columns',
+                                children: [
+                                    {
+                                        type: 'checklist',
+                                        id: 'chk-main',
+                                        datasetId: 'tasks',
+                                        title: 'Project Tasks',
+                                        statusColumn: 'done',
+                                        warningColumn: 'due',
+                                        warningThreshold: 5,
+                                        pageSize: 12,
+                                        maxHeight: 480,
+                                        rowModal: true,
+                                        rowModalTitle: 'Task Details',
+                                        columnFormats: {
+                                            due: 'date',
+                                            estHours: { format: 'number', digits: 1 }
+                                        },
+                                        exportFileName: 'tasks-export',
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: 'Left: hideCompleted + custom row modal (rowModalId). Right: conditionalFormats on a checklist',
+                                children: [
+                                    {
+                                        type: 'checklist',
+                                        id: 'chk-open-work',
+                                        datasetId: 'tasks',
+                                        title: 'Open work (hideCompleted: true)',
+                                        statusColumn: 'done',
+                                        warningColumn: 'due',
+                                        hideCompleted: true,
+                                        columns: ['task', 'owner', 'due'],
+                                        columnFormats: { due: 'date' },
+                                        rowModalId: 'task-detail-modal',
+                                        pageSize: 8,
+                                        border: true
+                                    },
+                                    {
+                                        type: 'checklist',
+                                        id: 'chk-condfmt',
+                                        datasetId: 'tasks',
+                                        title: 'High priority red, big estimates bold',
+                                        statusColumn: 'done',
+                                        warningColumn: 'due',
+                                        columns: ['task', 'priority', 'due', 'estHours'],
+                                        columnFormats: { due: 'date' },
+                                        conditionalFormats: [
+                                            { when: { column: 'priority', op: 'eq', value: 'High' }, style: 'error' },
+                                            { when: { column: 'estHours', op: 'gt', value: 16 }, css: { fontWeight: 700 } }
+                                        ],
+                                        pageSize: 8,
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: 'Left: defaultSort by column (due desc) + hidden column. Right: locked-down / legacy regression (no chips, progress, search, sort, menus, export)',
+                                children: [
+                                    {
+                                        type: 'checklist',
+                                        id: 'chk-defaultsort',
+                                        datasetId: 'tasks',
+                                        title: 'defaultSort: due desc ("status" is also a valid sort column)',
+                                        statusColumn: 'done',
+                                        warningColumn: 'due',
+                                        defaultSort: [{ column: 'due', direction: 'desc' }],
+                                        hiddenColumns: ['estHours'],
+                                        pageSize: 8,
+                                        border: true
+                                    },
+                                    {
+                                        type: 'checklist',
+                                        id: 'chk-locked',
+                                        datasetId: 'tasks',
+                                        title: 'Locked-down checklist',
+                                        statusColumn: 'done',
+                                        warningColumn: 'due',
+                                        columns: ['task', 'owner', 'due'],
+                                        showStatusFilter: false,
+                                        showProgress: false,
+                                        showSearch: false,
+                                        sortable: false,
+                                        contextMenu: false,
+                                        enableExport: false,
+                                        allowColumnHiding: false,
+                                        pageSize: 8,
+                                        border: true
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                modals: [
+                    {
+                        id: 'task-detail-modal',
+                        title: 'Task',
+                        rows: [
+                            {
+                                type: 'layout',
+                                direction: 'column',
+                                children: [
+                                    {
+                                        type: 'card',
+                                        title: '{{ row.task }}',
+                                        contentType: 'md',
+                                        text: '**Owner:** {{ row.owner }}\n**Priority:** {{ row.priority }}\n**Due:** {{ row.due }}\n**Estimate:** {{ formatNumber(row.estHours, 1) }} h\n**Done:** {{ row.done }}\n\n_Custom checklist row modal — cards can use `{{ row.* }}` templates._'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                datasets: {
+                    tasks: {
+                        id: 'tasks',
+                        columns: ['task', 'owner', 'priority', 'due', 'estHours', 'done'],
+                        dtypes: ['str', 'str', 'str', 'date', 'float', 'bool'],
+                        format: 'records',
+                        data: rows
+                    }
+                }
+            };
+
+            document.getElementById('report-data').textContent = JSON.stringify(config);
+        })();
+    </script>
+    <div id="root"></div>
+    <script src="http://localhost:8080/datalys2-reports.min.js"></script>
+</body>
+</html>

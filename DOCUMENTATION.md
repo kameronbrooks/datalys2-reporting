@@ -1,6 +1,8 @@
 # Datalys2 Reporting Documentation
 **Version 0.2.12**
 
+> **📚 Extensive per-feature documentation now lives in [docs/](docs/README.md)** — one file per feature with many worked examples, verified against the source. This single-file document is kept as a quick reference; where the two disagree, the docs/ folder is authoritative.
+
 
 This documentation guides you on how to create HTML reports using the Datalys2 Reporting library.
 
@@ -43,7 +45,7 @@ You can also use standard HTML meta tags to configure the report header informat
     </script>
 
     <!-- Include the library script -->
-    <script src="path/to/datalys2-reporting.js"></script>
+    <script src="path/to/datalys2-reports.min.js"></script>
 </body>
 </html>
 ```
@@ -378,8 +380,53 @@ Displays data in a tabular format with type-aware sorting (single and multi-colu
 | `totalRow` | `boolean \| object` | Grand-total row at the bottom, computed over the **filtered** data (all pages). `true` sums every numeric column. Or `{ "label": "Grand Total", "fns": { "amount": "sum", "units": "avg" } }` for per-column aggregate functions. Sticky when `maxHeight` is set. |
 | `totalColumn` | `boolean \| object` | Per-row total column appended on the right. `true` sums every numeric visible column, or `{ "label": "Sum", "columns": ["units", "amount"] }` to control the summed columns. |
 | `persistState` | `boolean` | Persist runtime view changes (sort, hidden columns, grouping) in the browser. Default **true** when the visual has an `id`. See [Persistent View State](#persistent-view-state). |
+| `columnFormats` | `object` | Per-column display formats. See [Column formatting](#column-formatting-columnformats). |
+| `conditionalFormats` | `object[]` | Cell/row highlight rules. See [Conditional formatting](#conditional-formatting-conditionalformats). |
 
 > Totals are display-only: CSV export and clipboard copy contain the data rows without the totals.
+
+**Column formatting (`columnFormats`):**
+
+Formats values for display without changing the underlying data. Keys are column names; values are a format spec or a shorthand format string:
+
+```json
+"columnFormats": {
+    "amount":  { "format": "currency", "symbol": "$", "digits": 0 },
+    "rate":    { "format": "percent", "digits": 1 },
+    "elapsed": { "format": "hms" },
+    "created": "date"
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `format` | `'number' \| 'currency' \| 'percent' \| 'date' \| 'hms'` | Formatting style (same enum as the Card/KPI `format` prop). `hms` renders seconds as `HH:MM:SS`. |
+| `digits` | `number` | Decimal places (defaults: currency 2, percent 1, number locale default). |
+| `symbol` | `string` | Currency symbol when format is `'currency'` (default `$`). |
+
+Formats apply to body cells, the total row, the total column (when every summed column shares the same format), group aggregates (match on the aggregate's `as` name), and row detail modals. **Display-only:** CSV export keeps raw values; clipboard copy matches the formatted on-screen view.
+
+**Conditional formatting (`conditionalFormats`):**
+
+Highlights cells or whole rows when a row matches a rule. `when` uses the standard [filter grammar](#filtering--aggregation):
+
+```json
+"conditionalFormats": [
+    { "when": { "column": "amount", "op": "gt", "value": 10000 }, "style": "success" },
+    { "when": { "column": "region", "op": "eq", "value": "EU" }, "target": "row", "style": "info" },
+    { "when": { "column": "margin", "op": "lt", "value": 0 }, "css": { "color": "var(--dl2-error)", "fontWeight": 600 } }
+]
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `when` | `FilterExpression` | **Required.** Filter the row must match (full grammar incl. `and`/`or`/`not`). |
+| `target` | `'cell' \| 'row'` | Style the matching cell(s) (default) or the whole row. |
+| `columns` | `string[]` | Cell target only: columns to style. Defaults to the `when` condition's own column; **required** when `when` is a compound expression. |
+| `style` | `string` | Named preset: `success`, `warning`, `error`, `info`, `muted` (theme-aware, light/dark). |
+| `css` | `object` | Inline CSS overrides (camelCase keys), applied over `style`. |
+
+The first matching rule wins per target (one row rule and one cell rule may compose). Rules apply to data rows only — totals and group aggregate rows are exempt.
 
 **Row detail modals:**
 
@@ -443,16 +490,48 @@ Inside a custom row modal, **card templates can reference the clicked row** via 
 
 **7. Checklist (`type: "checklist"`)**
 
-Displays a list of tasks with completion status and due date warnings.
+Displays a **read-only** list of tasks with status indicators derived from the dataset: `Complete` (truthy `statusColumn`), and — when a due-date `warningColumn` is configured — `Overdue`, `Due Soon` (within `warningThreshold` days), or `Pending`. The checklist never mutates data; completion always comes from the dataset.
+
+Since 0.4.1 the checklist shares the table's UX: type-aware sorting (single + Shift-click multi-sort), column hiding, right-click context menus, CSV export / clipboard copy, sticky header via `maxHeight`, row detail modals, `columnFormats` / `conditionalFormats`, and persistent view state. On top of that it adds status filter chips, a completion progress bar, and urgency-aware sorting.
+
+**Checklist-specific properties:**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `statusColumn` | `string` | **Required**. Column name containing boolean/truthy value for completion. |
 | `warningColumn` | `string` | Optional. Column name containing a date to check against. |
 | `warningThreshold` | `number` | Optional. Days before due date to trigger warning (default 3). |
-| `columns` | `string[]` | Optional array of column names to display. |
-| `pageSize` | `number` | Number of rows per page (default 10). |
-| `showSearch` | `boolean` | Whether to show the search bar (default true). |
+| `columns` | `string[]` | Optional array of column names to display (defaults to all except `statusColumn`). |
+| `showStatusFilter` | `boolean` | Show the status chips row: **All / Pending / Due Soon / Overdue / Complete** with counts. Clicking a chip hides/shows that status; **All** resets. Default true. |
+| `showProgress` | `boolean` | Show the completion progress bar (computed over the searched data, before the chips filter). Default true. |
+| `hideCompleted` | `boolean` | Start with completed tasks hidden (the Complete chip toggled off). Users can toggle them back at runtime. Default false. |
+| `defaultSort` | `{column, direction}[]` | Initial sort keys. The special column name `"status"` sorts by urgency. **Default: urgency (overdue → due soon → pending → complete), then due date.** |
+
+**Shared table properties** — same behavior as the Table visual: `pageSize`, `showSearch`, `sortable`, `hiddenColumns`, `allowColumnHiding`, `enableExport`, `exportFileName`, `contextMenu`, `maxHeight`, `stickyHeader`, `rowModal`, `rowModalId`, `rowModalColumns`, `rowModalTitle`, `persistState`, `columnFormats`, `conditionalFormats`.
+
+Notes:
+
+- The **Status** column header sorts by urgency (click, or right-click → "Sort by urgency"). Persisted view state includes sort, hidden columns, and the chips selection.
+- CSV export / clipboard copy include a derived `Status` column (`Complete` / `Pending` / `Due Soon` / `Overdue`).
+- The built-in row modal shows the status as its first row; custom `rowModalId` modals receive the clicked row via `{{ row.* }}` templates, exactly like tables.
+
+**Example — full-featured checklist:**
+
+```json
+{
+    "type": "checklist",
+    "id": "chk-tasks",
+    "datasetId": "tasks",
+    "title": "Project Tasks",
+    "statusColumn": "done",
+    "warningColumn": "due",
+    "warningThreshold": 5,
+    "hideCompleted": true,
+    "maxHeight": 420,
+    "rowModal": true,
+    "columnFormats": { "due": "date", "estHours": { "format": "number", "digits": 1 } }
+}
+```
 
 **8. Histogram (`type: "histogram"`)**
 

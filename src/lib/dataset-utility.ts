@@ -100,6 +100,31 @@ export function findColumnIndex(column: string | number, dataset: Dataset): numb
 };
 
 /**
+ * Normalizes a dataset's rows into records (objects keyed by column name).
+ * Table-format rows (arrays) are mapped through `columns`; records-format
+ * rows are returned as-is. Row objects are shared by reference where possible.
+ */
+export function toRecords(dataset: Dataset | undefined): Record<string, any>[] {
+    if (!dataset || !Array.isArray(dataset.data) || dataset.data.length === 0) return [];
+
+    if (typeof dataset.data[0] === 'object' && !Array.isArray(dataset.data[0])) {
+        return dataset.data;
+    }
+
+    if (Array.isArray(dataset.data[0])) {
+        return dataset.data.map((row: any[]) => {
+            const obj: Record<string, any> = {};
+            (dataset.columns || []).forEach((col, index) => {
+                obj[col] = row[index];
+            });
+            return obj;
+        });
+    }
+
+    return [];
+}
+
+/**
  * Decompresses all datasets in a record if they have compressedData.
  * @param datasets 
  * @param shouldGC If true, deletes the compressedData property and clears the source script tag after decompression.

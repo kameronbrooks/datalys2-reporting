@@ -97,8 +97,8 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
         flex: layout.flex ?? 1,
         padding: layout.padding ?? 0,
         margin: layout.margin ?? 0,
-        border: layout.border ? "1px solid var(--dl2-border-main)" : undefined,
-        boxShadow: layout.shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined,
+        border: typeof layout.border === 'string' ? layout.border : (layout.border ? "1px solid var(--dl2-border-main)" : undefined),
+        boxShadow: typeof layout.shadow === 'string' ? layout.shadow : (layout.shadow ? "2px 2px 5px var(--dl2-shadow)" : undefined),
     };
 
     const content = (

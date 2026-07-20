@@ -26,9 +26,9 @@ export interface GaugeProps extends ReportVisual {
     height?: number;
     /** Gauge arc thickness in pixels. */
     thickness?: number;
-    /** Start angle in radians. Defaults to -3/4 PI. */
+    /** Start angle in radians. Defaults to -PI/2 (-90°). */
     startAngle?: number;
-    /** End angle in radians. Defaults to 3/4 PI. */
+    /** End angle in radians. Defaults to PI/2 (90°). */
     endAngle?: number;
     /** Color palette used for ranges and value arc. */
     colors?: ColorProperty;

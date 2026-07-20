@@ -19,10 +19,12 @@ export interface TemplateContext {
 /**
  * Renders a template with `{{ ... }}` placeholders.
  *
- * Supported placeholders:
- * - Paths: `{{datasets.sales.data[0][1]}}`, `{{props.title}}`
- * - Functions (allowlisted): `sum(...)`, `avg(...)`, `min(...)`, `max(...)`, `count(...)`, `formatNumber(...)`, `formatPercent(...)`, `formatCurrency(...)`
+ * Each placeholder (and the `expr` / `unsafeJs` object forms) is evaluated as
+ * a JavaScript expression via `new Function` with `datasets`, `props`, `row`,
+ * and the helper functions (`count`, `sum`, `avg`, `min`, `max`,
+ * `formatNumber`, `formatPercent`, `formatCurrency`) in scope.
  *
- * This intentionally does NOT execute arbitrary JavaScript.
+ * ⚠️ This executes arbitrary JavaScript from the report config in the
+ * viewer's browser. Only render templates from trusted report-data.
  */
 export declare function renderTemplate(value: TemplateValue | null | undefined, ctx: TemplateContext): string;

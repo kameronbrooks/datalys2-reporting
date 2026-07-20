@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.4.1 — Tables Everywhere
+
+Checklist parity with tables, plus per-column and conditional formatting for both. The checklist remains **read-only by design** — status always comes from the dataset.
+
+### Checklist overhaul
+
+Re-platformed on the shared table infrastructure (records normalization, `VisualContainer`, type-aware `sort-utility`, `ContextMenu`, export and state-persistence utilities).
+
+**Parity with Table:** type-aware sorting (numbers/dates/natural strings, nulls last) with Shift+click multi-sort, column hide/show (`hiddenColumns` + Columns menu), right-click context menus, CSV export / clipboard copy, sticky header via `maxHeight`/`stickyHeader`, row detail modals (`rowModal`, `rowModalId`, `rowModalColumns`, `rowModalTitle`), and persistent view state (`persistState`, on by default with an `id`; participates in per-visual and report-wide Reset view). Opt-outs (`sortable`, `contextMenu`, `enableExport`, `allowColumnHiding: false`) restore the old behavior.
+
+**New checklist UX:**
+
+- Status filter chips with counts — All / Pending / Due Soon / Overdue / Complete; click a chip to hide/show that status (persisted).
+- Completion progress bar next to the "X / Y Completed" summary (`showProgress`).
+- Urgency default sort: overdue (most overdue first) → due soon → pending → complete, then due date. `defaultSort` accepts the special column `"status"`.
+- Status is a first-class sortable column; the Status header sorts by urgency.
+- `hideCompleted: true` starts with completed tasks hidden (Complete chip toggled off).
+- Exports include a derived `Status` column; the built-in row modal leads with the status.
+
+### Column formatting (`columnFormats`) — Table + Checklist
+
+- Per-column display formats: `number | currency | percent | date | hms` with `digits`/`symbol` options, or shorthand strings (`"due": "date"`).
+- Applies to cells, total row/column, group aggregates (matched by the aggregate's `as` name), and row detail modals.
+- Display-only: CSV export keeps raw values; clipboard copy matches the formatted view.
+
+### Conditional formatting (`conditionalFormats`) — Table + Checklist
+
+- Highlight rules evaluated per row with the standard filter grammar (`when`), targeting the matching cell(s) (default) or the whole row (`target: "row"`).
+- Named theme-aware presets (`success`, `warning`, `error`, `info`, `muted`) and/or inline `css` overrides.
+- First matching rule wins per target; one row rule and one cell rule can compose. Totals/aggregate rows are exempt.
+
+### Fixes & housekeeping
+
+- `trend` visual elements now render on line, area, stacked/clustered bar, and histogram charts (previously only the scatter plot supplied the numeric X domain the trend layer needs, so trend entries were silently skipped everywhere else). On categorical X axes the coefficients are evaluated against the 0-based category index; numeric axes (scatter, histogram) use real axis units.
+- Template helpers `sum`/`avg`/`min`/`max` now work on records-format datasets (previously they silently returned `undefined` for object rows; only table-format array rows were read).
+- `border` and `shadow` now honor CSS string values (`"border": "2px dashed #f59e0b"`) on layouts and visuals, as the types always declared; `true` keeps the standard theme style.
+- Removed the dead allowlisted template evaluator from `template-utility` and corrected its doc comment — `{{ }}` placeholders and `expr` values execute arbitrary JavaScript (as documented in the security note) and always have.
+- New per-feature documentation set under `docs/` (one file per feature, worked examples throughout); `DOCUMENTATION.md` remains as a quick reference. Fixed its bundle-filename typo and the stale Gauge angle JSDoc.
+- `null`/`undefined` cells now render empty instead of the literal "null" (tables and checklists).
+- New validation warnings: unknown `columnFormats` columns/kinds, malformed `conditionalFormats` (bad `when`, unknown preset/target, unresolvable columns), and column checks for `statusColumn`/`warningColumn`.
+- New `test-checklist.html` test page; `test-table-features.html` extended with columnFormats/conditionalFormats sections.
+- New shared internals: `format-utility`, `conditional-format-utility`, `toRecords` in `dataset-utility`.
+
 ## 0.4.0 — Tables & Interactivity
 
 ### Table totals

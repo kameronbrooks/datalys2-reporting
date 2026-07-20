@@ -151,6 +151,66 @@
                             {
                                 type: 'layout',
                                 direction: 'row',
+                                title: '0.4.1 — columnFormats: per-column currency/date formats (cells, totals, clipboard copy; CSV stays raw)',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        id: 'tbl-colformats',
+                                        datasetId: 'orders',
+                                        title: 'Formatted columns',
+                                        columns: ['date', 'region', 'units', 'amount'],
+                                        pageSize: 8,
+                                        columnFormats: {
+                                            amount: { format: 'currency', digits: 2 },
+                                            date: 'date'
+                                        },
+                                        totalRow: { fns: { units: 'sum', amount: 'sum' } },
+                                        totalColumn: { columns: ['amount'] },
+                                        tableStyle: 'bordered',
+                                        border: true
+                                    },
+                                    {
+                                        type: 'table',
+                                        id: 'tbl-colformats-grouped',
+                                        datasetId: 'orders',
+                                        title: 'Formats apply to group aggregates too (as: "amount")',
+                                        columns: ['region', 'category', 'amount'],
+                                        pageSize: 4,
+                                        groupBy: 'region',
+                                        groupAggregates: [{ column: 'amount', fn: 'sum', as: 'amount' }],
+                                        groupsCollapsed: true,
+                                        columnFormats: { amount: { format: 'currency', digits: 0 } },
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
+                                title: '0.4.1 — conditionalFormats: presets (success/error/muted rows+cells) and inline css',
+                                children: [
+                                    {
+                                        type: 'table',
+                                        id: 'tbl-condformats',
+                                        datasetId: 'orders',
+                                        title: 'Returned orders muted, amount >1200 green, <100 red, units ≥30 bold',
+                                        columns: ['date', 'region', 'rep', 'units', 'amount', 'returned'],
+                                        pageSize: 10,
+                                        columnFormats: { amount: 'currency', date: 'date' },
+                                        conditionalFormats: [
+                                            { when: { column: 'returned', op: 'eq', value: 'yes' }, target: 'row', style: 'muted' },
+                                            { when: { column: 'amount', op: 'gt', value: 1200 }, style: 'success' },
+                                            { when: { column: 'amount', op: 'lt', value: 100 }, style: 'error' },
+                                            { when: { column: 'units', op: 'gte', value: 30 }, css: { fontWeight: 700, color: 'var(--dl2-primary)' } }
+                                        ],
+                                        tableStyle: 'alternating',
+                                        border: true
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'layout',
+                                direction: 'row',
                                 title: 'Legacy config (regression: no new props — old behavior plus new UX defaults)',
                                 children: [
                                     {

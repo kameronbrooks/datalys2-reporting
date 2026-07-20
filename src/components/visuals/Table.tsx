@@ -5,7 +5,10 @@ import { isDate, printDate } from "../../lib/date-utility";
 import { multiSort, SortKey } from "../../lib/sort-utility";
 import { loadVisualState, saveVisualState, clearVisualState } from "../../lib/state-persistence";
 import { computeAggregates } from "../../lib/aggregate-utility";
-import { toCSV, toTSV, downloadCSV, copyTextToClipboard, formatCellForExport } from "../../lib/export-utility";
+import { toCSV, toTSV, downloadCSV, copyTextToClipboard } from "../../lib/export-utility";
+import { formatValue, resolveColumnFormats, ColumnFormatsProp, ColumnFormat } from "../../lib/format-utility";
+import { ConditionalFormat, evaluateConditionalFormats } from "../../lib/conditional-format-utility";
+import { toRecords } from "../../lib/dataset-utility";
 import { ContextMenu, ContextMenuItem } from "../ContextMenu";
 import { VisualContainer } from "./VisualContainer";
 
@@ -74,6 +77,20 @@ export interface TableProps extends ReportVisual {
      * "Reset view", or the report-wide reset in the headbar.
      */
     persistState?: boolean;
+    /**
+     * Per-column display formats, e.g.
+     * { "amount": { "format": "currency", "digits": 0 }, "created": "date" }.
+     * Applies to cells, totals, and group aggregates. Display-only — CSV
+     * export keeps raw values (clipboard copy uses the formatted view).
+     */
+    columnFormats?: ColumnFormatsProp;
+    /**
+     * Cell/row highlight rules evaluated per data row with the standard
+     * filter grammar, e.g.
+     * [{ "when": { "column": "amount", "op": "gt", "value": 10000 }, "style": "success" }].
+     * First matching rule wins per target; totals/aggregate rows are exempt.
+     */
+    conditionalFormats?: ConditionalFormat[];
 }
 
 /** The slice of table view state that persists across reloads. */
@@ -120,6 +137,8 @@ export const Table: React.FC<TableProps> = ({
     rowModalColumns,
     rowModalTitle,
     persistState,
+    columnFormats,
+    conditionalFormats,
     id
 }) => {
     const ctx = useContext(AppContext);
@@ -191,27 +210,9 @@ export const Table: React.FC<TableProps> = ({
      * Normalizes the dataset into an array of objects (records).
      * Handles both array-of-arrays and array-of-objects formats.
      */
-    const normalizedData = useMemo(() => {
-        if (!dataset) return [];
+    const normalizedData = useMemo(() => toRecords(dataset), [dataset]);
 
-        // If data is already array of objects (records format)
-        if (dataset.data.length > 0 && typeof dataset.data[0] === 'object' && !Array.isArray(dataset.data[0])) {
-            return dataset.data;
-        }
-
-        // If data is array of arrays (table format), map columns to keys
-        if (dataset.data.length > 0 && Array.isArray(dataset.data[0])) {
-            return dataset.data.map((row: any[]) => {
-                const obj: any = {};
-                dataset.columns.forEach((col, index) => {
-                    obj[col] = row[index];
-                });
-                return obj;
-            });
-        }
-
-        return [];
-    }, [dataset]);
+    const colFormats = useMemo(() => resolveColumnFormats(columnFormats), [columnFormats]);
 
     /**
      * All columns the table could display (before hiding).
@@ -334,8 +335,23 @@ export const Table: React.FC<TableProps> = ({
     /** Total number of rendered columns incl. the virtual total column. */
     const renderColumnCount = displayColumns.length + (totalColCfg ? 1 : 0);
 
-    const formatTotal = (value: any): string => {
+    /**
+     * Format for the per-row total column: used when every summed source
+     * column shares the same column format (e.g. all currency).
+     */
+    const totalColFormat = useMemo<ColumnFormat | undefined>(() => {
+        if (totalColSourceColumns.length === 0) return undefined;
+        const first = colFormats[totalColSourceColumns[0]];
+        if (!first) return undefined;
+        const same = totalColSourceColumns.every(
+            col => JSON.stringify(colFormats[col]) === JSON.stringify(first)
+        );
+        return same ? first : undefined;
+    }, [totalColSourceColumns, colFormats]);
+
+    const formatTotal = (value: any, fmt?: ColumnFormat): string => {
         if (value === null || value === undefined) return '';
+        if (fmt) return formatValue(value, fmt);
         if (typeof value === 'number') return (+value.toFixed(4)).toLocaleString();
         return isDate(value) ? printDate(value, undefined, true) : String(value);
     };
@@ -407,7 +423,13 @@ export const Table: React.FC<TableProps> = ({
     };
 
     const doCopyTable = () => {
-        copyTextToClipboard(toTSV(displayColumns, processedData));
+        // Clipboard copies match the on-screen (formatted) view; CSV export
+        // above intentionally keeps raw values.
+        copyTextToClipboard(toTSV(displayColumns, processedData.map(row => {
+            const display: Record<string, string> = {};
+            displayColumns.forEach(col => { display[col] = cellText(row[col], col); });
+            return display;
+        })));
     };
 
     /** Builds the context menu for a header cell. */
@@ -460,8 +482,8 @@ export const Table: React.FC<TableProps> = ({
             );
         }
         items.push(
-            { label: 'Copy cell', onClick: () => copyTextToClipboard(formatCellForExport(row[col])) },
-            { label: 'Copy row', onClick: () => copyTextToClipboard(displayColumns.map(c => formatCellForExport(row[c])).join('\t')) },
+            { label: 'Copy cell', onClick: () => copyTextToClipboard(cellText(row[col], col)) },
+            { label: 'Copy row', onClick: () => copyTextToClipboard(displayColumns.map(c => cellText(row[c], c)).join('\t')) },
         );
         if (enableExport) {
             items.push(
@@ -503,32 +525,50 @@ export const Table: React.FC<TableProps> = ({
         );
     };
 
-    const renderCell = (val: any) => isDate(val) ? printDate(val, undefined, true) : String(val);
+    const renderCell = (val: any) =>
+        val === null || val === undefined ? '' : (isDate(val) ? printDate(val, undefined, true) : String(val));
 
-    const renderDataRow = (row: any, i: number, indent: boolean = false) => (
-        <tr
-            key={i}
-            className={rowOpenEnabled ? 'dl2-table-row--openable' : undefined}
-            onDoubleClick={rowOpenEnabled ? () => openRowDetails(row) : undefined}
-            title={rowOpenEnabled ? 'Double-click to open details' : undefined}
-        >
-            {displayColumns.map((col, colIndex) => {
-                const val = row[col];
-                return (
-                    <td
-                        key={col}
-                        style={indent && colIndex === 0 ? { paddingLeft: 24 } : undefined}
-                        onContextMenu={(e) => openCellMenu(e, row, col)}
-                    >
-                        {renderCell(val)}
-                    </td>
-                );
-            })}
-            {totalColCfg && (
-                <td className="dl2-table-total-col">{formatTotal(rowTotal(row))}</td>
-            )}
-        </tr>
-    );
+    /** Cell display text: column format when configured, default rendering otherwise. */
+    const cellText = (val: any, col: string) =>
+        colFormats[col] ? formatValue(val, colFormats[col]) : renderCell(val);
+
+    const renderDataRow = (row: any, i: number, indent: boolean = false) => {
+        const cf = evaluateConditionalFormats(row, conditionalFormats, dataset);
+        const rowClasses = [
+            rowOpenEnabled ? 'dl2-table-row--openable' : '',
+            cf?.row?.className || ''
+        ].filter(Boolean).join(' ');
+        return (
+            <tr
+                key={i}
+                className={rowClasses || undefined}
+                style={cf?.row?.style as React.CSSProperties | undefined}
+                onDoubleClick={rowOpenEnabled ? () => openRowDetails(row) : undefined}
+                title={rowOpenEnabled ? 'Double-click to open details' : undefined}
+            >
+                {displayColumns.map((col, colIndex) => {
+                    const cellCf = cf?.cells[col];
+                    const style: React.CSSProperties = {
+                        ...(indent && colIndex === 0 ? { paddingLeft: 24 } : undefined),
+                        ...(cellCf?.style as React.CSSProperties | undefined)
+                    };
+                    return (
+                        <td
+                            key={col}
+                            className={cellCf?.className}
+                            style={Object.keys(style).length > 0 ? style : undefined}
+                            onContextMenu={(e) => openCellMenu(e, row, col)}
+                        >
+                            {cellText(row[col], col)}
+                        </td>
+                    );
+                })}
+                {totalColCfg && (
+                    <td className="dl2-table-total-col">{formatTotal(rowTotal(row), totalColFormat)}</td>
+                )}
+            </tr>
+        );
+    };
 
     const thStyle: React.CSSProperties | undefined = useStickyHeader
         ? { position: 'sticky', top: 0, zIndex: 1, backgroundColor: 'var(--dl2-bg-visual)' }
@@ -634,7 +674,9 @@ export const Table: React.FC<TableProps> = ({
                                             </span>
                                             {group.aggregates && Object.entries(group.aggregates).map(([name, value]) => (
                                                 <span key={name} className="dl2-table-group-agg">
-                                                    {name}: <b>{typeof value === 'number' ? +value.toFixed(4) : renderCell(value)}</b>
+                                                    {name}: <b>{colFormats[name]
+                                                        ? formatValue(value, colFormats[name])
+                                                        : (typeof value === 'number' ? +value.toFixed(4) : renderCell(value))}</b>
                                                 </span>
                                             ))}
                                         </td>
@@ -659,13 +701,13 @@ export const Table: React.FC<TableProps> = ({
                                 {displayColumns.map((col, colIndex) => {
                                     const value = totalRowValues?.[col];
                                     if (value !== undefined && value !== null) {
-                                        return <td key={col}>{formatTotal(value)}</td>;
+                                        return <td key={col}>{formatTotal(value, colFormats[col])}</td>;
                                     }
                                     return <td key={col}>{colIndex === 0 ? totalRowLabel : ''}</td>;
                                 })}
                                 {totalColCfg && (
                                     <td className="dl2-table-total-col">
-                                        {formatTotal(processedData.reduce((acc, row) => acc + rowTotal(row), 0))}
+                                        {formatTotal(processedData.reduce((acc, row) => acc + rowTotal(row), 0), totalColFormat)}
                                     </td>
                                 )}
                             </tr>
@@ -719,7 +761,7 @@ export const Table: React.FC<TableProps> = ({
                                     {(rowModalColumns && rowModalColumns.length > 0 ? rowModalColumns : displayColumns).map(col => (
                                         <tr key={col}>
                                             <th>{col}</th>
-                                            <td>{renderCell(detailRow[col])}</td>
+                                            <td>{cellText(detailRow[col], col)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

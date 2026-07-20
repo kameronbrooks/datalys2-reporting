@@ -18,6 +18,12 @@ export declare function processDatasetDates(dataset: Dataset): void;
  */
 export declare function findColumnIndex(column: string | number, dataset: Dataset): number | undefined;
 /**
+ * Normalizes a dataset's rows into records (objects keyed by column name).
+ * Table-format rows (arrays) are mapped through `columns`; records-format
+ * rows are returned as-is. Row objects are shared by reference where possible.
+ */
+export declare function toRecords(dataset: Dataset | undefined): Record<string, any>[];
+/**
  * Decompresses all datasets in a record if they have compressedData.
  * @param datasets
  * @param shouldGC If true, deletes the compressedData property and clears the source script tag after decompression.

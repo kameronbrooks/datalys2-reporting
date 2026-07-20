@@ -1,5 +1,7 @@
 import React from "react";
 import type { ReportVisual, AggregateColumn, AggFn } from "../../lib/types";
+import { ColumnFormatsProp } from "../../lib/format-utility";
+import { ConditionalFormat } from "../../lib/conditional-format-utility";
 export interface TableProps extends ReportVisual {
     columns?: string[];
     pageSize?: number;
@@ -74,5 +76,19 @@ export interface TableProps extends ReportVisual {
      * "Reset view", or the report-wide reset in the headbar.
      */
     persistState?: boolean;
+    /**
+     * Per-column display formats, e.g.
+     * { "amount": { "format": "currency", "digits": 0 }, "created": "date" }.
+     * Applies to cells, totals, and group aggregates. Display-only — CSV
+     * export keeps raw values (clipboard copy uses the formatted view).
+     */
+    columnFormats?: ColumnFormatsProp;
+    /**
+     * Cell/row highlight rules evaluated per data row with the standard
+     * filter grammar, e.g.
+     * [{ "when": { "column": "amount", "op": "gt", "value": 10000 }, "style": "success" }].
+     * First matching rule wins per target; totals/aggregate rows are exempt.
+     */
+    conditionalFormats?: ConditionalFormat[];
 }
 export declare const Table: React.FC<TableProps>;

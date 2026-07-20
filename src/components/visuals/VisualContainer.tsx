@@ -36,8 +36,8 @@ export const VisualContainer: React.FC<VisualContainerProps> = ({
             style={{
                 padding: padding ?? 10,
                 margin: margin ?? 0,
-                border: border ? '1px solid var(--dl2-border-main)' : undefined,
-                boxShadow: shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined,
+                border: typeof border === 'string' ? border : (border ? '1px solid var(--dl2-border-main)' : undefined),
+                boxShadow: typeof shadow === 'string' ? shadow : (shadow ? '2px 2px 5px var(--dl2-shadow)' : undefined),
                 flex: flex ?? 1,
                 backgroundColor: 'var(--dl2-bg-visual)',
                 overflow: 'hidden',

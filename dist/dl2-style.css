@@ -32,6 +32,17 @@
     --dl2-checklist-overdue-bg: #fff5f5;
     --dl2-checklist-overdue-text: #c53030;
 
+    --dl2-cf-success-bg: #f0fff4;
+    --dl2-cf-success-text: #2f855a;
+    --dl2-cf-warning-bg: #fffaf0;
+    --dl2-cf-warning-text: #c05621;
+    --dl2-cf-error-bg: #fff5f5;
+    --dl2-cf-error-text: #c53030;
+    --dl2-cf-info-bg: #ebf4ff;
+    --dl2-cf-info-text: #2b6cb0;
+    --dl2-cf-muted-bg: #f4f4f4;
+    --dl2-cf-muted-text: #888888;
+
     --dl2-headbar-bg: linear-gradient(to right, #155799, #159957);
     --dl2-headbar-text: #ffffff;
 
@@ -81,6 +92,17 @@
         --dl2-checklist-warning-text: #ed8936;
         --dl2-checklist-overdue-bg: #2d1c1c;
         --dl2-checklist-overdue-text: #f56565;
+
+        --dl2-cf-success-bg: #1c2d24;
+        --dl2-cf-success-text: #48bb78;
+        --dl2-cf-warning-bg: #2d261c;
+        --dl2-cf-warning-text: #ed8936;
+        --dl2-cf-error-bg: #2d1c1c;
+        --dl2-cf-error-text: #f56565;
+        --dl2-cf-info-bg: #1a2533;
+        --dl2-cf-info-text: #63b3ed;
+        --dl2-cf-muted-bg: #262626;
+        --dl2-cf-muted-text: #909090;
 
         --dl2-headbar-bg: linear-gradient(to right, #0d2c4d, #0d4d2c);
         --dl2-headbar-text: #e0e0e0;
@@ -737,6 +759,130 @@ a:hover {
 .dl2-checklist input[type='checkbox'] {
     width: 16px;
     height: 16px;
+}
+
+/* Checklist status chips + progress bar */
+.dl2-checklist-filterbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    padding: 0 5px;
+}
+
+.dl2-checklist-chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.dl2-checklist-chip {
+    padding: 3px 10px;
+    border: 1px solid var(--dl2-border-main);
+    border-radius: 12px;
+    background: var(--dl2-bg-main);
+    color: var(--dl2-text-secondary);
+    cursor: pointer;
+    font-size: 0.85em;
+    white-space: nowrap;
+    opacity: 0.6;
+}
+
+.dl2-checklist-chip:hover {
+    border-color: var(--dl2-primary);
+    opacity: 1;
+}
+
+.dl2-checklist-chip.active {
+    opacity: 1;
+    color: var(--dl2-text-main);
+    background-color: var(--dl2-bg-tab);
+}
+
+.dl2-checklist-chip.pending.active {
+    background-color: var(--dl2-bg-tab);
+}
+
+.dl2-checklist-chip.warning.active {
+    background-color: var(--dl2-checklist-warning-bg);
+    color: var(--dl2-checklist-warning-text);
+    border-color: var(--dl2-checklist-warning-text);
+}
+
+.dl2-checklist-chip.overdue.active {
+    background-color: var(--dl2-checklist-overdue-bg);
+    color: var(--dl2-checklist-overdue-text);
+    border-color: var(--dl2-checklist-overdue-text);
+}
+
+.dl2-checklist-chip.complete.active {
+    background-color: var(--dl2-checklist-complete-bg);
+    color: var(--dl2-checklist-complete-text);
+    border-color: var(--dl2-checklist-complete-text);
+}
+
+.dl2-checklist-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    flex: 0 1 220px;
+}
+
+.dl2-checklist-progress-track {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--dl2-bg-tab);
+    overflow: hidden;
+}
+
+.dl2-checklist-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background-color: var(--dl2-checklist-complete-text);
+    transition: width 0.3s ease;
+}
+
+.dl2-checklist-progress-label {
+    font-size: 0.85em;
+    color: var(--dl2-text-secondary);
+    white-space: nowrap;
+}
+
+/* Conditional formatting presets (columnFormats' sibling feature).
+   Scoped under .dl2-table so they beat the checklist row status backgrounds. */
+.dl2-table td.dl2-cf-success,
+.dl2-table tr.dl2-cf-success > td {
+    background-color: var(--dl2-cf-success-bg);
+    color: var(--dl2-cf-success-text);
+}
+
+.dl2-table td.dl2-cf-warning,
+.dl2-table tr.dl2-cf-warning > td {
+    background-color: var(--dl2-cf-warning-bg);
+    color: var(--dl2-cf-warning-text);
+}
+
+.dl2-table td.dl2-cf-error,
+.dl2-table tr.dl2-cf-error > td {
+    background-color: var(--dl2-cf-error-bg);
+    color: var(--dl2-cf-error-text);
+}
+
+.dl2-table td.dl2-cf-info,
+.dl2-table tr.dl2-cf-info > td {
+    background-color: var(--dl2-cf-info-bg);
+    color: var(--dl2-cf-info-text);
+}
+
+.dl2-table td.dl2-cf-muted,
+.dl2-table tr.dl2-cf-muted > td {
+    background-color: var(--dl2-cf-muted-bg);
+    color: var(--dl2-cf-muted-text);
 }
 
 /* Chart Styles */

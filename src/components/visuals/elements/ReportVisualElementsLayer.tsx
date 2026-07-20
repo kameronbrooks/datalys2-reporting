@@ -22,13 +22,56 @@ export interface ReportVisualElementsLayerProps {
     innerHeight: number;
     xScale: ScaleLike<any>;
     yScale: ScaleLike<any>;
-    /** Required for trend lines. For numeric x-scales you can pass `xScale.domain()` */
+    /**
+     * Numeric x-domain used to sample trend lines. Optional: when omitted it
+     * is derived from the scale — numeric scales use their own domain, and
+     * band/point (categorical) scales evaluate the trend against the 0-based
+     * category index.
+     */
     xDomain?: [number, number];
     /** Default interpretation for marker/label values */
     defaultValueAxis?: "x" | "y";
 }
 
 const isBandScale = (scale: any): boolean => typeof scale?.bandwidth === "function";
+
+/**
+ * Resolves the numeric domain and sampling scale for a trend line.
+ * Band/point scales get an index-based mapping (x = 0-based category index,
+ * interpolated between band centers); numeric scales use their own domain.
+ */
+const resolveTrendScale = (
+    xScale: ScaleLike<any>,
+    xDomain?: [number, number]
+): { domain: [number, number]; scale: (x: number) => number } | null => {
+    if (xDomain) return { domain: xDomain, scale: xScale as (x: number) => number };
+
+    const dom = typeof xScale.domain === "function" ? xScale.domain() : undefined;
+    if (!dom || dom.length === 0) return null;
+
+    if (isBandScale(xScale)) {
+        const center = (xScale.bandwidth?.() ?? 0) / 2;
+        const clamp = (i: number) => Math.min(Math.max(i, 0), dom.length - 1);
+        return {
+            domain: [0, Math.max(dom.length - 1, 1)],
+            scale: (x: number) => {
+                const i0 = clamp(Math.floor(x));
+                const i1 = clamp(i0 + 1);
+                const p0 = (xScale as any)(dom[i0]) + center;
+                const p1 = (xScale as any)(dom[i1]) + center;
+                const frac = x - i0;
+                return i1 === i0 ? p0 : p0 + (p1 - p0) * frac;
+            },
+        };
+    }
+
+    const first = dom[0];
+    const last = dom[dom.length - 1];
+    if (typeof first === "number" && typeof last === "number") {
+        return { domain: [first, last], scale: xScale as (x: number) => number };
+    }
+    return null;
+};
 
 const inferValueAxis = (
     value: unknown,
@@ -64,16 +107,17 @@ export const ReportVisualElementsLayer: React.FC<ReportVisualElementsLayerProps>
                 switch (el.visualElementType) {
                     case "trend": {
                         const t = el as TrendVisualElementType;
-                        if (!xDomain) return null;
+                        const trend = resolveTrendScale(xScale, xDomain);
+                        if (!trend) return null;
                         return (
                             <TrendVisualElement
                                 key={`trend-${idx}`}
                                 element={t}
                                 innerWidth={innerWidth}
                                 innerHeight={innerHeight}
-                                xScale={xScale as any}
+                                xScale={trend.scale as any}
                                 yScale={yScale as any}
-                                xDomain={xDomain}
+                                xDomain={trend.domain}
                             />
                         );
                     }

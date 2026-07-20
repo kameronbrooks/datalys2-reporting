@@ -1,6 +1,8 @@
 import { ApplicationData, Dataset, Layout, LayoutElement } from "./types";
 import { resolveElementKind } from "./element-utility";
 import { findPageIndexForTarget } from "./navigation-utility";
+import { KNOWN_COLUMN_FORMATS } from "./format-utility";
+import { KNOWN_CF_STYLES, ruleColumns } from "./conditional-format-utility";
 
 /**
  * Information the validator needs about the visual registry.
@@ -95,6 +97,70 @@ function validateAggregateSpec(aggregate: any, dataset: Dataset | undefined, pat
     }
 }
 
+/**
+ * Validates a `columnFormats` prop: keys must be dataset columns, values a
+ * known format kind (shorthand string) or an object with one.
+ */
+function validateColumnFormats(columnFormats: any, dataset: Dataset | undefined, path: string): void {
+    if (typeof columnFormats !== 'object' || Array.isArray(columnFormats)) {
+        warn(`${path}: columnFormats must be an object keyed by column name.`);
+        return;
+    }
+    for (const col in columnFormats) {
+        if (dataset && dataset.columns && !dataset.columns.includes(col)) {
+            warn(`${path}: columnFormats key "${col}" is not a column of dataset "${dataset.id}" (columns: ${dataset.columns.join(', ')}).`);
+        }
+        const spec = columnFormats[col];
+        const kind = typeof spec === 'string' ? spec : spec?.format;
+        if (!kind || !KNOWN_COLUMN_FORMATS.includes(kind)) {
+            warn(`${path}: columnFormats["${col}"] has unknown format "${kind}". Valid formats: ${KNOWN_COLUMN_FORMATS.join(', ')}.`);
+        }
+    }
+}
+
+/**
+ * Validates a `conditionalFormats` prop: an array of rules with a filter
+ * `when`, an optional 'cell'/'row' target, and a preset `style` or inline `css`.
+ */
+function validateConditionalFormats(rules: any, dataset: Dataset | undefined, path: string): void {
+    if (!Array.isArray(rules)) {
+        warn(`${path}: conditionalFormats must be an array of rules.`);
+        return;
+    }
+    rules.forEach((rule: any, i: number) => {
+        const rulePath = `${path}.conditionalFormats[${i}]`;
+        if (!rule || typeof rule !== 'object') {
+            warn(`${rulePath}: rule must be an object.`);
+            return;
+        }
+        if (!rule.when) {
+            warn(`${rulePath}: rule is missing "when" (a filter expression).`);
+        } else {
+            validateFilterExpression(rule.when, dataset, `${rulePath}.when`);
+        }
+        if (rule.target !== undefined && !['cell', 'row'].includes(rule.target)) {
+            warn(`${rulePath}: unknown target "${rule.target}" (expected "cell" or "row").`);
+        }
+        if (rule.style === undefined && rule.css === undefined) {
+            warn(`${rulePath}: rule has no effect — set "style" (${KNOWN_CF_STYLES.join(', ')}) and/or "css".`);
+        } else if (rule.style !== undefined && !KNOWN_CF_STYLES.includes(rule.style)) {
+            warn(`${rulePath}: unknown style preset "${rule.style}". Valid presets: ${KNOWN_CF_STYLES.join(', ')}.`);
+        }
+        if (rule.target !== 'row') {
+            const cols = ruleColumns(rule);
+            if (cols.length === 0) {
+                warn(`${rulePath}: cell-target rule with a compound "when" needs an explicit "columns" array.`);
+            } else if (dataset && dataset.columns) {
+                cols.forEach(col => {
+                    if (!dataset.columns.includes(col)) {
+                        warn(`${rulePath}: columns entry "${col}" is not a column of dataset "${dataset.id}".`);
+                    }
+                });
+            }
+        }
+    });
+}
+
 function validateElement(
     el: LayoutElement,
     data: ApplicationData,
@@ -168,8 +234,11 @@ function validateElement(
         }
     }
 
+    if (anyEl.columnFormats) validateColumnFormats(anyEl.columnFormats, dataset, desc);
+    if (anyEl.conditionalFormats) validateConditionalFormats(anyEl.conditionalFormats, dataset, desc);
+
     // Column-name references common across visuals
-    const columnProps = ['xColumn', 'yColumn', 'valueColumn', 'labelColumn', 'categoryColumn', 'groupBy'];
+    const columnProps = ['xColumn', 'yColumn', 'valueColumn', 'labelColumn', 'categoryColumn', 'groupBy', 'statusColumn', 'warningColumn'];
     // Note: when filter/aggregate is present the effective columns may differ
     // (aggregates emit renamed columns), so skip column checks in that case.
     if (dataset && dataset.columns && !anyEl.aggregate) {
