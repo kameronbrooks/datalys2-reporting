@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AppContext, ModalContext } from './components/context/AppContext';
 import { Headbar } from './components/Headbar';
@@ -9,6 +9,7 @@ import { decompressDatasets } from './lib/dataset-utility';
 import { decompressGzipB64ToObject } from './lib/compression-utility';
 import { validateAppData } from './lib/validation-utility';
 import { getDatasetlessTypes, getKnownVisualTypes } from './components/component-registry';
+import { findPageIndexForTarget, requestNavigation, scrollToVisual } from './lib/navigation-utility';
 
 function App() {
     const [datasets, setDatasets] = useState<Record<string, Dataset>>({});
@@ -42,6 +43,43 @@ function App() {
         setActiveModal(null);
         setModalContext(null);
     };
+
+    const [activePageIndex, setActivePageIndex] = useState(0);
+
+    /**
+     * Navigates to a visual by id: closes any open modal, switches to the
+     * page containing it, lets tab containers activate the right tab, then
+     * scrolls to and highlights the element.
+     */
+    const navigateTo = (targetId: string) => {
+        if (!targetId) return;
+        setActiveModal(null);
+        setModalContext(null);
+        const pageIndex = findPageIndexForTarget(appData.pages || [], targetId);
+        if (pageIndex >= 0) {
+            setActivePageIndex(pageIndex);
+        }
+        requestNavigation(targetId);
+        scrollToVisual(targetId);
+    };
+    const navigateToRef = useRef(navigateTo);
+    navigateToRef.current = navigateTo;
+
+    // #hash navigation: plain anchors like <a href="#visual-id"> (e.g. in
+    // markdown cards) navigate across pages too.
+    useEffect(() => {
+        if (!isLoaded) return;
+        const handleHash = () => {
+            const hash = decodeURIComponent(location.hash.slice(1));
+            if (hash) navigateToRef.current(hash);
+        };
+        window.addEventListener('hashchange', handleHash);
+        if (location.hash) {
+            // Initial-load deep link
+            setTimeout(handleHash, 100);
+        }
+        return () => window.removeEventListener('hashchange', handleHash);
+    }, [isLoaded]);
 
     const documentTitle = document.title || 'Datalys2 Report';
     const documentDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
@@ -104,7 +142,8 @@ function App() {
             modals: appData.modals || [],
             openModal,
             closeModal,
-            modalContext
+            modalContext,
+            navigateTo
         }}>
             <div>
                 <Headbar
@@ -114,7 +153,11 @@ function App() {
                     lastUpdated={documentLastUpdated}
                 />
                 <div>
-                    <TabGroup pages={appData.pages || []} />
+                    <TabGroup
+                        pages={appData.pages || []}
+                        activeIndex={activePageIndex}
+                        onSelect={setActivePageIndex}
+                    />
                 </div>
                 {activeModal && <Modal modal={activeModal} />}
             </div>

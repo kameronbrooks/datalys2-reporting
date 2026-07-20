@@ -1,5 +1,6 @@
 import { ApplicationData, Dataset, Layout, LayoutElement } from "./types";
 import { resolveElementKind } from "./element-utility";
+import { findPageIndexForTarget } from "./navigation-utility";
 
 /**
  * Information the validator needs about the visual registry.
@@ -157,6 +158,14 @@ function validateElement(
 
     if (anyEl.rowModalId && !(data.modals || []).some(m => m.id === anyEl.rowModalId)) {
         warn(`${desc}: rowModalId "${anyEl.rowModalId}" is not defined in "modals".`);
+    }
+
+    if (visualType === 'link') {
+        if (!anyEl.targetId && !anyEl.href) {
+            warn(`${desc}: link visual needs a "targetId" (visual id) or "href" (external URL).`);
+        } else if (anyEl.targetId && findPageIndexForTarget(data.pages || [], anyEl.targetId) < 0) {
+            warn(`${desc}: link targetId "${anyEl.targetId}" does not match any visual id in the report.`);
+        }
     }
 
     // Column-name references common across visuals

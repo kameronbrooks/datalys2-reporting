@@ -18,6 +18,11 @@ export interface AppContextProps {
     closeModal: () => void;
     /** Context of the currently open modal (e.g. the clicked row). */
     modalContext?: ModalContext | null;
+    /**
+     * Navigates to the visual with the given id: switches to its page (and
+     * tab), scrolls to it, and highlights it briefly.
+     */
+    navigateTo: (targetId: string) => void;
 }
 
 export const AppContext = createContext<AppContextProps>({
@@ -25,5 +30,6 @@ export const AppContext = createContext<AppContextProps>({
     modals: [],
     openModal: () => {},
     closeModal: () => {},
-    modalContext: null
+    modalContext: null,
+    navigateTo: () => {}
 });

@@ -539,6 +539,44 @@ a:hover {
     white-space: nowrap;
 }
 
+/* Link navigation */
+.dl2-link-visual {
+    color: var(--dl2-link-color);
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: var(--dl2-font-family);
+}
+
+.dl2-link-visual--button {
+    display: inline-block;
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid var(--dl2-primary);
+    border-radius: 4px;
+    color: var(--dl2-primary);
+    background: transparent;
+}
+
+.dl2-link-visual--button:hover {
+    background: var(--dl2-primary);
+    color: var(--dl2-primary-text);
+}
+
+.dl2-flash-highlight {
+    animation: dl2-flash-highlight 1.8s ease-out;
+}
+
+@keyframes dl2-flash-highlight {
+    0%, 40% {
+        outline: 3px solid var(--dl2-primary);
+        outline-offset: 3px;
+    }
+    100% {
+        outline: 3px solid transparent;
+        outline-offset: 3px;
+    }
+}
+
 /* Headbar report-wide reset button */
 .dl2-headbar-reset-btn {
     position: absolute;

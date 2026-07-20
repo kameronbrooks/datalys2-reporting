@@ -38,21 +38,33 @@ export const PageRow: React.FC<PageRowProps> = ({layout}) => {
             component = <Visual key={index} {...(child as any)} type={resolved.visualType} />;
         }
 
-        if (child.modalId && resolved.kind !== 'modal') {
+        // Wrap when the child needs a modal trigger and/or a DOM anchor for
+        // link navigation (visuals with an `id`).
+        const anchorId = resolved.kind === 'visual' ? (child as any).id : undefined;
+        const needsModalTrigger = child.modalId && resolved.kind !== 'modal';
+
+        if (needsModalTrigger || anchorId) {
             return (
-                <div key={index} className="dl2-element-wrapper" style={{ flex: child.flex ?? 1, display: 'flex' }}>
-                    <button
-                        className="dl2-modal-icon-trigger"
-                        onClick={() => openModal(child.modalId!)}
-                        title="View Details"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="15 3 21 3 21 9"></polyline>
-                            <polyline points="9 21 3 21 3 15"></polyline>
-                            <line x1="21" y1="3" x2="14" y2="10"></line>
-                            <line x1="3" y1="21" x2="10" y2="14"></line>
-                        </svg>
-                    </button>
+                <div
+                    key={index}
+                    id={anchorId}
+                    className="dl2-element-wrapper"
+                    style={{ flex: child.flex ?? 1, display: 'flex', minWidth: 0 }}
+                >
+                    {needsModalTrigger && (
+                        <button
+                            className="dl2-modal-icon-trigger"
+                            onClick={() => openModal(child.modalId!)}
+                            title="View Details"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <polyline points="9 21 3 21 3 15"></polyline>
+                                <line x1="21" y1="3" x2="14" y2="10"></line>
+                                <line x1="3" y1="21" x2="10" y2="14"></line>
+                            </svg>
+                        </button>
+                    )}
                     {component}
                 </div>
             );

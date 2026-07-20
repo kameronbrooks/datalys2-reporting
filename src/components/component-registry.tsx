@@ -14,6 +14,7 @@ import { AreaChart } from "./visuals/AreaChart";
 import { BoxPlot } from "./visuals/BoxPlot";
 import { Gauge } from "./visuals/Gauge";
 import { TabsVisual } from "./visuals/TabsVisual";
+import { LinkVisual } from "./visuals/LinkVisual";
 import { AppContext } from "./context/AppContext";
 import { AggregateSpec, FilterExpression } from "../lib/types";
 import { applyFilter } from "../lib/filter-utility";
@@ -42,6 +43,7 @@ const componentRegistry: { [key: string]: RegistryEntry } = {
     'gauge': { component: Gauge, requiresDataset: true },
     'tabs': { component: TabsVisual, requiresDataset: false },
     'tabgroup': { component: TabsVisual, requiresDataset: false },
+    'link': { component: LinkVisual, requiresDataset: false },
     // Add other components here as needed
 };
 

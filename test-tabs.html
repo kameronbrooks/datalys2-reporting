@@ -19,6 +19,16 @@
                 {
                     "type": "layout",
                     "direction": "row",
+                    "title": "Link navigation",
+                    "children": [
+                        { "type": "link", "targetId": "low-scores-table", "label": "Jump to the Low scores table (page 3, tab 3) →", "linkStyle": "button" },
+                        { "type": "link", "targetId": "score-trend-chart", "label": "Jump to the score trend chart (this page, Trend tab)", "flex": 0 },
+                        { "type": "card", "contentType": "md", "text": "Markdown hash links work too: [go to the nested tabs](#nested-tabs-inner).", "flex": 1 }
+                    ]
+                },
+                {
+                    "type": "layout",
+                    "direction": "row",
                     "children": [
                         {
                             "type": "kpi",
@@ -40,6 +50,7 @@
                                     "children": [
                                         {
                                             "type": "line",
+                                            "id": "score-trend-chart",
                                             "datasetId": "metrics",
                                             "xColumn": "date",
                                             "yColumns": "score",
@@ -102,6 +113,7 @@
                                     "children": [
                                         {
                                             "type": "tabs",
+                                            "id": "nested-tabs-inner",
                                             "tabs": [
                                                 { "title": "Nested 1", "children": [ { "type": "card", "text": "Deeply nested content 1" } ] },
                                                 { "title": "Nested 2", "children": [ { "type": "card", "text": "Deeply nested content 2" } ] }
@@ -150,6 +162,7 @@
                                     "children": [
                                         {
                                             "type": "table",
+                                            "id": "low-scores-table",
                                             "datasetId": "metrics",
                                             "filter": { "column": "score", "op": "lt", "value": 75 },
                                             "pageSize": 8

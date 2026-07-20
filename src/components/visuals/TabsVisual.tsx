@@ -4,6 +4,7 @@ import { PageRow } from "../PageRow";
 import { TabStrip } from "../TabStrip";
 import { VisualContainer } from "./VisualContainer";
 import { loadVisualState, saveVisualState } from "../../lib/state-persistence";
+import { elementTreeContainsId, getPendingNavigationTarget, NAVIGATE_EVENT } from "../../lib/navigation-utility";
 
 /**
  * A single tab in a 'tabs' container visual. Provide either:
@@ -67,6 +68,30 @@ export const TabsVisual: React.FC<TabsVisualProps> = ({
         }
         if (persistenceEnabled) saveVisualState(id!, { activeTab: activeIndex });
     }, [persistenceEnabled, id, activeIndex]);
+
+    // Link navigation: when a navigation targets a visual inside one of our
+    // tabs, activate that tab so the scroll can find it. Checked both on
+    // mount (pending target — we may mount after the event fired) and on
+    // every navigate event.
+    const tabsRef = useRef(validTabs);
+    tabsRef.current = validTabs;
+    useEffect(() => {
+        const activateTabContaining = (targetId: string) => {
+            const index = tabsRef.current.findIndex(tab =>
+                (tab.layout && elementTreeContainsId(tab.layout, targetId))
+                || (Array.isArray(tab.children) && tab.children.some(child => elementTreeContainsId(child, targetId)))
+            );
+            if (index >= 0) setActiveIndex(index);
+        };
+        const pending = getPendingNavigationTarget();
+        if (pending) activateTabContaining(pending);
+        const onNavigate = (e: Event) => {
+            const targetId = (e as CustomEvent).detail?.targetId;
+            if (targetId) activateTabContaining(targetId);
+        };
+        window.addEventListener(NAVIGATE_EVENT, onNavigate);
+        return () => window.removeEventListener(NAVIGATE_EVENT, onNavigate);
+    }, []);
 
     if (validTabs.length === 0) {
         return (

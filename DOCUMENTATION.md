@@ -859,6 +859,31 @@ Derived datasets can chain (as above). Circular `source` chains and missing sour
 
 > Filtering/aggregation applies to `table` and `records` format datasets. `list` and `record` formats pass through unchanged with a console warning.
 
+## Links & Navigation
+
+Every visual with an `id` is a navigation anchor. A link can jump to it from anywhere in the report — switching to the containing page, activating the containing tab (including nested tab groups), scrolling to the visual, and flashing it briefly.
+
+**Link visual (`type: "link"`)** — dataset-free:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `targetId` | `string` | Id of the visual to navigate to. |
+| `href` | `string` | External URL alternative (opens in a new tab). |
+| `label` / `text` | `string` | The link text. |
+| `linkStyle` | `'link' \| 'button'` | Inline link (default) or button styling. |
+
+```json
+{ "type": "link", "targetId": "orders-table", "label": "Jump to the orders table →" }
+```
+
+**Hash links** also work — anywhere you can emit an anchor, `#<visual-id>` navigates, including across pages. E.g. in a markdown card:
+
+```json
+{ "type": "card", "contentType": "md", "text": "See the [orders table](#orders-table) for details." }
+```
+
+Deep links work too: opening `report.html#orders-table` navigates to that visual on load. If the id isn't found, a `[datalys2]` console warning is emitted (the validator also checks `targetId` values at load).
+
 ## Persistent View State
 
 Runtime view changes a user makes are saved in the browser's `localStorage` and restored on the next load — the report config itself is never modified.
