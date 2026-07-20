@@ -377,6 +377,7 @@ Displays data in a tabular format with type-aware sorting (single and multi-colu
 | `stickyHeader` | `boolean` | Sticky header (defaults to true when `maxHeight` is set). |
 | `totalRow` | `boolean \| object` | Grand-total row at the bottom, computed over the **filtered** data (all pages). `true` sums every numeric column. Or `{ "label": "Grand Total", "fns": { "amount": "sum", "units": "avg" } }` for per-column aggregate functions. Sticky when `maxHeight` is set. |
 | `totalColumn` | `boolean \| object` | Per-row total column appended on the right. `true` sums every numeric visible column, or `{ "label": "Sum", "columns": ["units", "amount"] }` to control the summed columns. |
+| `persistState` | `boolean` | Persist runtime view changes (sort, hidden columns, grouping) in the browser. Default **true** when the visual has an `id`. See [Persistent View State](#persistent-view-state). |
 
 > Totals are display-only: CSV export and clipboard copy contain the data rows without the totals.
 
@@ -857,6 +858,26 @@ Define a dataset as a transformation of another by giving it a `source`. Useful 
 Derived datasets can chain (as above). Circular `source` chains and missing sources are reported as console warnings and left unresolved.
 
 > Filtering/aggregation applies to `table` and `records` format datasets. `list` and `record` formats pass through unchanged with a console warning.
+
+## Persistent View State
+
+Runtime view changes a user makes are saved in the browser's `localStorage` and restored on the next load — the report config itself is never modified.
+
+What persists (per visual, keyed by its `id`):
+
+- **Table**: sort keys, hidden columns, grouping.
+- **Tabs**: the active tab.
+
+Requirements & controls:
+
+- A visual must have a unique `id` for its state to persist (the validator warns about duplicate ids). Set `persistState: false` on a visual to opt out.
+- **Reset one visual**: right-click a table header → **Reset view** (clears its saved state and restores the config defaults).
+- **Reset the whole report**: a **Reset view** button appears on the right of the headbar whenever the report has saved customizations; it clears everything and reloads.
+- Reports are namespaced by `<meta name="report-id" content="...">` when present, else the document title, else the URL path. Give reports a stable `report-id` if their titles change between publishes:
+
+```html
+<meta name="report-id" content="quarterly-sales">
+```
 
 ## Config Validation
 

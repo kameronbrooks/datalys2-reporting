@@ -1,8 +1,9 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import type { ReportVisual, AggregateColumn, AggFn } from "../../lib/types";
 import { isDate, printDate } from "../../lib/date-utility";
 import { multiSort, SortKey } from "../../lib/sort-utility";
+import { loadVisualState, saveVisualState, clearVisualState } from "../../lib/state-persistence";
 import { computeAggregates } from "../../lib/aggregate-utility";
 import { toCSV, toTSV, downloadCSV, copyTextToClipboard, formatCellForExport } from "../../lib/export-utility";
 import { ContextMenu, ContextMenuItem } from "../ContextMenu";
@@ -66,6 +67,20 @@ export interface TableProps extends ReportVisual {
     rowModalColumns?: string[];
     /** Title of the default row detail modal. Default: "Details". */
     rowModalTitle?: string;
+    /**
+     * Persist runtime view changes (sort, hidden columns, grouping) in the
+     * browser so they survive reloads. Requires the visual to have an `id`.
+     * Default true when an `id` is present. Reset via right-click →
+     * "Reset view", or the report-wide reset in the headbar.
+     */
+    persistState?: boolean;
+}
+
+/** The slice of table view state that persists across reloads. */
+interface PersistedTableState {
+    sortKeys?: SortKey[];
+    hiddenCols?: string[];
+    groupByCol?: string | null;
 }
 
 interface MenuState {
@@ -103,25 +118,64 @@ export const Table: React.FC<TableProps> = ({
     rowModal,
     rowModalId,
     rowModalColumns,
-    rowModalTitle
+    rowModalTitle,
+    persistState,
+    id
 }) => {
     const ctx = useContext(AppContext);
     const dataset = ctx.datasets[datasetId];
     const rowOpenEnabled = rowModal === true || !!rowModalId;
 
+    // View-state persistence: on by default when the visual has an id.
+    const persistenceEnabled = (persistState ?? true) && !!id;
+    const savedState = useMemo<PersistedTableState | null>(
+        () => persistenceEnabled ? loadVisualState<PersistedTableState>(id!) : null,
+        // Load once per mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
+    );
+
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortKeys, setSortKeys] = useState<SortKey[]>(
-        () => (defaultSort || []).map(s => ({ key: s.column, direction: s.direction }))
+        () => savedState?.sortKeys
+            ?? (defaultSort || []).map(s => ({ key: s.column, direction: s.direction }))
     );
-    const [hiddenCols, setHiddenCols] = useState<string[]>(initialHiddenColumns || []);
-    const [groupByCol, setGroupByCol] = useState<string | null>(initialGroupBy || null);
+    const [hiddenCols, setHiddenCols] = useState<string[]>(
+        () => savedState?.hiddenCols ?? (initialHiddenColumns || [])
+    );
+    const [groupByCol, setGroupByCol] = useState<string | null>(
+        () => savedState?.groupByCol !== undefined ? savedState.groupByCol : (initialGroupBy || null)
+    );
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const [allCollapsed] = useState(groupsCollapsed);
     const [menu, setMenu] = useState<MenuState | null>(null);
     const [detailRow, setDetailRow] = useState<any | null>(null);
 
     const useStickyHeader = stickyHeader ?? (maxHeight !== undefined);
+
+    // Save view state on change (skipping the initial render so untouched
+    // tables leave no storage entries behind).
+    const didMountRef = useRef(false);
+    useEffect(() => {
+        if (!didMountRef.current) {
+            didMountRef.current = true;
+            return;
+        }
+        if (!persistenceEnabled) return;
+        saveVisualState(id!, { sortKeys, hiddenCols, groupByCol } satisfies PersistedTableState);
+    }, [persistenceEnabled, id, sortKeys, hiddenCols, groupByCol]);
+
+    /** Clears saved state and restores the config-defined defaults. */
+    const resetViewState = () => {
+        if (persistenceEnabled) clearVisualState(id!);
+        setSortKeys((defaultSort || []).map(s => ({ key: s.column, direction: s.direction })));
+        setHiddenCols(initialHiddenColumns || []);
+        setGroupByCol(initialGroupBy || null);
+        setCollapsedGroups({});
+        setSearchTerm("");
+        setCurrentPage(1);
+    };
 
     /** Opens the detail view for a row — custom modal if configured, else the built-in one. */
     const openRowDetails = (row: any) => {
@@ -386,6 +440,10 @@ export const Table: React.FC<TableProps> = ({
                 { label: 'Copy table to clipboard', onClick: doCopyTable }
             );
         }
+        items.push(
+            { separator: true },
+            { label: 'Reset view', onClick: resetViewState }
+        );
         setMenu({ position: { x: e.clientX, y: e.clientY }, items });
     };
 

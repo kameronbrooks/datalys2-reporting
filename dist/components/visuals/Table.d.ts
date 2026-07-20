@@ -67,5 +67,12 @@ export interface TableProps extends ReportVisual {
     rowModalColumns?: string[];
     /** Title of the default row detail modal. Default: "Details". */
     rowModalTitle?: string;
+    /**
+     * Persist runtime view changes (sort, hidden columns, grouping) in the
+     * browser so they survive reloads. Requires the visual to have an `id`.
+     * Default true when an `id` is present. Reset via right-click →
+     * "Reset view", or the report-wide reset in the headbar.
+     */
+    persistState?: boolean;
 }
 export declare const Table: React.FC<TableProps>;

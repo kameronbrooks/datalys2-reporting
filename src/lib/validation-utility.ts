@@ -244,6 +244,27 @@ export function validateAppData(data: ApplicationData, registry: ValidationRegis
 
         validateDatasets(data);
 
+        // Duplicate visual ids break anchors and view-state persistence.
+        const idCounts = new Map<string, number>();
+        const collectIds = (node: any): void => {
+            if (!node || typeof node !== 'object') return;
+            // Count visuals only — modal triggers intentionally repeat modal ids.
+            if (typeof node.id === 'string' && node.id && resolveElementKind(node).kind === 'visual') {
+                idCounts.set(node.id, (idCounts.get(node.id) || 0) + 1);
+            }
+            if (Array.isArray(node.children)) node.children.forEach(collectIds);
+            if (Array.isArray(node.tabs)) node.tabs.forEach((tab: any) => {
+                if (tab?.layout) collectIds(tab.layout);
+                if (Array.isArray(tab?.children)) tab.children.forEach(collectIds);
+            });
+        };
+        (data.pages || []).forEach(page => (page.rows || []).forEach(collectIds));
+        idCounts.forEach((count, id) => {
+            if (count > 1) {
+                warn(`Visual id "${id}" is used ${count} times — ids must be unique for links and view-state persistence to work correctly.`);
+            }
+        });
+
         (data.pages || []).forEach((page, p) => {
             const pagePath = `pages[${p}] ("${page.title || 'untitled'}")`;
             if (!Array.isArray(page.rows) || page.rows.length === 0) {

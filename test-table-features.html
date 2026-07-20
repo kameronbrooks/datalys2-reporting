@@ -51,6 +51,7 @@
                                 children: [
                                     {
                                         type: 'table',
+                                        id: 'tbl-orders-main',
                                         datasetId: 'orders',
                                         title: 'Orders',
                                         pageSize: 25,
@@ -68,6 +69,7 @@
                                 children: [
                                     {
                                         type: 'table',
+                                        id: 'tbl-grouped',
                                         datasetId: 'orders',
                                         title: 'Grouped Orders',
                                         pageSize: 4,
@@ -94,6 +96,7 @@
                                 children: [
                                     {
                                         type: 'table',
+                                        id: 'tbl-rowmodal-default',
                                         datasetId: 'orders',
                                         title: 'Default row modal',
                                         columns: ['date', 'region', 'rep', 'amount'],
@@ -105,6 +108,7 @@
                                     },
                                     {
                                         type: 'table',
+                                        id: 'tbl-rowmodal-custom',
                                         datasetId: 'orders',
                                         title: 'Custom row modal (rowModalId)',
                                         columns: ['date', 'region', 'rep', 'amount'],
@@ -121,6 +125,7 @@
                                 children: [
                                     {
                                         type: 'table',
+                                        id: 'tbl-totals',
                                         datasetId: 'orders',
                                         title: 'Totals table',
                                         columns: ['region', 'category', 'units', 'amount'],
@@ -133,6 +138,7 @@
                                     },
                                     {
                                         type: 'table',
+                                        id: 'tbl-totals-auto',
                                         datasetId: 'orders',
                                         title: 'totalRow: true (auto-sums numeric columns)',
                                         columns: ['region', 'units', 'amount'],
@@ -149,6 +155,7 @@
                                 children: [
                                     {
                                         type: 'table',
+                                        id: 'tbl-legacy',
                                         datasetId: 'orders',
                                         title: 'Legacy Table',
                                         columns: ['date', 'region', 'rep', 'amount'],
@@ -158,6 +165,7 @@
                                     },
                                     {
                                         type: 'table',
+                                        id: 'tbl-locked',
                                         datasetId: 'orders',
                                         title: 'Locked-down table (no sort, no menu, no export, no hiding)',
                                         columns: ['date', 'region', 'amount'],

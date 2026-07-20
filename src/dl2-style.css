@@ -539,6 +539,26 @@ a:hover {
     white-space: nowrap;
 }
 
+/* Headbar report-wide reset button */
+.dl2-headbar-reset-btn {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--dl2-headbar-text);
+    cursor: pointer;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.dl2-headbar-reset-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
 /* Openable rows + row detail modal */
 .dl2-table-row--openable {
     cursor: pointer;

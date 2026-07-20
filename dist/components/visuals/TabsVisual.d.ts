@@ -16,6 +16,10 @@ export interface TabsVisualProps extends LayoutElement {
     defaultTab?: number;
     title?: string;
     description?: string;
+    /** Unique id — enables remembering the active tab across reloads. */
+    id?: string;
+    /** Persist the active tab in the browser. Default true when `id` is set. */
+    persistState?: boolean;
 }
 /**
  * Container visual that shows one child view at a time behind a tab strip.
